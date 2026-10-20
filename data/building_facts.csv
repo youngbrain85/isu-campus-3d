@@ -1,8 +1,8 @@
 osm_id,map_no,name,year,levels,height_m,detail_level,source,notes
 way/183426119,30,Hulman Center,1973,3,,drawing,"Sverdrup & Parcel bid set 1971; renovated 2018-2020 (RATIO); scholars.indianastate.edu/iv-buildings/18",arena; post-2020 metal-panel skin + glass south lobby
 way/544686559,63,Student Recreation Center,2009,2,,drawing,"Hastings+Chivetta construction set 2007; iv-buildings/39",2 storeys + clerestory
-way/544686556,54,Reeve Hall (West),2014,4,,drawing,"CSO Architects bid set 2012; news.indianastate.edu 2012-11-15",4 storeys + attic; brick with limestone trim
-way/1348752763,54,Reeve Hall (East),2014,4,,drawing,"CSO Architects bid set 2012",4 storeys + attic
+way/544686556,54,Reeve Hall (East),2014,4,,drawing,"CSO Architects bid set 2012; news.indianastate.edu 2012-11-15",4 storeys + attic; brick with limestone trim
+way/1348752763,54,Reeve Hall (West),2014,4,,drawing,"CSO Architects bid set 2012",4 storeys + attic
 way/545265789,23,Fine Arts Building,1940,4,,drawing,"arcDESIGN renovation bid set 2018; iv-buildings/13 (Miller & Yeager 1940)",4 storeys + lower level; brick with limestone trim
 way/461428305,66,Technology Building (Bailey College of Engineering & Technology),1983,3,,drawing,"RATIO cTED construction set 2025; iv-buildings/45; OSM polygon is mis-tagged 'ISU Parking Garage'",modelled in 2025 renovated form with north addition; 3 levels + penthouse
 way/461428310,38,John W. Moore Welcome Center,1956,2,,drawing,"Miller Vrydagh & Miller 1955 Home Economics Building drawings; iv-buildings/25",2 storeys + basement

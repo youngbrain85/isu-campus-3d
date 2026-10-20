@@ -6,4 +6,5 @@ export const MODULES = {
   'way/461428305': () => import('./technology_bldg.js'),
   'way/183426119': () => import('./hulman_center.js'),
   'way/545265789': () => import('./fine_arts.js'),
+  'way/544686556': () => import('./reeve_hall.js'),   // extraIds: way/1348752763 (mirrored twin)
 };

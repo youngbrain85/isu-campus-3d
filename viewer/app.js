@@ -126,13 +126,18 @@ async function main() {
   // ?mod=buildings/foo.js : 레지스트리에 없는 모듈을 임시로 추가 로드 (모델링 중 미리보기용)
   const extraMod = params.get('mod');
   if (extraMod) { const m = await import('./' + extraMod); MODULES[m.meta.osm] = () => Promise.resolve(m); }
-  const detailedIds = new Set(Object.keys(MODULES));
+  // 상세 건물 모듈을 먼저 모두 로드해 (extraIds 포함) 매스 생성에서 제외할 footprint 를 정한다
+  const loaded = [];
+  for (const id of Object.keys(MODULES)) {
+    try { loaded.push([id, await MODULES[id]()]); } catch (e) { console.error('module load failed', id, e); }
+  }
+  const detailedIds = new Set();
+  for (const [id, mod] of loaded) { detailedIds.add(id); for (const x of mod.meta.extraIds || []) detailedIds.add(x); }
   const masses = buildMasses(site, M, detailedIds); scene.add(masses.group);
   const detailHeights = new Map();
-  for (const id of detailedIds) {
-    say('Building detailed model: ' + id);
+  for (const [id, mod] of loaded) {
+    say('Building detailed model: ' + mod.meta.name);
     try {
-      const mod = await MODULES[id]();
       const grp = mod.build(M, G);
       G.toWorld(grp, mod.meta.anchor, mod.meta.rotation);
       grp.name = 'bldg_' + mod.meta.id; scene.add(grp);
