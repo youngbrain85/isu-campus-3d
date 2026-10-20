@@ -2,4 +2,6 @@
 export const MODULES = {
   'way/461428310': () => import('./welcome_center.js'),
   'way/545275293': () => import('./nursing_bldg.js'),
+  'way/461428304': () => import('./myers_tech.js'),
+  'way/461428305': () => import('./technology_bldg.js'),
 };
