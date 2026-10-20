@@ -162,6 +162,7 @@ async function main() {
 
   console.log('site:', site.buildings.length, 'buildings,', masses.byId.size, 'masses,', detailedIds.size, 'detailed,', treeList.length, 'trees, mass tris', masses.tris);
   applyPreset(SHOT || 'campus');
+  if (SHOT) { const h = document.getElementById('hud'); if (h) h.classList.add('collapsed'); }   // 렌더용: HUD 접기
   say('');
   const loader = document.getElementById('loader'); if (loader) loader.style.display = 'none';
 
