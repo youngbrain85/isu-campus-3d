@@ -123,6 +123,9 @@ async function main() {
   const groundImg = buildGround(site, M, tex); scene.add(groundImg);
   const schematic = buildSchematic(site, M); schematic.visible = false; scene.add(schematic);
   say('Building masses…');
+  // ?mod=buildings/foo.js : 레지스트리에 없는 모듈을 임시로 추가 로드 (모델링 중 미리보기용)
+  const extraMod = params.get('mod');
+  if (extraMod) { const m = await import('./' + extraMod); MODULES[m.meta.osm] = () => Promise.resolve(m); }
   const detailedIds = new Set(Object.keys(MODULES));
   const masses = buildMasses(site, M, detailedIds); scene.add(masses.group);
   const detailHeights = new Map();

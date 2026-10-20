@@ -1,4 +1,5 @@
-// 헤드리스 렌더: node tools/shot.mjs <preset,...> [outdir]   (EXPORT=1 이면 첫 프리셋에서 GLB 도 저장)
+// 헤드리스 렌더: node tools/shot.mjs <preset,...> [outdir]
+//   env: EXPORT=1 첫 프리셋에서 GLB 저장, PORT=서버 포트(기본 8765), MOD=buildings/foo.js 미등록 모듈 임시 로드, LOW=1 저사양
 import { chromium } from 'playwright';
 import { spawn } from 'node:child_process';
 import fs from 'node:fs';
@@ -7,7 +8,7 @@ import path from 'node:path';
 const presets = (process.argv[2] || 'campus').split(',');
 const outdir = process.argv[3] || 'shots';
 fs.mkdirSync(outdir, { recursive: true });
-const port = 8765;
+const port = parseInt(process.env.PORT || '8765');
 const server = spawn(process.platform === 'win32' ? 'npx.cmd' : 'npx', ['http-server', '.', '-p', String(port), '-s', '-c-1'], { stdio: 'ignore', shell: process.platform === 'win32' });
 await new Promise(r => setTimeout(r, 2000));
 const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist', '--enable-webgl'] });
@@ -18,7 +19,7 @@ try {
     page.on('console', m => logs.push(m.type() + ': ' + m.text()));
     page.on('pageerror', e => logs.push('PAGEERROR: ' + e.message));
     const t0 = Date.now();
-    await page.goto(`http://localhost:${port}/viewer/index_local.html?shot=${p}&low=${process.env.LOW || '0'}`, { waitUntil: 'load' });
+    await page.goto(`http://localhost:${port}/viewer/index_local.html?shot=${p}&low=${process.env.LOW || '0'}${process.env.MOD ? '&mod=' + process.env.MOD : ''}`, { waitUntil: 'load' });
     try {
       await page.waitForFunction(() => window.__ready === true || document.getElementById('status')?.textContent?.startsWith('Error'), null, { timeout: parseInt(process.env.TMO || '300000') });
     } catch (e) { logs.push('TIMEOUT waiting for __ready'); }
