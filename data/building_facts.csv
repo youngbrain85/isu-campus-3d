@@ -6,7 +6,7 @@ way/1348752763,54,Reeve Hall (East),2014,4,,drawing,"CSO Architects bid set 2012
 way/545265789,23,Fine Arts Building,1940,4,,drawing,"arcDESIGN renovation bid set 2018; iv-buildings/13 (Miller & Yeager 1940)",4 storeys + lower level; brick with limestone trim
 way/461428305,66,Technology Building (Bailey College of Engineering & Technology),1983,3,,drawing,"RATIO cTED construction set 2025; iv-buildings/45; OSM polygon is mis-tagged 'ISU Parking Garage'",modelled in 2025 renovated form with north addition; 3 levels + penthouse
 way/461428310,38,John W. Moore Welcome Center,1956,2,,drawing,"Miller Vrydagh & Miller 1955 Home Economics Building drawings; iv-buildings/25",2 storeys + basement
-way/545275301,,Former School of Nursing Building,1970,4,,drawing,"Ewing Miller Associates Phase II record drawings (1969-70); iv-buildings/30; OSM mislabels it 'Charles E. Brown African American Cultural Center'",4 storeys + basement + stair penthouse; not numbered on 2023 map
+way/545275293,,Former School of Nursing Building,1970,4,,drawing,"Ewing Miller Associates Phase II record drawings (1969-70); iv-buildings/30; OSM name 'College of Nursing'; site plan fixes it at the SW corner of 8th & Chestnut (fit RMS 0.8 ft)",4 storeys + basement + stair penthouse; not numbered on 2023 map
 way/461428304,40,John T. Myers Technology Center,1997,3,,drawing-plan,"ISU Facilities master-set plans 2007 (342-346); iv-buildings/26",floor outlines from drawings; 3 storeys + partial 4th/penthouse; heights estimated
 way/752686738,27,Health and Human Services Building (Arena),1962,3,,mass+photo,"iv-buildings/16; 2016 addition",arena hall ~ 3-storey height; OSM footprint includes 2016 addition
 way/461428306,59,Science Building,1968,4,,mass+photo,"iv-buildings/37 (Unit I 1960, Unit II 1968)",estimate
@@ -24,7 +24,7 @@ way/349907334,15,Cunningham Memorial Library,1973,4,,mass+photo,"iv-buildings/7 
 way/461428309,56,Root Hall,1989,3,,mass+photo,"iv-buildings/35",estimate
 way/545266789,48,Power Plant,2001,2,,mass+photo,"iv-buildings/33",tall single hall + stack
 way/545265791,35,Landini Center for Performing and Fine Arts,1997,2,,mass+photo,"iv-buildings/22",
-way/545275293,3,Charles E. Brown African American Cultural Center,1993,2,,mass+photo,"campus map no. 3; iv-buildings/53; OSM mislabels this polygon 'College of Nursing'",small building between 7th and 8th south of Chestnut
+way/545275301,3,Charles E. Brown African American Cultural Center,1993,2,,mass+photo,"campus map no. 3 (3-I, east of 8th St); iv-buildings/53",flat-roofed building east of 8th St south of Chestnut
 way/956551298,4,Art Annex,,1,,mass,estimate,single-storey warehouse type
 way/461428313,17,Dreiser Hall,1950,3,,mass+photo,"iv-buildings/9; OSM building:levels=3",
 way/545265800,27/50,Academic Enrichment Center / University Police,,2,,mass+photo,estimate,

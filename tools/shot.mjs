@@ -10,7 +10,11 @@ const outdir = process.argv[3] || 'shots';
 fs.mkdirSync(outdir, { recursive: true });
 const port = parseInt(process.env.PORT || '8765');
 const server = spawn(process.platform === 'win32' ? 'npx.cmd' : 'npx', ['http-server', '.', '-p', String(port), '-s', '-c-1'], { stdio: 'ignore', shell: process.platform === 'win32' });
-await new Promise(r => setTimeout(r, 2000));
+// 서버가 뜰 때까지 대기 (최대 30 s)
+for (let i = 0; i < 60; i++) {
+  try { const r = await fetch(`http://localhost:${port}/viewer/index_local.html`); if (r.ok) break; } catch (e) {}
+  await new Promise(r => setTimeout(r, 500));
+}
 const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist', '--enable-webgl'] });
 try {
   for (const p of presets) {
