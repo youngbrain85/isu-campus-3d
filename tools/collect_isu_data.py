@@ -21,6 +21,10 @@ What it collects into ./isu_data/ :
 Requires:  pip install requests pillow
 """
 import csv, json, math, os, sys, time
+try:
+    sys.stdout.reconfigure(encoding="utf-8")   # Windows cp949 콘솔에서 유니코드 출력 오류 방지
+except Exception:
+    pass
 from pathlib import Path
 
 try:
