@@ -1,0 +1,45 @@
+osm_id,map_no,name,year,levels,height_m,detail_level,source,notes
+way/183426119,30,Hulman Center,1973,3,,drawing,"Sverdrup & Parcel bid set 1971; renovated 2018-2020 (RATIO); scholars.indianastate.edu/iv-buildings/18",arena; post-2020 metal-panel skin + glass south lobby
+way/544686559,63,Student Recreation Center,2009,2,,drawing,"Hastings+Chivetta construction set 2007; iv-buildings/39",2 storeys + clerestory
+way/544686556,54,Reeve Hall (West),2014,4,,drawing,"CSO Architects bid set 2012; news.indianastate.edu 2012-11-15",4 storeys + attic; brick with limestone trim
+way/1348752763,54,Reeve Hall (East),2014,4,,drawing,"CSO Architects bid set 2012",4 storeys + attic
+way/545265789,23,Fine Arts Building,1940,4,,drawing,"arcDESIGN renovation bid set 2018; iv-buildings/13 (Miller & Yeager 1940)",4 storeys + lower level; brick with limestone trim
+way/461428305,66,Technology Building (Bailey College of Engineering & Technology),1983,3,,drawing,"RATIO cTED construction set 2025; iv-buildings/45; OSM polygon is mis-tagged 'ISU Parking Garage'",modelled in 2025 renovated form with north addition; 3 levels + penthouse
+way/461428310,38,John W. Moore Welcome Center,1956,2,,drawing,"Miller Vrydagh & Miller 1955 Home Economics Building drawings; iv-buildings/25",2 storeys + basement
+way/545275301,,Former School of Nursing Building,1970,4,,drawing,"Ewing Miller Associates Phase II record drawings (1969-70); iv-buildings/30; OSM mislabels it 'Charles E. Brown African American Cultural Center'",4 storeys + basement + stair penthouse; not numbered on 2023 map
+way/461428304,40,John T. Myers Technology Center,1997,3,,drawing-plan,"ISU Facilities master-set plans 2007 (342-346); iv-buildings/26",floor outlines from drawings; 3 storeys + partial 4th/penthouse; heights estimated
+way/752686738,27,Health and Human Services Building (Arena),1962,3,,mass+photo,"iv-buildings/16; 2016 addition",arena hall ~ 3-storey height; OSM footprint includes 2016 addition
+way/461428306,59,Science Building,1968,4,,mass+photo,"iv-buildings/37 (Unit I 1960, Unit II 1968)",estimate
+way/236260172,43,Chestnut Building,,3,,mass+photo,estimate from imagery,dark glass/metal office block with central atrium
+way/1348635036,31,Dede Activity Center (Hulman Memorial Student Union),1990,2,,mass+photo,"iv-buildings/8 (Dede Plaza 1990)",estimate
+way/544820727,31,Hulman Memorial Student Union,1977,3,,mass+photo,estimate,"HMSU core; 3 storeys"
+way/545265796,67,Tirey Hall / Rankin Hall / Parsons Hall,1940,3,,mass+photo,"iv-buildings/41 (Tirey 1940), /34 (Rankin 1972 'three-story'), /48 (Parsons 1937)",brick with limestone trim
+way/283611919,65,Sycamore Towers (dining commons base),1965,2,,mass+photo,"iv-residence/44",low connecting base between the four towers
+way/236260776,37,Mills Hall,1965,12,38,mass+photo,"iv-residence/44 (Unit II 1965); OSM building:levels=12",
+way/236260775,55,Rhoads Hall,1965,12,38,mass+photo,"iv-residence/44; OSM building:levels=12",
+way/236260171,6,Blumberg Hall,1964,12,38,mass+photo,"iv-residence/44 (Unit I 1964); skydb 38 m (unverified)",
+way/236260173,14,Cromwell Hall,1964,12,38,mass+photo,"iv-residence/44",
+way/461428308,29,Holmstedt Hall,1966,4,,mass+photo,"iv-buildings/17 (Curry and Weber)",estimate
+way/349907334,15,Cunningham Memorial Library,1973,4,,mass+photo,"iv-buildings/7 ('five floors' incl. lower level)",4 above ground + lower level
+way/461428309,56,Root Hall,1989,3,,mass+photo,"iv-buildings/35",estimate
+way/545266789,48,Power Plant,2001,2,,mass+photo,"iv-buildings/33",tall single hall + stack
+way/545265791,35,Landini Center for Performing and Fine Arts,1997,2,,mass+photo,"iv-buildings/22",
+way/545275293,3,Charles E. Brown African American Cultural Center,1993,2,,mass+photo,"campus map no. 3; iv-buildings/53; OSM mislabels this polygon 'College of Nursing'",small building between 7th and 8th south of Chestnut
+way/956551298,4,Art Annex,,1,,mass,estimate,single-storey warehouse type
+way/461428313,17,Dreiser Hall,1950,3,,mass+photo,"iv-buildings/9; OSM building:levels=3",
+way/545265800,27/50,Academic Enrichment Center / University Police,,2,,mass+photo,estimate,
+way/545265769,64,Student Health Center (Sycamore Center for Wellness),1971,2,,mass+photo,"iv-buildings/63 (Ewing Miller 1971)",estimate
+way/461428311,9,Career Center,,2,,mass+photo,estimate,
+way/544686558,41,New Theater,1979,2,,mass+photo,"iv-buildings/27",fly tower volume
+way/545265790,42,Normal Hall,1909,2,,mass+photo,"iv-buildings/28; NRHP",limestone; stained-glass dome
+way/461428314,25,Gillum Hall,1950,4,,mass+photo,"iv-buildings/14",estimate
+way/461428312,62,Stalker Hall,1953,3,,mass+photo,"iv-buildings/47",
+way/545265798,18,Erickson Hall,,3,,mass+photo,estimate,residence hall
+way/545265799,8,Burford Hall,,4,,mass+photo,estimate,residence hall
+way/545265797,47,Pickerl Hall,,4,,mass+photo,estimate,residence hall
+way/545265807,13,Condit House,1860,2,,mass+photo,"iv-buildings/5",pitched roof
+way/545265788,21,Fairbanks Hall,1906,2,,mass+photo,"Wikipedia (Terre Haute Public Library 1906)",Indiana limestone Beaux-Arts
+way/1464427781,26,University Grounds / Maintenance Department,,1,,mass,estimate,
+way/545275297,53,Recycle Center,,1,,mass,estimate,
+way/545275306,11,ISU Parking Garage (Cherry Street Garage / bus terminal),,5,,mass+photo,"campus map no. 11; OSM polygon named 'Grayhound/City of Terre Haute'",open-deck precast garage
+way/770894656,,University Village (659 Elm St),,3,,mass,estimate,apartments

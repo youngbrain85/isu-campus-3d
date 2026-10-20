@@ -1,0 +1,10 @@
+{
+ "zoom": 19,
+ "north": 39.47754556963623,
+ "south": 39.46429421569262,
+ "west": -87.41889953613281,
+ "east": -87.4017333984375,
+ "width_px": 6400,
+ "height_px": 6400,
+ "note": "Web-Mercator tiles; pixel rows are NOT linear in latitude. Use mercator maths or the bounds + zoom to georeference."
+}
