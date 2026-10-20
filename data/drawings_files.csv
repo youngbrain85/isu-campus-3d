@@ -1,0 +1,547 @@
+set,path,pages,sheet_in,text,size_mb
+Blumburg Hall Renovations,Blumburg Hall Renovations/Addendum # 2/Addendum # 2-Small Format Sketches.pdf,3,8x11,vector,0.3
+Blumburg Hall Renovations,Blumburg Hall Renovations/Addendum # 2/ISU Blumberg Hall Renovations - Addendum No 2.pdf,12,8x11,vector,0.36
+Blumburg Hall Renovations,Blumburg Hall Renovations/Addendum # 3/ISU Blumberg Hall Renovations - Addendum No 3.pdf,3,8x11,vector,0.1
+Blumburg Hall Renovations,Blumburg Hall Renovations/Addendum # 5/002000 Bid Form Revised for Add # 5.docx,,,n/a,0.03
+Blumburg Hall Renovations,Blumburg Hall Renovations/Addendum # 5/ISU Blumberg Hall Renovations - Addendum No 5.pdf,19,8x11,vector,0.31
+(root),collect_isu_data.py,,,n/a,0.01
+cTED building plans,"cTED building plans/cTED ArchStructCivil drawings/Architectural/A-001-GENERAL-NOTES,-SYMBOLS,-AND-STANDARD-MOUNTING-HEIGHTS-Rev.2.pdf",1,48x36,vector,0.43
+cTED building plans,cTED building plans/cTED ArchStructCivil drawings/Architectural/A-002-INTERIOR-PARTITION-TYPES-AND-STANDARD-PARTITION-DETAILS-Rev.3.pdf,1,48x36,vector,0.36
+cTED building plans,cTED building plans/cTED ArchStructCivil drawings/Architectural/A-100-LOWER-LEVEL-FLOOR-PLAN-Rev.2.pdf,1,48x36,vector,0.35
+cTED building plans,cTED building plans/cTED ArchStructCivil drawings/Architectural/A-101-FIRST-FLOOR-PLAN-Rev.8.pdf,1,48x36,vector,0.41
+cTED building plans,cTED building plans/cTED ArchStructCivil drawings/Architectural/A-102-SECOND-FLOOR-PLAN-Rev.7.pdf,1,48x36,vector,0.53
+cTED building plans,cTED building plans/cTED ArchStructCivil drawings/Architectural/A-103-ROOF-PLAN-Rev.3.pdf,1,48x36,vector,0.33
+cTED building plans,cTED building plans/cTED ArchStructCivil drawings/Architectural/A-131-FIRST-FLOOR-REFLECTED-CEILING-PLAN-Rev.11.pdf,1,48x36,vector,2.46
+cTED building plans,cTED building plans/cTED ArchStructCivil drawings/Architectural/A-132-SECOND-FLOOR-REFLECTED-CEILING-PLAN-Rev.8.pdf,1,48x36,vector,2.35
+cTED building plans,cTED building plans/cTED ArchStructCivil drawings/Architectural/A-151-FIRST-FLOOR-FINISH-PLAN-Rev.4.pdf,1,48x36,vector,0.48
+cTED building plans,cTED building plans/cTED ArchStructCivil drawings/Architectural/A-152-SECOND-FLOOR-FINISH-PLAN-Rev.6.pdf,1,48x36,vector,0.46
+cTED building plans,cTED building plans/cTED ArchStructCivil drawings/Architectural/A-201-EXTERIOR-ELEVATIONS-Rev.4.pdf,1,48x36,vector,3.48
+cTED building plans,cTED building plans/cTED ArchStructCivil drawings/Architectural/A-202-EXTERIOR-ELEVATIONS-Rev.4.pdf,1,48x36,vector,2.78
+cTED building plans,cTED building plans/cTED ArchStructCivil drawings/Architectural/A-203-EXTERIOR-SIGNAGE-ELEVATIONS-AND-DETAILS-Rev.0.pdf,1,48x36,vector,0.57
+cTED building plans,cTED building plans/cTED ArchStructCivil drawings/Architectural/A-301-BUILDING-SECTIONS-Rev.1.pdf,1,48x36,vector,0.69
+cTED building plans,cTED building plans/cTED ArchStructCivil drawings/Architectural/A-321-WALL-SECTIONS-Rev.4.pdf,1,48x36,vector,0.64
+cTED building plans,cTED building plans/cTED ArchStructCivil drawings/Architectural/A-322-WALL-SECTIONS-Rev.3.pdf,1,48x36,vector,1.37
+cTED building plans,cTED building plans/cTED ArchStructCivil drawings/Architectural/A-323-WALL-SECTIONS-Rev.4.pdf,1,48x36,vector,0.77
+cTED building plans,cTED building plans/cTED ArchStructCivil drawings/Architectural/A-324-WALL-SECTIONS-Rev.5.pdf,1,48x36,vector,0.5
+cTED building plans,cTED building plans/cTED ArchStructCivil drawings/Architectural/A-325-WALL-SECTIONS-Rev.2.pdf,1,48x36,vector,0.67
+cTED building plans,cTED building plans/cTED ArchStructCivil drawings/Architectural/A-326-WALL-SECTIONS-Rev.4.pdf,1,48x36,vector,2.13
+cTED building plans,cTED building plans/cTED ArchStructCivil drawings/Architectural/A-350-EXTERIOR-DETAILS-Rev.6.pdf,1,48x36,vector,0.55
+cTED building plans,cTED building plans/cTED ArchStructCivil drawings/Architectural/A-351-EXTERIOR-DETAILS-Rev.6.pdf,1,48x36,vector,0.62
+cTED building plans,cTED building plans/cTED ArchStructCivil drawings/Architectural/A-352-EXTERIOR-DETAILS-Rev.4.pdf,1,48x36,vector,0.47
+cTED building plans,cTED building plans/cTED ArchStructCivil drawings/Architectural/A-353-EXTERIOR-DETAILS-Rev.0.pdf,1,48x36,vector,0.12
+cTED building plans,cTED building plans/cTED ArchStructCivil drawings/Architectural/A-370-EXTERIOR-PLAN-DETAILS-Rev.4.pdf,1,48x36,vector,0.28
+cTED building plans,cTED building plans/cTED ArchStructCivil drawings/Architectural/A-371-EXTERIOR-PLAN-DETAILS-Rev.3.pdf,1,48x36,vector,0.26
+cTED building plans,cTED building plans/cTED ArchStructCivil drawings/Architectural/A-401-ENLARGED-PLANS-AND-DETAILS-Rev.4.pdf,1,48x36,vector,0.36
+cTED building plans,cTED building plans/cTED ArchStructCivil drawings/Architectural/A-421-STAIR-AND-ELEVATOR-PLANS-AND-SECTIONS-Rev.3.pdf,1,48x36,vector,0.99
+cTED building plans,cTED building plans/cTED ArchStructCivil drawings/Architectural/A-422-STAIR-AND-ELEVATOR-PLANS-AND-SECTIONS-Rev.4.pdf,1,48x36,vector,0.64
+cTED building plans,cTED building plans/cTED ArchStructCivil drawings/Architectural/A-424-STAIR-AND-RAILING-DETAILS-Rev.3.pdf,1,48x36,vector,0.36
+cTED building plans,cTED building plans/cTED ArchStructCivil drawings/Architectural/A-425-STAIR-AND-RAILING-DETAILS-Rev.4.pdf,1,48x36,vector,0.44
+cTED building plans,cTED building plans/cTED ArchStructCivil drawings/Architectural/A-501-INTERIOR-ELEVATIONS-Rev.2.pdf,1,48x36,vector,0.44
+cTED building plans,cTED building plans/cTED ArchStructCivil drawings/Architectural/A-601-DOOR-SCHEDULE-AND-DETAILS-Rev.4.pdf,1,48x36,vector,0.37
+cTED building plans,cTED building plans/cTED ArchStructCivil drawings/Architectural/A-610-EXTERIOR-GLAZING-ELEVATIONS-Rev.4.pdf,1,48x36,vector,0.55
+cTED building plans,cTED building plans/cTED ArchStructCivil drawings/Architectural/A-611-EXTERIOR-GLAZING-ELEVATIONS-Rev.2.pdf,1,48x36,vector,0.4
+cTED building plans,cTED building plans/cTED ArchStructCivil drawings/Architectural/A-650-FINISH-SCHEDULE-AND-FINISH-DETAILS-Rev.9.pdf,1,48x36,vector,0.27
+cTED building plans,cTED building plans/cTED ArchStructCivil drawings/Architectural/A-651-FINISH-DETAILS-Rev.5.pdf,1,48x36,vector,0.52
+cTED building plans,cTED building plans/cTED ArchStructCivil drawings/Architectural/A-701-FIRST-LEVEL-EQUIPMENT-PLAN-Rev.2.pdf,1,48x36,vector,1.4
+cTED building plans,cTED building plans/cTED ArchStructCivil drawings/Architectural/A-702-SECOND-LEVEL-EQUIPMENT-PLAN-Rev.1.pdf,1,48x36,vector,1.43
+cTED building plans,cTED building plans/cTED ArchStructCivil drawings/Architectural/A-704-EQUIPMENT-SCHEDULE-Rev.2.pdf,1,48x36,vector,0.11
+cTED building plans,cTED building plans/cTED ArchStructCivil drawings/Architectural/AD-100-LOWER-LEVEL-DEMO-PLAN-Rev.3.pdf,1,48x36,vector,0.36
+cTED building plans,cTED building plans/cTED ArchStructCivil drawings/Architectural/AD-101-FIRST-LEVEL-DEMO-PLAN-Rev.3.pdf,1,48x36,vector,0.53
+cTED building plans,cTED building plans/cTED ArchStructCivil drawings/Architectural/AD-102-SECOND-LEVEL-DEMO-PLAN-Rev.2.pdf,1,48x36,vector,0.5
+cTED building plans,cTED building plans/cTED ArchStructCivil drawings/Architectural/AD-103-ROOF-LEVEL-DEMO-PLAN-Rev.3.pdf,1,48x36,vector,0.39
+cTED building plans,cTED building plans/cTED ArchStructCivil drawings/Civil/C-101-UTILITY-DEMOLITION-PLAN-Rev.4.pdf,1,48x36,vector,1.04
+cTED building plans,cTED building plans/cTED ArchStructCivil drawings/Civil/C-300-GRADING-PLAN-Rev.4.pdf,1,48x36,vector,1.12
+cTED building plans,cTED building plans/cTED ArchStructCivil drawings/Civil/C-301-GRADING-PLAN-Rev.0.pdf,1,48x36,vector,0.76
+cTED building plans,cTED building plans/cTED ArchStructCivil drawings/Civil/C-302-GRADING-AND-DRAINAGE-PLAN-Rev.0.pdf,1,48x36,vector,0.8
+cTED building plans,cTED building plans/cTED ArchStructCivil drawings/Civil/C-400-STORMWATER-PLAN-Rev.5.pdf,1,48x36,vector,0.88
+cTED building plans,cTED building plans/cTED ArchStructCivil drawings/Civil/C-401-STORMWATER-PROFILES-Rev.1.pdf,1,48x36,vector,0.49
+cTED building plans,cTED building plans/cTED ArchStructCivil drawings/Civil/C-500-UTILITY-PLAN-Rev.4.pdf,1,48x36,vector,0.94
+cTED building plans,cTED building plans/cTED ArchStructCivil drawings/Civil/C-600-MAINTENANCE-OF-TRAFFIC-PLAN-Rev.2.pdf,1,48x36,vector,1.71
+cTED building plans,cTED building plans/cTED ArchStructCivil drawings/Civil/C-800-SITE-DETAILS-Rev.2.pdf,1,48x36,vector,1.33
+cTED building plans,cTED building plans/cTED ArchStructCivil drawings/Civil/C-801-SITE-DETAILS-Rev.1.pdf,1,48x36,vector,7.73
+cTED building plans,cTED building plans/cTED ArchStructCivil drawings/Civil/C-900-STORMWATER-POLLUTION-PREVENTION-PLAN-Rev.3.pdf,1,48x36,vector,1.35
+cTED building plans,cTED building plans/cTED ArchStructCivil drawings/Civil/C-900B-STORMWATER-POLLUTION-PREVENTION-PLAN-Rev.0.pdf,1,48x36,vector,0.99
+cTED building plans,cTED building plans/cTED ArchStructCivil drawings/Civil/C-901-STORMWATER-POLLUTION-PREVENTION-PLAN-NOTES-Rev.3.pdf,1,48x36,vector,1.11
+cTED building plans,cTED building plans/cTED ArchStructCivil drawings/Civil/C-902-STORMWATER-POLLUTION-PREVENTION-PLAN-DETAILS-Rev.3.pdf,1,48x36,vector,0.58
+cTED building plans,cTED building plans/OLD - prior to renov/527 Model (1).pdf,1,18x24,scan,0.04
+cTED building plans,cTED building plans/OLD - prior to renov/528 Model (1).pdf,1,18x24,scan,0.07
+cTED building plans,cTED building plans/OLD - prior to renov/529 Model (1).pdf,1,18x24,scan,0.07
+Holmstedt Hall Record Drawings,Holmstedt Hall Record Drawings/2010-06-02 Holmstedt Hall Specs.pdf,260,8x11,vector,1.07
+Holmstedt Hall Record Drawings,Holmstedt Hall Record Drawings/Addendum # 1.docx,,,n/a,0.04
+Holmstedt Hall Record Drawings,Holmstedt Hall Record Drawings/Final Bid Drawings.pdf,17,24x36,scan,16.64
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/1 pdf/TEMP001.PDF,1,42x30,scan,0.44
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/1 pdf/TEMP002.PDF,1,42x30,scan,0.46
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/1 pdf/TEMP004.PDF,1,42x30,scan,0.96
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/1 pdf/TEMP005.PDF,1,42x30,scan,0.87
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/1 pdf/TEMP006.PDF,1,42x30,scan,0.97
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/1 pdf/TEMP008.PDF,1,42x30,scan,0.62
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/1 pdf/TEMP012.PDF,1,42x30,scan,0.83
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/1 pdf/TEMP013.PDF,1,42x30,scan,0.75
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/1 pdf/TEMP014.PDF,1,42x30,scan,0.73
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/1 pdf/TEMP015.PDF,1,42x30,scan,0.56
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/1 pdf/TEMP020.PDF,1,42x30,scan,0.94
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/1 pdf/TEMP021.PDF,1,42x30,scan,0.91
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/1 pdf/TEMP031.PDF,1,42x30,scan,0.86
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/1 pdf/TEMP032.PDF,1,42x30,scan,0.6
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/1 pdf/TEMP033.PDF,1,42x30,scan,0.56
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/1 pdf/TEMP036.PDF,1,42x30,scan,0.5
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/1 pdf/TEMP037.PDF,1,42x30,scan,0.64
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/1 pdf/TEMP038.PDF,1,42x30,scan,0.8
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/1 pdf/TEMP039.PDF,1,42x30,scan,0.79
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/1 pdf/TEMP041.PDF,1,42x30,scan,0.83
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/1 pdf/TEMP042.PDF,1,42x30,scan,0.72
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/1 pdf/TEMP043.PDF,1,42x30,scan,0.95
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/1 pdf/TEMP045.PDF,1,42x30,scan,0.83
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/1 pdf/TEMP046.PDF,1,42x30,scan,0.84
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/1 pdf/TEMP047.PDF,1,42x30,scan,0.83
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/1 pdf/TEMP048.PDF,1,42x30,scan,0.68
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/1 pdf/TEMP049.PDF,1,42x30,scan,0.88
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/1 pdf/TEMP050.PDF,1,42x30,scan,0.65
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/1 pdf/TEMP051.PDF,1,42x30,scan,0.89
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/1 pdf/TEMP052.PDF,1,42x30,scan,0.73
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/1 pdf/TEMP053.PDF,1,42x30,scan,0.6
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/1 pdf/TEMP054.PDF,1,42x30,scan,0.76
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/1 pdf/TEMP055.PDF,1,42x30,scan,0.68
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/1 pdf/TEMP056.PDF,1,42x30,scan,0.54
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/1 pdf/TEMP060.PDF,1,42x30,scan,0.69
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/1 pdf/TEMP061.PDF,1,42x30,scan,0.74
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/1 pdf/TEMP062.PDF,1,42x30,scan,0.62
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/1 pdf/TEMP063.PDF,1,42x30,scan,0.68
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/1 pdf/TEMP064.PDF,1,42x30,scan,0.67
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/1 pdf/TEMP065.PDF,1,42x30,scan,0.75
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP003.PDF,1,42x30,scan,0.8
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP004.PDF,1,42x30,scan,0.72
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP005.PDF,1,42x30,scan,0.6
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP006.PDF,1,42x30,scan,0.73
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP007.PDF,1,42x30,scan,0.38
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP008.PDF,1,42x30,scan,0.86
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP009.PDF,1,42x30,scan,0.74
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP010.PDF,1,42x30,scan,0.94
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP012.PDF,1,42x30,scan,0.04
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP013.PDF,1,42x30,scan,0.63
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP014.PDF,1,42x30,scan,0.62
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP015.PDF,1,42x30,scan,0.43
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP016.PDF,1,42x30,scan,0.81
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP017.PDF,1,42x30,scan,0.54
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP018.PDF,1,42x30,scan,0.74
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP019.PDF,1,42x30,scan,0.55
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP020.PDF,1,42x30,scan,0.63
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP021.PDF,1,42x30,scan,0.58
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP022.PDF,1,42x30,scan,0.62
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP023.PDF,1,42x30,scan,0.53
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP024.PDF,1,42x30,scan,0.68
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP025.PDF,1,42x30,scan,0.74
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP026.PDF,1,42x30,scan,0.49
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP027.PDF,1,42x30,scan,0.53
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP028.PDF,1,42x30,scan,0.65
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP029.PDF,1,42x30,scan,0.58
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP030.PDF,1,42x30,scan,0.53
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP031.PDF,1,42x30,scan,0.65
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP032.PDF,1,42x30,scan,0.97
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP033.PDF,1,42x30,scan,0.98
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP035.PDF,1,42x30,scan,0.87
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP040.PDF,1,42x30,scan,0.63
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP041.PDF,1,42x30,scan,0.74
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP042.PDF,1,42x30,scan,0.94
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP043.PDF,1,42x30,scan,0.87
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP044.PDF,1,42x30,scan,0.86
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP045.PDF,1,42x30,scan,0.55
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP048.PDF,1,42x30,scan,0.45
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP049.PDF,1,42x30,scan,0.51
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP050.PDF,1,42x30,scan,0.51
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP051.PDF,1,42x30,scan,0.47
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP052.PDF,1,42x30,scan,0.36
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP053.PDF,1,42x30,scan,0.41
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP054.PDF,1,42x30,scan,0.45
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP055.PDF,1,42x30,scan,0.37
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP056.PDF,1,42x30,scan,0.46
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP057.PDF,1,42x30,scan,0.53
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP058.PDF,1,42x30,scan,0.5
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP059.PDF,1,42x30,scan,0.52
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP060.PDF,1,42x30,scan,0.43
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP062.PDF,1,42x30,scan,0.38
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP063.PDF,1,42x30,scan,0.39
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP064.PDF,1,42x30,scan,0.42
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP065.PDF,1,42x30,scan,0.4
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP066.PDF,1,42x30,scan,0.34
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP067.PDF,1,42x30,scan,0.34
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP068.PDF,1,42x30,scan,0.33
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP069.PDF,1,42x30,scan,0.36
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP070.PDF,1,42x30,scan,0.4
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP071.PDF,1,42x30,scan,0.47
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP072.PDF,1,42x30,scan,0.42
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP073.PDF,1,42x30,scan,0.46
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP074.PDF,1,42x30,scan,0.46
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP075.PDF,1,42x30,scan,0.54
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP076.PDF,1,42x30,scan,0.7
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP077.PDF,1,42x30,scan,0.65
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP079.PDF,1,42x30,scan,0.34
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP080.PDF,1,42x30,scan,0.84
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP081.PDF,1,42x30,scan,0.7
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP082.PDF,1,42x30,scan,0.64
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP083.PDF,1,42x30,scan,0.57
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP084.PDF,1,42x30,scan,0.44
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP085.PDF,1,42x30,scan,0.47
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP086.PDF,1,42x30,scan,0.77
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP087.PDF,1,42x30,scan,0.9
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP088.PDF,1,42x30,scan,0.68
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP090.PDF,1,42x30,scan,0.5
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP091.PDF,1,42x30,scan,0.66
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP095.PDF,1,42x30,scan,0.89
+Hulman Center Record Drawings,Hulman Center Record Drawings/hulman/2 pdf/TEMP108.PDF,1,42x30,scan,0.95
+(root),ISU Files.zip,,,n/a,752.47
+"ISU Fine Arts Renovation, Bid # B0025901","ISU Fine Arts Renovation, Bid # B0025901/Addenda/Addendum 1/Fine Arts Renovation- addendum 1.pdf",68,8x11,vector,3.79
+"ISU Fine Arts Renovation, Bid # B0025901","ISU Fine Arts Renovation, Bid # B0025901/Addenda/Addendum 2/Fine Arts Renovation Addendum  2.pdf",69,8x11,vector,23.07
+"ISU Fine Arts Renovation, Bid # B0025901","ISU Fine Arts Renovation, Bid # B0025901/Addenda/Addendum 3/Fine Arts Renovation Addendum  3.pdf",76,8x11,vector,5.87
+"ISU Fine Arts Renovation, Bid # B0025901","ISU Fine Arts Renovation, Bid # B0025901/Addenda/Addendum 4/Fine Arts Renovation addendum 4.pdf",126,8x11,vector,26.2
+"ISU Fine Arts Renovation, Bid # B0025901","ISU Fine Arts Renovation, Bid # B0025901/Addenda/Bid Tally Sheet/Bid Tally Sheet PDF - Fine Arts Renovation - B0025901.pdf",2,14x8,vector,0.62
+"ISU Fine Arts Renovation, Bid # B0025901","ISU Fine Arts Renovation, Bid # B0025901/Plans/Award Letter/AwardLetterPDF-FineArtsBuildingRenovation-B0025901.pdf",1,8x11,vector,0.36
+"ISU Fine Arts Renovation, Bid # B0025901","ISU Fine Arts Renovation, Bid # B0025901/Plans/Plans/17180 - ISU FineArts - BID SET Volume 1.pdf",176,36x24,vector,109.27
+"ISU Fine Arts Renovation, Bid # B0025901","ISU Fine Arts Renovation, Bid # B0025901/Plans/Plans/17180 - ISU FineArts - BID SET Volume 2.pdf",101,36x24,vector,26.2
+"ISU Fine Arts Renovation, Bid # B0025901","ISU Fine Arts Renovation, Bid # B0025901/Specs/Specbooks/17180_FINE ARTS_B0025901_VOLUME 1.pdf",181,8x11,vector,2.81
+"ISU Fine Arts Renovation, Bid # B0025901","ISU Fine Arts Renovation, Bid # B0025901/Specs/Specbooks/17180_FINE ARTS_B0025901_VOLUME 2.pdf",636,8x11,vector,12.15
+"ISU Fine Arts Renovation, Bid # B0025901","ISU Fine Arts Renovation, Bid # B0025901/Specs/Specbooks/17180_FINE ARTS_B0025901_VOLUME 3.pdf",681,8x11,vector,6.61
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#01_Site-Survey.PDF,1,22x15,scan,0.25
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#02_Location-Plan.PDF,1,22x15,scan,0.21
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#03_Legends-Schedules.PDF,1,22x15,scan,0.26
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#04_Typical-Student-Units.PDF,1,22x15,scan,0.25
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#05_Special-Units.PDF,1,22x15,scan,0.22
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#06_Building-Elevations.PDF,1,22x15,scan,0.18
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#07_Building-Elevations.PDF,1,22x15,scan,0.18
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#08_Building-Elevations.PDF,1,22x15,scan,0.15
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#09_Wall-Sections.PDF,1,22x15,scan,0.2
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#100_Dining-Room-Electrical-Plan.PDF,1,22x15,scan,0.13
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#101_Mechanical-Room-Electrical-Plan.PDF,1,22x15,scan,0.28
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#102_Plugmold-Details.PDF,1,22x15,scan,0.17
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#103_Electrical-Feeder-Diagram.PDF,1,22x15,scan,0.2
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#104_Electrical-Details.PDF,1,22x15,scan,0.24
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#105_Electrical-Panel-Schedules.PDF,1,22x15,scan,0.27
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#106_Electrical-Panel-Schedules.PDF,1,22x15,scan,0.23
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#10_Stairs.PDF,1,22x15,scan,0.22
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#11_Lower-Level-Commons-Plan.PDF,1,22x15,scan,0.23
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#12_Upper-Level-Commons-Plan.PDF,1,22x15,scan,0.19
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#13_Commons-Roof-Plan.PDF,1,22x15,scan,0.09
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#14_Elevations.PDF,1,22x15,scan,0.13
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#15_Building-Sections.PDF,1,22x15,scan,0.23
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#16_Wall-Sections.PDF,1,22x15,scan,0.18
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#17_Wall-Sections.PDF,1,22x15,scan,0.17
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#18_Stairs.PDF,1,22x15,scan,0.26
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#19_Curtain-Wall&Window-Details.PDF,1,22x15,scan,0.23
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#20_Details.PDF,1,22x15,scan,0.26
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#21_Details.PDF,1,22x15,scan,0.28
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#22_Commons-Lower-Level-RCP.PDF,1,22x15,scan,0.16
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#23_Commons-Upper-Level-RCP.PDF,1,22x15,scan,0.14
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#24_Walks-Drives-Courtyard-Plan(Void).PDF,1,22x15,scan,0.24
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#24_Walks-Drives-Courtyard-Plan.PDF,1,22x15,scan,0.29
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#30_Unit-Framing-Plans.PDF,1,22x15,scan,0.26
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#31_Structural-Details.PDF,1,22x15,scan,0.23
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#32_Commons-Foundation-Plan.PDF,1,22x15,scan,0.27
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#33_Commons-Upper-Level-Framing-Plan.PDF,1,22x15,scan,0.27
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#34_Commons-Roof-Framing-Plan.PDF,1,22x15,scan,0.24
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#35_Tunnel-Plans.PDF,1,22x15,scan,0.15
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#40_Kitchen-Equipment-Plan.PDF,1,22x15,scan,0.19
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#41_Serving-Line-Plan.PDF,1,22x15,scan,0.12
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#42_Dry-Storage-Shelving-Plan.PDF,1,22x15,scan,0.04
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#43_Kitchen-Equipment-Details.PDF,1,22x15,scan,0.15
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#44_Kitchen-Equipment-Details.PDF,1,22x15,scan,0.15
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#45_Kitchen-Equipment-Schedules&Details.PDF,1,22x15,scan,0.23
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#50_Plumbing-Site-Plan(2).PDF,1,22x15,scan,0.14
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#50_Plumbing-Site-Plan.PDF,1,22x15,scan,0.13
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#51_Student-Unit-Plumbing-Plans(Void).PDF,1,22x15,scan,0.13
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#51_Student-Unit-Plumbing-Plans.PDF,1,22x15,scan,0.13
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#52_Special-Unit-Plumbing-Plans(Void).PDF,1,22x15,scan,0.11
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#52_Special-Unit-Plumbing-Plans.PDF,1,22x15,scan,0.11
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#53_Commons-Lower-Level-Plumbing-Plan.PDF,1,22x15,scan,0.14
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#54_Commons-Upper-Level-Plumbing-Plan(Void).PDF,1,22x15,scan,0.1
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#54_Commons-Upper-Level-Plumbing-Plan.PDF,1,22x15,scan,0.09
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#55_Kitchen-Plumbing-Plan.PDF,1,22x15,scan,0.17
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#56_Mechanical-Room-Plumbing-Plan.PDF,1,22x15,scan,0.12
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#57_Water-Piping-Diagrams.PDF,1,22x15,scan,0.18
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#58_Water-Piping-Diagrams.PDF,1,22x15,scan,0.18
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#59_Water&Vent-Piping-Diagrams.PDF,1,22x15,scan,0.16
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#60_Waste-Vent-Piping-Diagrams.PDF,1,22x15,scan,0.11
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#61_Commons-Water-Diagrams.PDF,1,22x15,scan,0.25
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#62_Commons-Waste-Vent-Diagrams.PDF,1,22x15,scan,0.18
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#63_Plumbing-Details.PDF,1,22x15,scan,0.11
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#70_HVAC-Site-Plan.PDF,1,22x15,scan,0.13
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#71_Tunnel-Piping-Plan.PDF,1,22x15,scan,0.21
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#72_Tunnel-Piping-Details.PDF,1,22x15,scan,0.21
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#73_HVAC-Student-Unit-Plans.PDF,1,22x15,scan,0.19
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#74_HVAC-Special-Unit-Plans.PDF,1,22x15,scan,0.13
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#75_HVAC-Commons-Lower-Level-Plan.PDF,1,22x15,scan,0.26
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#76_HVAC-Commons-Upper-Level-Plan(Void).PDF,1,22x15,scan,0.13
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#76_HVAC-Commons-Upper-Level-Plan.PDF,1,22x15,scan,0.12
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#77_HVAC-Kitchen-Plan(Void).PDF,1,22x15,scan,0.25
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#77_HVAC-Kitchen-Plan.PDF,1,22x15,scan,0.24
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#78_HVAC-Mechanical-Room-Plan.PDF,1,22x15,scan,0.29
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#79_HVAC-Roof-Plan.PDF,1,22x15,scan,0.08
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#80_HVAC-Mechanical-Room-Piping-Diagram.PDF,1,22x15,scan,0.37
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#81_HVAC-Sections.PDF,1,22x15,scan,0.16
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#82_HVAC-Schedules.PDF,1,22x15,scan,0.32
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#83_HVAC-Piping-Details.PDF,1,22x15,scan,0.11
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#84_HVAC-Temperature-Control-Diagrams.PDF,1,22x15,scan,0.24
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#90_Electrical-Site-Plan(2).PDF,1,22x15,scan,0.18
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#90_Electrical-Site-Plan.PDF,1,22x15,scan,0.16
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#91_Electrical-Site-Details.PDF,1,22x15,scan,0.2
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#92_Electrical-Site-Details.PDF,1,22x15,scan,0.15
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#93_Electrical-Student-Unit-Plans.PDF,1,22x15,scan,0.15
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#94_Electrical-Special-Unit-Plans.PDF,1,22x15,scan,0.17
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#95_Commons-Lower-Level-Lighting-Plan.PDF,1,22x15,scan,0.16
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#96_Commons-Lower-Level-Power-Plan.PDF,1,22x15,scan,0.18
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#97_Commons-Upper-Level-Lighting-Plan.PDF,1,22x15,scan,0.19
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#98_Commons-Upper-Level-Power-Plan.PDF,1,22x15,scan,0.13
+Lincoln Quad Record Drawings,Lincoln Quad Record Drawings/Sheet#99_Kitchen-Electrical-Plan.PDF,1,22x15,scan,0.25
+Reeve Hall Record Drawings,Reeve Hall Record Drawings/1 Cover_Vol1.pdf,1,42x30,vector,5.29
+Reeve Hall Record Drawings,Reeve Hall Record Drawings/2 Civil_full.pdf,21,42x30,scan,13.1
+Reeve Hall Record Drawings,Reeve Hall Record Drawings/3 Landscape_full.pdf,17,42x30,vector,18.31
+Reeve Hall Record Drawings,Reeve Hall Record Drawings/4 Structural_full.pdf,24,42x30,vector,3.53
+Reeve Hall Record Drawings,Reeve Hall Record Drawings/5 arch_full.pdf,73,42x30,vector,48.72
+Reeve Hall Record Drawings,Reeve Hall Record Drawings/6 Cover_Vol2.pdf,1,42x30,vector,5.29
+Reeve Hall Record Drawings,Reeve Hall Record Drawings/7 Mechanical_full.pdf,30,42x30,vector,5.44
+Reeve Hall Record Drawings,Reeve Hall Record Drawings/8 Plumbing_full.pdf,18,42x30,vector,3.29
+Reeve Hall Record Drawings,Reeve Hall Record Drawings/9 FireP_full.pdf,13,42x30,vector,1.52
+Reeve Hall Record Drawings,Reeve Hall Record Drawings/9.1 Electrical_full.pdf,52,42x30,vector,19.42
+Reeve Hall Record Drawings,Reeve Hall Record Drawings/ADDENDUM #1 COMPLETE.pdf,160,8x11,vector,5.78
+Reeve Hall Record Drawings,Reeve Hall Record Drawings/Addendum #2.pdf,1,8x11,vector,0.12
+Reeve Hall Record Drawings,Reeve Hall Record Drawings/Addendum #3 - FULL.pdf,22,8x11,vector,0.51
+Reeve Hall Record Drawings,Reeve Hall Record Drawings/Addendum #4 - FULL.pdf,14,8x11,vector,0.52
+Reeve Hall Record Drawings,Reeve Hall Record Drawings/Volume No 2 - Complete.pdf,807,8x11,vector,20.22
+School of Nursing,School of Nursing/ISU School of Nursing Complete Record Dwgs.pdf,63,22x15,scan,46.17
+School of Nursing,School of Nursing/ISU School of Nursing Dwg Index.pdf,1,22x15,scan,0.92
+School of Nursing,School of Nursing/ISU School of Nursing Electrical.pdf,14,22x15,scan,10.71
+School of Nursing,School of Nursing/ISU School of Nursing Gen Const.pdf,16,22x15,scan,10.69
+School of Nursing,School of Nursing/ISU School of Nursing HVAC.pdf,12,22x15,scan,9.92
+School of Nursing,School of Nursing/ISU School of Nursing Mechanical.pdf,1,22x15,scan,0.52
+School of Nursing,School of Nursing/ISU School of Nursing Plumbing.pdf,11,22x15,scan,6.9
+School of Nursing,School of Nursing/ISU School of Nursing Structural.pdf,7,22x15,scan,6.16
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Aquatic/SP0.0.pdf,1,42x30,scan,0.53
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Aquatic/SP1.0.pdf,1,42x30,scan,0.32
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Aquatic/SP1.1.pdf,1,42x30,scan,0.4
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Aquatic/SP1.2.pdf,1,42x30,scan,0.55
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Aquatic/SP1.3.pdf,1,42x30,scan,0.41
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Aquatic/SP1.4.pdf,1,42x30,scan,0.64
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Aquatic/SP2.0.pdf,1,42x30,scan,0.62
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Aquatic/SP2.1.pdf,1,42x30,scan,0.4
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Aquatic/SP3.0.pdf,1,42x30,scan,0.48
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Aquatic/SP3.1.pdf,1,42x30,scan,0.54
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Aquatic/SP4.0.pdf,1,42x30,scan,0.44
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Aquatic/SP4.1.pdf,1,42x30,scan,0.34
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Aquatic/SP4.2.pdf,1,42x30,scan,0.62
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Aquatic/SP4.3.pdf,1,42x30,scan,0.52
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Aquatic/SP4.4.pdf,1,42x30,scan,0.19
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Aquatic/SP5.0.pdf,1,42x30,scan,0.35
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Aquatic/SP5.1.pdf,1,42x30,scan,0.13
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A0.00.pdf,1,30x42,scan,1.11
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A0.01.pdf,1,30x42,scan,0.72
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A0.02.pdf,1,30x42,scan,0.34
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A1.01.pdf,1,30x42,scan,1.42
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A1.02.pdf,1,30x42,scan,0.45
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A1.03.pdf,1,30x42,scan,0.32
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A1.04.pdf,1,30x42,scan,0.26
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A1.05.pdf,1,30x42,scan,0.26
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A10.01.pdf,1,30x42,scan,0.32
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A2.00.pdf,1,30x42,scan,0.35
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A2.01.pdf,1,30x42,scan,0.48
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A2.02.pdf,1,30x42,scan,0.34
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A2.03.pdf,1,30x42,scan,0.4
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A2.04.pdf,1,30x42,scan,0.69
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A2.05.pdf,1,30x42,scan,0.54
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A2.06.pdf,1,30x42,scan,0.55
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A2.07.pdf,1,30x42,scan,0.53
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A2.08.pdf,1,30x42,scan,0.29
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A2.09.pdf,1,30x42,scan,0.25
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A2.10.pdf,1,30x42,scan,0.62
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A2.11.pdf,1,30x42,scan,0.29
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A3.01.pdf,1,30x42,scan,0.52
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A3.02.pdf,1,30x42,scan,0.56
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A3.03.pdf,1,30x42,scan,0.49
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A3.04.pdf,1,30x42,scan,0.43
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A4.01.pdf,1,30x42,scan,0.82
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A4.02.pdf,1,30x42,scan,0.29
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A4.03.pdf,1,30x42,scan,0.63
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A4.04.pdf,1,30x42,scan,0.57
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A4.05.pdf,1,30x42,scan,0.33
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A5.01.pdf,1,30x42,scan,0.82
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A5.02.pdf,1,30x42,scan,0.57
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A5.03.pdf,1,30x42,scan,0.87
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A5.04.pdf,1,30x42,scan,0.83
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A5.05.pdf,1,30x42,scan,0.66
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A5.06.pdf,1,30x42,scan,0.73
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A5.07.pdf,1,30x42,scan,0.69
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A5.08.pdf,1,30x42,scan,0.9
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A5.09.pdf,1,30x42,scan,0.81
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A5.10.pdf,1,30x42,scan,0.94
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A5.11.pdf,1,30x42,scan,0.29
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A5.12.pdf,1,30x42,scan,1.13
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A5.13.pdf,1,30x42,scan,0.8
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A6.01.pdf,1,30x42,scan,0.74
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A6.02.pdf,1,30x42,scan,0.91
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A6.03.pdf,1,30x42,scan,0.96
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A6.04.pdf,1,30x42,scan,0.96
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A6.05.pdf,1,30x42,scan,0.75
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A6.06.pdf,1,30x42,scan,0.68
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A6.07.pdf,1,30x42,scan,0.63
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A6.08.pdf,1,30x42,scan,1.17
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A6.09.pdf,1,30x42,scan,0.77
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A6.10.pdf,1,30x42,scan,0.9
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A6.11.pdf,1,30x42,scan,0.33
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A6.12.pdf,1,30x42,scan,0.28
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A6.13.pdf,1,30x42,scan,0.42
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A6.14.pdf,1,30x42,scan,0.39
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A6.15.pdf,1,30x42,scan,0.4
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A6.16.pdf,1,30x42,scan,0.42
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A7.01.pdf,1,30x42,scan,0.48
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A7.02.pdf,1,30x42,scan,0.67
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A7.03.pdf,1,30x42,scan,0.39
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A7.04.pdf,1,30x42,scan,0.63
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A7.05.pdf,1,30x42,scan,0.79
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A7.06.pdf,1,30x42,scan,0.28
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A8.01.pdf,1,30x42,scan,0.39
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A8.02.pdf,1,30x42,scan,0.2
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A8.03.pdf,1,30x42,scan,0.3
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A8.04.pdf,1,30x42,scan,0.34
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A8.05.pdf,1,30x42,scan,0.36
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A8.06.pdf,1,30x42,scan,0.64
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A8.07.pdf,1,30x42,scan,0.37
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A9.01.pdf,1,30x42,scan,0.45
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A9.02.pdf,1,30x42,scan,0.26
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Arch/2817 A9.03.pdf,1,30x42,scan,0.24
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Civil/Aquatic/SP0.0.pdf,1,42x30,scan,0.53
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Civil/Aquatic/SP1.0.pdf,1,42x30,scan,0.32
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Civil/Aquatic/SP1.1.pdf,1,42x30,scan,0.4
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Civil/Aquatic/SP1.2.pdf,1,42x30,scan,0.55
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Civil/Aquatic/SP1.3.pdf,1,42x30,scan,0.41
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Civil/Aquatic/SP1.4.pdf,1,42x30,scan,0.64
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Civil/Aquatic/SP2.0.pdf,1,42x30,scan,0.62
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Civil/Aquatic/SP2.1.pdf,1,42x30,scan,0.4
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Civil/Aquatic/SP3.0.pdf,1,42x30,scan,0.48
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Civil/Aquatic/SP3.1.pdf,1,42x30,scan,0.54
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Civil/Aquatic/SP4.0.pdf,1,42x30,scan,0.44
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Civil/Aquatic/SP4.1.pdf,1,42x30,scan,0.34
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Civil/Aquatic/SP4.2.pdf,1,42x30,scan,0.62
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Civil/Aquatic/SP4.3.pdf,1,42x30,scan,0.52
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Civil/Aquatic/SP4.4.pdf,1,42x30,scan,0.19
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Civil/Aquatic/SP5.0.pdf,1,42x30,scan,0.35
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Civil/Aquatic/SP5.1.pdf,1,42x30,scan,0.13
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Civil/C1.01.PDF,1,42x30,scan,1.48
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Civil/C2.01.PDF,1,42x30,scan,0.54
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Civil/C3.01.PDF,1,42x30,scan,1.09
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Civil/C4.01.PDF,1,42x30,scan,0.84
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Civil/C4.02.PDF,1,42x30,scan,0.77
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Civil/C5.01.PDF,1,42x30,scan,1.34
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Civil/C6.01.PDF,1,42x30,scan,0.69
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Civil/C6.02.PDF,1,42x30,scan,0.68
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Civil/TS1.0.PDF,1,42x30,scan,1.02
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Elec/E0.1(119200.000).pdf,1,30x42,scan,0.79
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Elec/E1.1(119200.000).pdf,1,30x42,scan,0.52
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Elec/E1.2-(19200.000).pdf,1,30x42,scan,0.47
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Elec/E1.3 (119200.000).pdf,1,30x42,scan,0.35
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Elec/E2.1 (119200.000).pdf,1,30x42,scan,1.01
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Elec/E2.2 (119200.000).pdf,1,30x42,scan,0.67
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Elec/E2.3 (119200.000).pdf,1,30x42,scan,0.63
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Elec/E2.4 (119200.000).pdf,1,30x42,scan,0.57
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Elec/E3.1 (119200.000).pdf,1,30x42,scan,1.04
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Elec/E3.2 (119200.000).pdf,1,30x42,scan,0.52
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Elec/E3.3 (119200.000).pdf,1,30x42,scan,0.43
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Elec/E3.4 (119200.000).pdf,1,30x42,scan,0.34
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Elec/E3.5 (119200.000).pdf,1,30x42,scan,0.3
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Elec/E3.6 (119200.000).pdf,1,30x42,scan,0.54
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Elec/E3.7 (119200.000).pdf,1,30x42,scan,0.4
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Elec/E4.1 (119200.000).pdf,1,30x42,scan,0.62
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Elec/E4.2 (119200.000).pdf,1,30x42,scan,0.39
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Elec/E4.3 (119200.000).pdf,1,30x42,scan,0.36
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Elec/E4.4 (119200.000).pdf,1,30x42,scan,0.27
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Elec/E5.1 (119200.000).pdf,1,30x42,scan,0.92
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Elec/E5.2 (119200.000).pdf,1,30x42,scan,0.63
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Elec/E5.3 (119200.000).pdf,1,30x42,scan,0.63
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Elec/E5.4 (119200.000).pdf,1,30x42,scan,0.41
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Elec/E5.5 (119200.000).pdf,1,30x42,scan,0.5
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Elec/E5.6 (119200.000).pdf,1,30x42,scan,0.38
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Elec/E5.7 (119200.000).pdf,1,30x42,scan,0.36
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Elec/E6.1 (119200.000).pdf,1,30x42,scan,0.56
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Elec/E6.2 (119200.000).pdf,1,30x42,scan,0.72
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Elec/E6.3 (119200.000).pdf,1,30x42,scan,0.98
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Elec/E6.4 (119200.000).pdf,1,30x42,scan,0.93
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Elec/E7.1 (119200.000).pdf,1,30x42,scan,0.39
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Elec/E7.2 (119200.000).pdf,1,30x42,scan,0.35
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Elec/E7.3 (119200.000).pdf,1,30x42,scan,0.44
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Elec/SDE-25(E4 3 2) (119200 000).pdf,1,11x17,scan,0.13
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Mech/M5.06-119200.000-M5.06.pdf,1,30x42,scan,0.4
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Mech/M5.07-119200.000-M5.07.pdf,1,30x42,scan,0.46
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Mech/M5.08-119200.000-M5.08.pdf,1,30x42,scan,0.43
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Mech/M5.09-119200.000-M5.09.pdf,1,30x42,scan,0.49
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Mech/M5.10-119200.000-M5.10.pdf,1,30x42,scan,0.27
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Mech/M5.11-119200.000-M5.11.pdf,1,30x42,scan,0.42
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Mech/M5.12-M5.13-119200.000-M5.12.pdf,1,30x42,scan,0.42
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Mech/M5.12-M5.13-119200.000-M5.13.pdf,1,30x42,scan,0.46
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Mech/M5.14-119200.000-M5.14.pdf,1,30x42,scan,0.74
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Mech/M5.15-119200.000-M5.15.pdf,1,30x42,scan,0.49
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Mech/M5.16-119200.000-M5.16.pdf,1,30x42,scan,0.67
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Mech/M6.01-119200.000-M6.01.pdf,1,30x42,scan,0.88
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Mech/M6.02- 119200.000-M6.02.pdf,1,30x42,scan,0.71
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Mech/M7.01-119200.000-M7.01.pdf,1,30x42,scan,0.47
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Mech/M7.02-119200.000-M7.02.pdf,1,30x42,scan,0.33
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Mech/M7.03-119200.000-M7.03.pdf,1,30x42,scan,0.32
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Mech/M8.01-119200.000-M8.01.pdf,1,30x42,scan,0.54
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Mech/M8.02-119200.000-M8.02.pdf,1,30x42,scan,0.36
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Struct/S0.01.PDF,1,42x30,scan,1.13
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Struct/S1.00.PDF,1,42x30,scan,0.99
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Struct/S1.01.PDF,1,42x30,scan,1.25
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Struct/S1.02.PDF,1,42x30,scan,0.85
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Struct/S1.03.PDF,1,42x30,scan,0.78
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Struct/S1.04.PDF,1,42x30,scan,0.73
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Struct/S2.00A.PDF,1,42x30,scan,1.28
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Struct/S2.00B.PDF,1,42x30,scan,0.95
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Struct/S2.01A.PDF,1,42x30,scan,1.39
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Struct/S2.01B.PDF,1,42x30,scan,1.09
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Struct/S2.02A.PDF,1,42x30,scan,1.12
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Struct/S2.02B.PDF,1,42x30,scan,1.04
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Struct/S2.03A.PDF,1,42x30,scan,1.12
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Struct/S2.03B.PDF,1,42x30,scan,0.85
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Struct/S2.04A.PDF,1,42x30,scan,0.87
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Struct/S2.04B.PDF,1,42x30,scan,0.75
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Struct/S2.05.PDF,1,42x30,scan,0.84
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Struct/S2.06.PDF,1,42x30,scan,1.12
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Struct/S2.07.PDF,1,42x30,scan,0.72
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Struct/S3.00.PDF,1,42x30,scan,0.77
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Struct/S3.01.PDF,1,42x30,scan,0.57
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Struct/S3.02.PDF,1,42x30,scan,0.8
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Struct/S3.03A.PDF,1,42x30,scan,0.74
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Struct/S3.03B.PDF,1,42x30,scan,0.79
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Struct/S3.04.PDF,1,42x30,scan,0.83
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Struct/S3.05.PDF,1,42x30,scan,0.74
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Struct/S3.06.PDF,1,42x30,scan,0.67
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Struct/S4.00.PDF,1,42x30,scan,0.76
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Struct/S4.01A.PDF,1,42x30,scan,0.78
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Struct/S4.01B.PDF,1,42x30,scan,0.82
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Struct/S4.02.PDF,1,42x30,scan,1.03
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Struct/S4.03.PDF,1,42x30,scan,0.95
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Struct/S4.04.PDF,1,42x30,scan,0.52
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Struct/S4.05.PDF,1,42x30,scan,0.42
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Struct/S4.06.PDF,1,42x30,scan,0.84
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Struct/S4.07.PDF,1,42x30,scan,0.78
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Struct/S4.08.PDF,1,42x30,scan,1.09
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Struct/S4.09.PDF,1,42x30,scan,0.78
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Struct/S4.10.PDF,1,42x30,scan,0.88
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Struct/S4.11.PDF,1,42x30,scan,0.99
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Struct/S4.12.PDF,1,42x30,scan,0.84
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Struct/S4.13.PDF,1,42x30,scan,0.84
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Struct/S4.14.PDF,1,42x30,scan,0.8
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Struct/S4.15.PDF,1,42x30,scan,0.8
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Struct/S4.16.PDF,1,42x30,scan,0.9
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Struct/S4.17.PDF,1,42x30,scan,0.79
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Struct/S4.20.PDF,1,42x30,scan,0.96
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Struct/S4.21.PDF,1,42x30,scan,0.89
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Struct/S5.00A.PDF,1,42x30,scan,0.69
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Struct/S5.00B.PDF,1,42x30,scan,0.72
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Struct/S5.01.PDF,1,42x30,scan,1.16
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Struct/S5.02.PDF,1,42x30,scan,1.06
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Struct/S5.03.PDF,1,42x30,scan,0.77
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Struct/S5.04A.PDF,1,42x30,scan,1.38
+Student Rec Ctr Record Drawings,Student Rec Ctr Record Drawings/Struct/S5.04B.PDF,1,42x30,scan,1.42
+TC Bldg,TC Bldg/342 Model (1).pdf,1,24x18,scan,0.16
+TC Bldg,TC Bldg/343 Model (1).pdf,1,36x24,scan,0.85
+TC Bldg,TC Bldg/344 Model (1).pdf,1,24x18,scan,1.6
+TC Bldg,TC Bldg/345 Model (1).pdf,1,24x18,scan,0.22
+TC Bldg,TC Bldg/346 Model (1).pdf,1,24x18,scan,0.07
+Welcome Center,Welcome Center/Home Ec 1955 originals compressed.pdf,26,37x27,scan,40.45
