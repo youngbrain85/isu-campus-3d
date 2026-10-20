@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Indiana State University – 3D Campus Model</title>
+<meta name="description" content="3D model of the Indiana State University main campus (Terre Haute, Indiana): buildings with construction drawings modelled in detail, the rest massed from OpenStreetMap footprints over Esri satellite imagery.">
+<style>
+  :root { --bg:#0f141a; --panel:rgba(14,18,24,0.78); --fg:#e8edf2; --muted:#9aa6b2; --accent:#7fc1ff; --border:rgba(255,255,255,0.12); color-scheme: dark; }
+  html,body { margin:0; height:100%; background:var(--bg); color:var(--fg); font:14px/1.45 -apple-system, "Segoe UI", Roboto, sans-serif; overflow:hidden; }
+  canvas#c { display:block; width:100vw; height:100vh; }
+  #hud { position:fixed; left:16px; top:16px; max-width:min(400px, calc(100vw - 32px)); background:var(--panel); backdrop-filter:blur(8px); border:1px solid var(--border); border-radius:12px; padding:12px 14px; }
+  #hud h1 { font-size:15px; margin:0 0 4px; font-weight:600; display:flex; justify-content:space-between; align-items:center; gap:8px; }
+  #hudToggle { background:none; border:1px solid var(--border); color:var(--muted); border-radius:6px; cursor:pointer; font-size:12px; padding:1px 7px; }
+  #hud .sub { color:var(--muted); font-size:12px; margin-bottom:8px; }
+  #hud.collapsed > :not(h1) { display:none; }
+  .grp { font-size:11px; color:var(--muted); margin:6px 0 2px; text-transform:uppercase; letter-spacing:.04em; }
+  .views { display:flex; flex-wrap:wrap; gap:6px; margin:4px 0 6px; }
+  .views button, #btnExport { background:rgba(255,255,255,0.08); color:var(--fg); border:1px solid var(--border); border-radius:8px; padding:5px 9px; font-size:12px; cursor:pointer; }
+  .views button:hover, #btnExport:hover { background:rgba(127,193,255,0.25); border-color:var(--accent); }
+  .toggles { display:flex; flex-wrap:wrap; gap:10px; font-size:12px; color:var(--muted); margin:6px 0 8px; }
+  .toggles label { display:flex; gap:4px; align-items:center; cursor:pointer; }
+  #status { font-size:12px; color:var(--accent); min-height:16px; }
+  #legend { position:fixed; right:16px; bottom:16px; background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:10px 12px; font-size:12px; color:var(--muted); max-width:min(380px, calc(100vw - 32px)); }
+  #legend b { color:var(--fg); }
+  #loader { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:var(--bg); color:var(--muted); font-size:14px; flex-direction:column; gap:10px; z-index:5; }
+  .spin { width:28px; height:28px; border:3px solid var(--border); border-top-color:var(--accent); border-radius:50%; animation:sp 1s linear infinite; }
+  @keyframes sp { to { transform:rotate(360deg); } }
+  @media (max-width:640px) { #legend { display:none; } }
+</style>
+<script type="importmap">
+{ "imports": { "three": "__THREE__", "three/addons/": "__ADDONS__" } }
+</script>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="loader"><div class="spin"></div><div id="status">Loading…</div></div>
+<div id="hud">
+  <h1><span>Indiana State University – 3D Campus</span><button id="hudToggle" title="Collapse">▾</button></h1>
+  <div class="sub">Terre Haute, Indiana · main campus · drawings + OSM + Esri imagery</div>
+  <div class="grp">Campus</div>
+  <div class="views">
+    <button data-view="campus">Campus aerial</button>
+    <button data-view="hmsu">Hulman Memorial Student Union</button>
+    <button data-view="library">Cunningham Memorial Library</button>
+    <button data-view="towers">Residence halls</button>
+  </div>
+  <div class="grp">Buildings from drawings</div>
+  <div class="views">
+    <button data-view="hulman">Hulman Center</button>
+    <button data-view="rec">Student Recreation Center</button>
+    <button data-view="reeve">Reeve Hall</button>
+    <button data-view="finearts">Fine Arts Building</button>
+    <button data-view="tech">Technology Building</button>
+    <button data-view="welcome">Welcome Center</button>
+    <button data-view="nursing">Former Nursing Building</button>
+    <button data-view="myers">Myers Technology Center</button>
+  </div>
+  <div class="toggles">
+    <label><input type="checkbox" id="tgTrees" checked> Trees</label>
+    <label><input type="checkbox" id="tgMass" checked> Mass buildings</label>
+    <label><input type="checkbox" id="tgLabels"> Labels</label>
+    <label><input type="checkbox" id="tgGround" checked> Ground imagery</label>
+    <label><input type="checkbox" id="tgShadow" checked> Shadows</label>
+  </div>
+  <button id="btnExport">Export GLB (Windows 3D Viewer / Blender)</button>
+  <div style="font-size:11px;color:var(--muted);margin-top:6px">Drag: orbit · Wheel: zoom · Right-drag: pan</div>
+</div>
+<div id="legend">
+  <b>How this model was made</b> — Buildings with construction drawings (Hulman Center, Student Recreation Center, Reeve Hall, Fine Arts, Technology Building, Welcome Center, former Nursing Building, Myers Technology Center) are modelled from the drawings. All other buildings are OpenStreetMap footprints extruded by storey count (published or estimated). Ground: Esri World Imagery; roads and lots: OSM; trees: OSM nodes + imagery classification. Units feet, X east, Z south, origin 39.4710 N 87.4100 W.
+</div>
+<script>window.ASSET_BASE = 'assets/';</script>
+<script type="module" src="__APP__"></script>
+</body>
+</html>

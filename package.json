@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "scripts": {
-    "serve": "http-server viewer -p 8765 -s -c-1",
+    "serve": "http-server . -p 8765 -s -c-1",
     "shot": "node tools/shot.mjs"
   },
   "devDependencies": {
