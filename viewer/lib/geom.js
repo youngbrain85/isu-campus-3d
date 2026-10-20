@@ -143,9 +143,10 @@ export function gableRoof(poly, yEave, pitch = 0.5, axisDeg = 0) {
   for (const p of poly) { const u = p[0] * c + p[1] * s, v = -p[0] * s + p[1] * c; u0 = Math.min(u0, u); u1 = Math.max(u1, u); v0 = Math.min(v0, v); v1 = Math.max(v1, v); }
   const half = (v1 - v0) / 2, ridge = yEave + half * pitch, vm = (v0 + v1) / 2;
   const P = (u, v, y) => [u * c - v * s, y, u * s + v * c];
+  // 정점 순서: 위에서 봤을 때 반시계 → 법선이 위·바깥을 향함
   const quads = [
-    [P(u0, v0, yEave), P(u1, v0, yEave), P(u1, vm, ridge), P(u0, vm, ridge)],
-    [P(u1, v1, yEave), P(u0, v1, yEave), P(u0, vm, ridge), P(u1, vm, ridge)],
+    [P(u0, vm, ridge), P(u1, vm, ridge), P(u1, v0, yEave), P(u0, v0, yEave)],
+    [P(u1, vm, ridge), P(u0, vm, ridge), P(u0, v1, yEave), P(u1, v1, yEave)],
   ];
   const pos = [], uv = [];
   for (const q of quads) {
@@ -154,7 +155,7 @@ export function gableRoof(poly, yEave, pitch = 0.5, axisDeg = 0) {
     uv.push(0, 0, L / 24, 0, L / 24, W / 12, 0, 0, L / 24, W / 12, 0, W / 12);
   }
   // 박공 삼각형 2개
-  for (const [u, flip] of [[u0, false], [u1, true]]) {
+  for (const [u, flip] of [[u0, true], [u1, false]]) {
     const t = [P(u, v0, yEave), P(u, v1, yEave), P(u, vm, ridge)];
     if (flip) t.reverse();
     pos.push(...t[0], ...t[1], ...t[2]); uv.push(0, 0, 1, 0, 0.5, 1);
