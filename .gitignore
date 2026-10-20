@@ -7,3 +7,5 @@ _downloads/
 
 # large collected imagery (>100 MB) lives in GitHub Releases
 data/imagery/esri_z20.png
+shots/
+scratch/

@@ -1,0 +1,14 @@
+{
+  "name": "isu-campus-3d",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "serve": "http-server viewer -p 8765 -s -c-1",
+    "shot": "node tools/shot.mjs"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1",
+    "playwright": "^1.50.0",
+    "three": "0.170.0"
+  }
+}
