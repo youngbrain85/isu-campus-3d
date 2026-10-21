@@ -5,39 +5,42 @@ Technology Building (Bailey College of Engineering & Technology),way/461428305,3
 Reeve Hall (West),way/1348752763,39.473119,-87.410305,4,15.0,2014,CSO Architects bid set 2012; height: levels x storey height,drawing,54,residential,1609,,4 storeys + attic
 Reeve Hall (East),way/544686556,39.473115,-87.409669,4,15.0,2014,CSO Architects bid set 2012; news.indianastate.edu 2012-11-15; height: levels x storey height,drawing,54,residential,1608,,4 storeys + attic; brick with limestone trim
 Fine Arts Building,way/545265789,39.470277,-87.408088,4,17.0,1940,arcDESIGN renovation bid set 2018; iv-buildings/13 (Miller & Yeager 1940); height: levels x storey height,drawing,23,university,1500,,4 storeys + lower level; brick with limestone trim
-John W. Moore Welcome Center,way/461428310,39.470174,-87.410445,2,9.0,1956,Miller Vrydagh & Miller 1955 Home Economics Building drawings; iv-buildings/25; height: levels x storey height,drawing,38,university,1239,,2 storeys + basement
-Former School of Nursing Building,way/545275293,39.470308,-87.406157,4,17.0,1970,Ewing Miller Associates Phase II record drawings (1969-70); iv-buildings/30; OSM name 'College of Nursing'; site plan fixes it at the SW corner of 8th & Chestnut (fit RMS 0.8 ft); height: levels x storey height,drawing,,university,871,,4 storeys + basement + stair penthouse; not numbered on 2023 map
+John W. Moore Welcome Center,way/461428310,39.470174,-87.410445,2,9.0,1956,Miller Vrydagh & Miller 1955 Home Economics Building drawings; iv-buildings/25; name per ISU virtual tour map (tours.covecreekproductions.com); height: levels x storey height,drawing,38,university,1239,,2 storeys + basement
+Chestnut Building (former School of Nursing),way/545275293,39.470308,-87.406157,4,17.0,1970,Ewing Miller Associates Phase II record drawings (1969-70); iv-buildings/30; OSM name 'College of Nursing'; site plan fixes it at the SW corner of 8th & Chestnut (fit RMS 0.8 ft); name per ISU virtual tour map (tours.covecreekproductions.com); height: levels x storey height,drawing,43,university,871,,4 storeys + basement + stair penthouse; not numbered on 2023 map
 John T. Myers Technology Center,way/461428304,39.467819,-87.408485,3,13.0,1997,ISU Facilities master-set plans 2007 (342-346); iv-buildings/26; height: levels x storey height,drawing-plan,40,university,2830,,floor outlines from drawings; 3 storeys + partial 4th/penthouse; heights estimated
-Health and Human Services Building (Arena),way/752686738,39.47171,-87.412122,3,13.0,1962,iv-buildings/16; 2016 addition; height: levels x storey height,mass+photo,27,university,23038,,arena hall ~ 3-storey height; OSM footprint includes 2016 addition
+College of Health and Human Services,way/752686738,39.47171,-87.412122,3,13.0,1962,iv-buildings/16; 2016 addition; name per ISU virtual tour map (tours.covecreekproductions.com); height: levels x storey height,mass+photo,27,university,23038,,arena hall ~ 3-storey height; OSM footprint includes 2016 addition
 Science Building,way/461428306,39.47147,-87.409653,4,17.0,1968,"iv-buildings/37 (Unit I 1960, Unit II 1968); height: levels x storey height",mass+photo,59,university,6988,,estimate
-Chestnut Building,way/236260172,39.471068,-87.406466,3,11.5,,estimate from imagery; height: levels x storey height,mass+photo,43,yes,5142,,dark glass/metal office block with central atrium
-Dede Activity Center (Hulman Memorial Student Union),way/1348635036,39.470911,-87.410718,2,9.0,1990,iv-buildings/8 (Dede Plaza 1990); height: levels x storey height,mass+photo,31,university,4969,,estimate
+Building at 7th & Chestnut (not ISU per tour map),way/236260172,39.471068,-87.406466,3,11.5,,estimate from imagery; name per ISU virtual tour map (tours.covecreekproductions.com); height: levels x storey height,mass+photo,,yes,5142,,
+Hulman Memorial Student Union,way/1348635036,39.470911,-87.410718,2,9.0,1990,iv-buildings/8 (Dede Plaza 1990); name per ISU virtual tour map (tours.covecreekproductions.com); height: levels x storey height,mass+photo,31,university,4969,,HMSU incl. Dede Activity Center
 Tirey Hall / Rankin Hall / Parsons Hall,way/545265796,39.468728,-87.407541,3,13.0,1940,"iv-buildings/41 (Tirey 1940), /34 (Rankin 1972 'three-story'), /48 (Parsons 1937); height: levels x storey height",mass+photo,67,university,4932,,brick with limestone trim
-Hulman Memorial Student Union,way/544820727,39.472006,-87.410649,3,13.0,1977,estimate; height: levels x storey height,mass+photo,31,university,4643,,HMSU core; 3 storeys
+"Sandison, Hines & Jones Halls",way/544820727,39.472006,-87.410649,3,13.0,1977,estimate; name per ISU virtual tour map (tours.covecreekproductions.com); height: levels x storey height,mass+photo,31,university,4643,,residence halls (towers) + commons; ISU tour map
 Sycamore Towers (dining commons base),way/283611919,39.469385,-87.411967,2,9.0,1965,iv-residence/44; height: levels x storey height,mass+photo,65,university,3753,,low connecting base between the four towers
 Holmstedt Hall,way/461428308,39.471297,-87.408742,4,17.0,1966,iv-buildings/17 (Curry and Weber); height: levels x storey height,mass+photo,29,university,3625,,estimate
 Cunningham Memorial Library,way/349907334,39.472736,-87.408661,4,15.0,1973,iv-buildings/7 ('five floors' incl. lower level); height: levels x storey height,mass+photo,15,yes,3498,,4 above ground + lower level
-ISU Parking Garage (Cherry Street Garage / bus terminal),way/545275306,39.468036,-87.406042,5,18.5,,campus map no. 11; OSM polygon named 'Grayhound/City of Terre Haute'; height: levels x storey height,mass+photo,11,yes,3321,,open-deck precast garage
+Parking Garage,way/545275306,39.468036,-87.406042,5,18.5,,campus map no. 11; OSM polygon named 'Grayhound/City of Terre Haute'; name per ISU virtual tour map (tours.covecreekproductions.com); height: levels x storey height,mass+photo,11,yes,3321,,open-deck precast garage
 Root Hall,way/461428309,39.471893,-87.407695,3,13.0,1989,iv-buildings/35; height: levels x storey height,mass+photo,56,university,3303,,estimate
-Power Plant,way/545266789,39.474594,-87.406548,2,9.0,2001,iv-buildings/33; height: levels x storey height,mass+photo,48,university,2519,,tall single hall + stack
+Power Station,way/545266789,39.474594,-87.406548,2,9.0,2001,iv-buildings/33; name per ISU virtual tour map (tours.covecreekproductions.com); height: levels x storey height,mass+photo,48,university,2519,,tall single hall + stack
 Landini Center for Performing and Fine Arts,way/545265791,39.470105,-87.407478,2,9.0,1997,iv-buildings/22; height: levels x storey height,mass+photo,35,university,2257,,
-Charles E. Brown African American Cultural Center,way/545275301,39.470161,-87.405434,2,9.0,1993,"campus map no. 3 (3-I, east of 8th St); iv-buildings/53; height: levels x storey height",mass+photo,3,university,1657,,flat-roofed building east of 8th St south of Chestnut
+Charles E. Brown Culture Center,way/545275301,39.470161,-87.405434,2,9.0,1993,"campus map no. 3 (3-I, east of 8th St); iv-buildings/53; name per ISU virtual tour map (tours.covecreekproductions.com); height: levels x storey height",mass+photo,3,university,1657,,flat-roofed building east of 8th St south of Chestnut
 Dreiser Hall,way/461428313,39.469377,-87.409811,3,13.0,1950,iv-buildings/9; OSM building:levels=3; height: levels x storey height,mass+photo,17,university,1575,,
 Academic Enrichment Center / University Police,way/545265800,39.469392,-87.410932,2,9.0,,estimate; height: levels x storey height,mass+photo,27/50,university,1570,,
-Student Health Center (Sycamore Center for Wellness),way/545265769,39.473139,-87.411072,2,9.0,1971,iv-buildings/63 (Ewing Miller 1971); height: levels x storey height,mass+photo,64,university,1482,,estimate
+Indiana State Bookstore and ISU Foundation,way/752686727,39.467356,-87.411957,1,5.5,,estimate (building type default); height: levels x storey height,mass+photo,7,retail,1511,,
+Parking Garage (west wing),way/545275307,39.467755,-87.406603,3,11.5,,OSM building:levels; height: levels x storey height,mass+photo,11,yes,1492,flat,
+Sycamore Center for Wellness and Applied Medicine,way/545265769,39.473139,-87.411072,2,9.0,1971,iv-buildings/63 (Ewing Miller 1971); name per ISU virtual tour map (tours.covecreekproductions.com); height: levels x storey height,mass+photo,64,university,1482,,estimate
 Career Center,way/461428311,39.470238,-87.40964,2,9.0,,estimate; height: levels x storey height,mass+photo,9,university,1330,,
-New Theater,way/544686558,39.473313,-87.407981,2,9.0,1979,iv-buildings/27; height: levels x storey height,mass+photo,41,university,1282,,fly tower volume
+7th Street Theater,way/544686558,39.473313,-87.407981,2,9.0,1979,iv-buildings/27; name per ISU virtual tour map (tours.covecreekproductions.com); height: levels x storey height,mass+photo,41,university,1282,,fly tower volume
 Normal Hall,way/545265790,39.469866,-87.408312,2,9.0,1909,iv-buildings/28; NRHP; height: levels x storey height,mass+photo,42,university,1228,,limestone; stained-glass dome
 Gillum Hall,way/461428314,39.468765,-87.409829,4,17.0,1950,iv-buildings/14; height: levels x storey height,mass+photo,25,university,1199,,estimate
 Stalker Hall,way/461428312,39.4703,-87.40892,3,13.0,1953,iv-buildings/47; height: levels x storey height,mass+photo,62,university,1139,,
 Erickson Hall,way/545265798,39.46932,-87.410475,3,11.5,,estimate; height: levels x storey height,mass+photo,18,dormitory,994,,residence hall
-Pickerl Hall,way/545265797,39.469651,-87.410946,4,15.0,,estimate; height: levels x storey height,mass+photo,47,dormitory,950,,residence hall
+University Honors College / Pickerl Hall,way/545265797,39.469651,-87.410946,4,15.0,,estimate; name per ISU virtual tour map (tours.covecreekproductions.com); height: levels x storey height,mass+photo,47,dormitory,950,,residence hall
 Fairbanks Hall,way/545265788,39.469247,-87.407394,2,9.0,1906,Wikipedia (Terre Haute Public Library 1906); height: levels x storey height,mass+photo,21,university,914,,Indiana limestone Beaux-Arts
 Burford Hall,way/545265799,39.468847,-87.410777,4,15.0,,estimate; height: levels x storey height,mass+photo,8,dormitory,889,,residence hall
 Mills Hall,way/236260776,39.469787,-87.411716,12,38.0,1965,iv-residence/44 (Unit II 1965); OSM building:levels=12; height: published/OSM,mass+photo,37,university,710,,
 Blumberg Hall,way/236260171,39.468975,-87.411712,12,38.0,1964,iv-residence/44 (Unit I 1964); skydb 38 m (unverified); height: published/OSM,mass+photo,6,university,699,,
 Rhoads Hall,way/236260775,39.469763,-87.41228,12,38.0,1965,iv-residence/44; OSM building:levels=12; height: published/OSM,mass+photo,55,university,698,,
 Cromwell Hall,way/236260173,39.468972,-87.412287,12,38.0,1964,iv-residence/44; height: published/OSM,mass+photo,14,university,696,,
+Satellite Chilled Water Plant,way/1230759382,39.475149,-87.41236,2,8.0,,estimate (building type default); height: levels x storey height,mass+photo,58,yes,652,,
 Condit House,way/545265807,39.468263,-87.408939,2,9.0,1860,iv-buildings/5; height: levels x storey height,mass+photo,13,university,343,,pitched roof
 Riverfront Lofts,way/827549916,39.472004,-87.418596,3,11.5,,estimate (building type default); height: levels x storey height,mass,,apartments,5831,,
 Terre Haute Convention Center,way/1259267592,39.466871,-87.405631,2,8.0,,estimate (building type default); height: levels x storey height,mass,,yes,3346,,
@@ -51,7 +54,6 @@ Vigo County Courthouse,way/283463393,39.465967,-87.41473,3,14.5,,estimate (build
 Zorah Shrine of Terre Haute,way/545265778,39.471254,-87.407433,2,9.0,,estimate (building type default); height: levels x storey height,mass,,commercial,1798,,
 First Financial Bank,way/724476247,39.466139,-87.409379,2,9.0,,estimate (building type default); height: levels x storey height,mass,,commercial,1771,flat,
 Art Annex,way/956551298,39.473321,-87.412312,1,4.5,,estimate; height: levels x storey height,mass,4,yes,1579,,single-storey warehouse type
-Barnes & Noble,way/752686727,39.467356,-87.411957,1,5.5,,estimate (building type default); height: levels x storey height,mass,,retail,1511,,
 Hilton Garden Inn,way/450743804,39.466764,-87.406661,2,8.0,,estimate (building type default); height: levels x storey height,mass,,yes,1419,,
 St. Stephen's Episcopal Church,way/545275302,39.469233,-87.40679,1,9.0,,estimate (building type default); height: levels x storey height,mass,,church,1380,,
 Terre Haute Federal Courthouse,way/724477201,39.465152,-87.403333,3,14.5,,estimate (building type default); height: levels x storey height,mass,,civic,1356,,
@@ -63,7 +65,7 @@ Prairie Farms,way/822557179,39.472175,-87.414704,1,4.5,,estimate (building type 
 Centenary United Methodist Church,way/545275295,39.469725,-87.406693,1,9.0,,estimate (building type default); height: levels x storey height,mass,,church,1016,,
 Indiana Department of Workforce Development,way/236260176,39.467343,-87.406152,2,8.0,,estimate (building type default); height: levels x storey height,mass,,yes,997,,
 Social Security Administration,way/1230759403,39.467923,-87.41498,2,9.0,,estimate (building type default); height: levels x storey height,mass,,public,995,,
-Recycle Center,way/545275297,39.471841,-87.404163,1,5.0,,estimate; height: levels x storey height,mass,53,university,977,,
+Recycling Center,way/545275297,39.471841,-87.404163,1,5.0,,estimate; name per ISU virtual tour map (tours.covecreekproductions.com); height: levels x storey height,mass,53,university,977,,
 Swope Block,way/729239399,39.46579,-87.407294,1,5.5,,estimate (building type default); height: levels x storey height,mass,,retail,959,,
 Candlewood Suites Terre Haute,way/762578352,39.466221,-87.406253,4,15.0,,estimate (building type default); height: levels x storey height,mass,,hotel,929,,
 Vigo County Historical Museum,way/729239405,39.466464,-87.403152,2,8.0,,estimate (building type default); height: levels x storey height,mass,,yes,908,,
@@ -115,7 +117,6 @@ J. Ford’s,way/768313202,39.464542,-87.407255,2,8.0,,estimate (building type de
 ,way/729239466,39.465152,-87.405244,2,8.0,,estimate (building type default),mass,,yes,1883,,
 ,way/1462947927,39.47612,-87.416336,2,8.0,,estimate (building type default),mass,,yes,1848,,
 ,way/759774256,39.465011,-87.416154,2,8.0,,estimate (building type default),mass,,yes,1673,,
-,way/545275307,39.467755,-87.406603,3,11.5,,OSM building:levels,mass,,yes,1492,flat,
 ,way/729239482,39.464669,-87.40819,2,8.0,,estimate (building type default),mass,,yes,1486,,
 ,way/1348635046,39.471567,-87.414682,2,8.0,,estimate (building type default),mass,,yes,1462,,
 ,way/1462944979,39.475805,-87.418701,2,8.0,,estimate (building type default),mass,,yes,1312,,
@@ -158,7 +159,6 @@ J. Ford’s,way/768313202,39.464542,-87.407255,2,8.0,,estimate (building type de
 ,way/724476276,39.464943,-87.413505,2,8.0,,estimate (building type default),mass,,yes,657,,
 ,way/729239457,39.466122,-87.412301,2,8.0,,estimate (building type default),mass,,yes,654,,
 ,way/724476306,39.467369,-87.41043,1,5.5,,estimate (building type default),mass,,retail,652,,
-,way/1230759382,39.475149,-87.41236,2,8.0,,estimate (building type default),mass,,yes,652,,
 ,way/759774264,39.465122,-87.414345,2,8.0,,estimate (building type default),mass,,yes,632,,
 ,way/1462947906,39.47732,-87.416061,2,8.0,,estimate (building type default),mass,,yes,627,,
 ,way/1463208329,39.473869,-87.414976,2,8.0,,estimate (building type default),mass,,yes,608,,

@@ -22,8 +22,8 @@
 "module": "sycamore_towers.js"
 },
 "way/236260172": {
-"name": "Chestnut Building",
-"map_no": "43",
+"name": "Building at 7th & Chestnut (not ISU per tour map)",
+"map_no": "",
 "year": "",
 "storeys": "3",
 "height_ft": 45.0,
@@ -92,9 +92,9 @@
 "map_no": "40",
 "year": "1997",
 "storeys": "3",
-"height_ft": 56.0,
+"height_ft": 65.0,
 "model": "Construction drawings",
-"sources": "Myers Tech Master Set 2007: sheets 342 (lower level), 343 (1st), 344 (2nd), 345 (3rd), 346 (4th/roof); Esri imagery for roof",
+"sources": "Myers Tech Master Set 2007: sheets 342 (lower level), 343 (1st), 344 (2nd), 345 (3rd), 346 (4th/roof); Street View photospheres (Cherry St, 7th St plaza, north quad); Esri imagery for roof",
 "notes": "floor outlines from drawings; 3 storeys + partial 4th/penthouse; heights estimated",
 "module": "myers_tech.js"
 },
@@ -209,7 +209,7 @@
 "module": "reeve_hall.js"
 },
 "way/544686558": {
-"name": "New Theater",
+"name": "7th Street Theater",
 "map_no": "41",
 "year": "1979",
 "storeys": "2",
@@ -231,7 +231,7 @@
 "module": "rec_center.js"
 },
 "way/544820727": {
-"name": "Hulman Memorial Student Union",
+"name": "Sandison, Hines & Jones Halls",
 "map_no": "31",
 "year": "1977",
 "storeys": "3",
@@ -242,7 +242,7 @@
 "module": "hmsu.js"
 },
 "way/545265769": {
-"name": "Student Health Center (Sycamore Center for Wellness)",
+"name": "Sycamore Center for Wellness and Applied Medicine",
 "map_no": "64",
 "year": "1971",
 "storeys": "2",
@@ -330,7 +330,7 @@
 "module": "tirey_complex.js"
 },
 "way/545265797": {
-"name": "Pickerl Hall",
+"name": "University Honors College / Pickerl Hall",
 "map_no": "47",
 "year": "",
 "storeys": "4",
@@ -385,7 +385,7 @@
 "module": "condit_house.js"
 },
 "way/545266789": {
-"name": "Power Plant",
+"name": "Power Station",
 "map_no": "48",
 "year": "2001",
 "storeys": "2",
@@ -396,8 +396,8 @@
 "module": "power_plant.js"
 },
 "way/545275293": {
-"name": "Former School of Nursing Building",
-"map_no": "",
+"name": "Chestnut Building (former School of Nursing)",
+"map_no": "43",
 "year": "1970",
 "storeys": "4",
 "height_ft": 49.75,
@@ -429,7 +429,7 @@
 "module": "churches.js"
 },
 "way/545275297": {
-"name": "Recycle Center",
+"name": "Recycling Center",
 "map_no": "53",
 "year": "",
 "storeys": "1",
@@ -440,7 +440,7 @@
 "module": "service_bldgs.js"
 },
 "way/545275301": {
-"name": "Charles E. Brown African American Cultural Center",
+"name": "Charles E. Brown Culture Center",
 "map_no": "3",
 "year": "1993",
 "storeys": "2",
@@ -484,22 +484,44 @@
 "module": "churches.js"
 },
 "way/545275306": {
-"name": "ISU Parking Garage (Cherry Street Garage / bus terminal)",
+"name": "Parking Garage",
 "map_no": "11",
 "year": "",
 "storeys": "5",
-"height_ft": 67.0,
+"height_ft": 61,
 "model": "Street View photos + satellite imagery",
-"sources": "Street View vp74 (2019), Esri imagery z20/z19",
+"sources": "Street View vp74 (Cherry St), 8th St panoramas (2024), Esri imagery z20/z19",
 "notes": "",
 "module": "parking_garage.js"
 },
 "way/545275307": {
-"name": "Unnamed building",
+"name": "Parking Garage (west wing)",
+"map_no": "11",
+"year": "",
+"storeys": "3",
+"height_ft": 38,
+"model": "Street View photos + satellite imagery",
+"sources": "Street View vp74 (Cherry St), 8th St panoramas (2024), Esri imagery z20/z19",
+"notes": "",
+"module": "parking_garage.js"
+},
+"way/640437205": {
+"name": "Highland Quarters",
 "map_no": "",
 "year": "",
 "storeys": "3",
 "height_ft": 38,
+"model": "OpenStreetMap footprint (simple mass)",
+"sources": "OpenStreetMap",
+"notes": "",
+"module": ""
+},
+"way/724476296": {
+"name": "500 Wabash Apartments",
+"map_no": "",
+"year": "",
+"storeys": "5",
+"height_ft": 62,
 "model": "OpenStreetMap footprint (simple mass)",
 "sources": "OpenStreetMap",
 "notes": "",
@@ -517,8 +539,8 @@
 "module": "minor_bldgs.js"
 },
 "way/752686727": {
-"name": "Barnes & Noble",
-"map_no": "",
+"name": "Indiana State Bookstore and ISU Foundation",
+"map_no": "7",
 "year": "",
 "storeys": "1",
 "height_ft": 18,
@@ -528,7 +550,7 @@
 "module": "minor_bldgs.js"
 },
 "way/752686738": {
-"name": "Health and Human Services Building (Arena)",
+"name": "College of Health and Human Services",
 "map_no": "27",
 "year": "1962",
 "storeys": "3",
@@ -561,8 +583,8 @@
 "module": "art_annex.js"
 },
 "way/1230759382": {
-"name": "Unnamed building",
-"map_no": "",
+"name": "Satellite Chilled Water Plant",
+"map_no": "58",
 "year": "",
 "storeys": "2",
 "height_ft": 26,
@@ -582,8 +604,19 @@
 "notes": "",
 "module": "minor_bldgs.js"
 },
+"way/1245721408": {
+"name": "Facilities Management",
+"map_no": "",
+"year": "",
+"storeys": "2",
+"height_ft": 26,
+"model": "OpenStreetMap footprint (simple mass)",
+"sources": "OpenStreetMap",
+"notes": "",
+"module": ""
+},
 "way/1348635036": {
-"name": "Dede Activity Center (Hulman Memorial Student Union)",
+"name": "Hulman Memorial Student Union",
 "map_no": "31",
 "year": "1990",
 "storeys": "2",
@@ -1021,5 +1054,16 @@
 "sources": "Street View vp20, vp80/vp21, vp42; Esri imagery z20/z19",
 "notes": "",
 "module": "hmsu.js"
+},
+"relation/11267893": {
+"name": "The Annex",
+"map_no": "",
+"year": "",
+"storeys": "",
+"height_ft": null,
+"model": "OpenStreetMap footprint (simple mass)",
+"sources": "OpenStreetMap",
+"notes": "",
+"module": ""
 }
 }

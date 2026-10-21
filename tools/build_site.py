@@ -19,7 +19,11 @@ Image.MAX_IMAGE_PIXELS = None
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA, OUT = ROOT / "data", ROOT / "viewer" / "assets"
-CLIP = (-1250.0, -1600.0, 1700.0, 1330.0)        # x0, z0, x1, z1 (ft): 3rd St 서측 ~ 9th St 동측, Tippecanoe ~ Cherry St 남측
+CORE_CLIP = (-1250.0, -1600.0, 1700.0, 1330.0)   # 건물 포함 기본 범위: 3rd St 서측 ~ 9th St 동측, Tippecanoe ~ Cherry St 남측
+CLIP = (-1500.0, -1600.0, 2000.0, 1620.0)         # 지면·도로·수목 범위 (아래 TOUR_EXTRA 건물까지 포함)
+# ISU 가상투어 지도(tours.covecreekproductions.com)에 ISU 건물로 등록됐지만 기본 범위 밖에 있는 건물
+TOUR_EXTRA = {"way/640437205": "Scott College of Business", "way/724476296": "500 Wabash Apartments",
+              "way/1245721408": "Facilities Management", "relation/11267893": "The Annex"}
 TILES, TILE_PX = 2, 2048                          # 위성 오버레이 타일 (선택 표시용)
 CORE = (-420.0, -1480.0, 1190.0, 520.0)           # 벽돌 포장 보도 구역: 5th–8th St, Tippecanoe–Eagle St (스트리트뷰 확인)
 
@@ -148,18 +152,21 @@ def main():
     png, bj = DATA / "imagery" / "esri_z19.png", DATA / "imagery" / "esri_z19.json"
     mosaic = geo.MosaicBounds(bj); img = Image.open(png).convert("RGB")
 
+    extra = DATA / "osm_extra_buildings.geojson"
+    if extra.exists():
+        B["features"] += json.load(open(extra, encoding="utf-8"))["features"]
     buildings, rings = [], []
     for f in B["features"]:
         if f["geometry"]["type"] != "Polygon":
             continue
         ring = f["geometry"]["coordinates"][0]; row = rows.get(f["id"], {})
         poly = ring_to_local(ring)
-        if len(poly) < 3 or not inside(centroid(poly)):
+        if len(poly) < 3 or not (inside(centroid(poly), CORE_CLIP) or f["id"] in TOUR_EXTRA):
             continue
         rings.append(ring)
         tags = f["properties"]
         buildings.append({
-            "id": f["id"], "name": row.get("name", "") or tags.get("name", ""), "poly": poly,
+            "id": f["id"], "name": TOUR_EXTRA.get(f["id"]) or row.get("name", "") or tags.get("name", ""), "poly": poly,
             "holes": [ring_to_local(h)[::-1] for h in f["geometry"]["coordinates"][1:]],
             "h": round(float(row.get("height_m", 7) or 7) * geo.FT_PER_M, 1), "levels": int(row.get("levels", 2) or 2),
             "roof": roof_colour(mosaic, img, ring),
