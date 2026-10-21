@@ -26,7 +26,9 @@
 // ■ Dede Activity Center (way/1348635036, 1990): 22 ft. vp80_005/050: 하부 3.5 ft 콘크리트 기단, 적갈색 벽돌, 15.5–18 ft 에 3.5 ft 돌출 백색 처마
 //   파시아, 그 위 벽돌 파라펫(22 ft). 서면(5th St)은 1층이 6 ft 들어간 로지아 (17 ft 간격 벽돌 피어, 검은 유리), 남단 30 ft 는 무창 벽돌 + 모서리 피어.
 //   남동 곡면(분수 광장을 향한 반경 161 ft 오목 호, 중심 (-95,175)) = 유리 커튼월 15.5 ft + 위성의 8 ft 폭 백색 띠 지붕, 그 안쪽 본체 벽은 22 ft.
-//   로툰다 (중심 (-205.5,52.5), r 25): 유리 하부 + 벽돌 + 지붕 위로 솟은 고창 드럼(30.5) + 유리 원뿔 지붕. 지붕 중앙 청색 피라미드 천창 50 × 51 ft
+//   로툰다 (중심 (-205.5,52.5), r 25): 유리 하부 + 벽돌 + 지붕 위로 솟은 고창 드럼(30.5), [항공사진 수정] 드럼 안은 열린 고리(낮은 원형 지붕 +
+//   원형 천창). [항공사진 수정] 지붕 중앙 = 유리 고창 + 청색 금속지붕 옥상 박스 50 × 32 ft, 지붕 = 짙은 회갈색 자갈 (isu/r, fountain/f;
+//   비교 scratch/aerial/hmsu.png). (이전: 청색 피라미드 천창 50 × 51 ft
 //   (-208,-62), 설비 다수. 동·북면은 사진 없음 → 서면과 같은 로지아/벽돌로 가정.
 // 가정·미확인: 북측 두 타워의 북·동면 패턴(사진 원경만), WT 층수, 저층 연결부 창 배치, Dede 동·북면, 파빌리온 뒤 로비의 범위.
 import * as THREE from 'three';
@@ -372,6 +374,7 @@ export function build(M, G) {
 
   // ================================================================ Dede Activity Center
   {
+    const dedeRoof = tint('dede_roof', M.roof_gravel, 0x6c6253);
     const H = 22, HB = 15.5, AC = [-95, 175], DR = [-205.5, 52.5], RR = 25;
     const push = (p, d) => { const dx = p[0] - AC[0], dz = p[1] - AC[1], L = Math.hypot(dx, dz); return [p[0] + dx / L * d, p[1] + dz / L * d]; };
     const arcE = [11, 12, 13, 14, 15, 16], arcW = [24, 25, 26, 27, 28, 29];
@@ -379,7 +382,8 @@ export function build(M, G) {
     const up = [];
     for (let i = 0; i < DD.length; i++) up.push((arcE.includes(i) && i !== 11) || arcW.includes(i) ? push(DD[i], 8) : DD[i]);
     const upper = ccw(up);
-    roofCap(upper, H, M.roof_gravel);
+    // 항공사진(isu/r, fountain/f): Dede 지붕 = 짙은 회갈색 자갈 (사진 평균 ≈ (102,92,78))
+    roofCap(upper, H, dedeRoof);
     // 곡면 띠 (유리 커튼월 + 백색 평지붕)
     const bandE = ccw([...[11, 12, 13, 14, 15, 16].map(i => DD[i]), ...[16, 15, 14, 13, 12].map(i => push(DD[i], 8))]);
     const bandW = ccw([...[24, 25, 26, 27, 28, 29].map(i => DD[i]), ...[29, 28, 27, 26, 25, 24].map(i => push(DD[i], 8))]);
@@ -441,15 +445,22 @@ export function build(M, G) {
     P(G.sideGeometry(c0, HB + 1.0, H + 0.5), brickD);
     P(G.sideGeometry(circ(RR - 1.5), H + 0.5, 29), M.pane, false);
     P(G.sideGeometry(circ(RR - 1.1), 29, 30.5), wh);
-    roofCap(circ(RR - 1.1), 30.5, wh, [circ(RR - 3)]);
+    roofCap(circ(RR - 1.1), 30.5, wh, [circ(RR - 3)]);   // 드럼 윗면 흰 고리
     for (const [a, b] of edges(c0)) { const e = E(a, b); bx(a, b, -0.25, 0.25, 0, HB - 1.2, -0.1, 0.5, M.dark); void e; }
     for (const [a, b] of edges(circ(RR - 1.5))) bx(a, b, -0.3, 0.3, H + 0.5, 29, -0.1, 0.6, wh);
-    frustum(circ(RR - 3), 30.5, circ(2.5), 37, skyGlass);
-    roofCap(circ(2.5), 37, wh);
+    // 항공사진: 드럼 위는 원뿔이 아니라 열린 고리 — 드럼 안쪽으로 낮은 원형 지붕(24 ft) + 가운데 원형 천창
+    P(G.sideGeometry([...circ(RR - 3)].reverse(), 24, 30.5), brickD, false);
+    roofCap(circ(RR - 3), 24, dedeRoof, [circ(9)]);
+    P(G.sideGeometry(circ(9), 24, 25.5), wh); frustum(circ(9), 25.5, circ(3), 28, skyGlass);
     // 지붕 중앙 청색 피라미드 천창 + 설비
-    const sq = rectXZ(-233, -183, -87.5, -36.5);
+    // 항공사진(isu/r 근경): 피라미드 천창이 아니라 유리 고창 측벽 + 청색 금속 평지붕(낮은 모임)의 옥상 박스 (≈ 50 × 32 ft, 높이 ≈ 10 ft)
+    const sq = rectXZ(-233, -183, -78, -46);
     { const ex = G.extrudePoly(sq, [], 1.5, { y0: H }); P(ex.sides, M.trim); }
-    hip(sq, H + 1.5, 10.5, skyGlass);
+    { const ex = G.extrudePoly(sq, [], 7.5, { y0: H + 1.5 }); P(ex.sides, darkGlass, false); }
+    for (const [a, b] of edges(sq)) { const e = E(a, b), nn = Math.max(1, Math.round(e.L / 5)); for (let k = 0; k <= nn; k++) { const c = Math.min(e.L - 0.2, Math.max(0.2, k * e.L / nn)); bx(a, b, c - 0.2, c + 0.2, H + 1.5, H + 9, -0.1, 0.3, M.dark); } }
+    const sqo = G.offsetPoly(sq, -1.5);
+    { const ex = G.extrudePoly(sqo, [], 0.8, { y0: H + 9 }); P(ex.sides, blue); }
+    hip(sqo, H + 9.8, 2.2, blue);
     for (const [x, z, w, d] of [[-300, -118, 8, 5], [-292, -62, 6, 6], [-276, -20, 10, 5], [-252, -96, 6, 4], [-244, 8, 8, 6], [-162, -112, 10, 6], [-150, -30, 6, 6], [-128, -82, 8, 5], [-118, -10, 6, 4], [-292, 58, 8, 6], [-270, 104, 6, 5], [-172, -126, 6, 4], [-310, 20, 5, 5], [-140, -128, 7, 5]])
       P(G.box(w, 4.5, d, x, H, z), M.metal);
   }

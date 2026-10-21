@@ -6,7 +6,11 @@
 // ■ 지붕(위성): 동·서 두 날개 위 아주 낮은 힙지붕(옅은 X 자 힙선, 회색), 가운데 x 296.5~327, z 273~311 에 진한 회색 힙지붕
 //   (중앙 파빌리온), 중정 쪽 x 268~290, z 255~268 어두운 박스(옥상 펜트하우스), 흰 환기구 2.
 // ■ 층수·높이: 3 층, 층고 13 ft (1950 년대 강의동) → 벽 상단 40, 코니스 40~41.5, 날개 힙 경사 0.22, 중앙 힙 경사 0.5.
-// ■ 재료: 붉은 벽돌 + 석회석(기단, 1층 위 띠, 창대·인방, 중앙 파빌리온 모서리 퀸·입구 프론티스피스).
+// ■ 재료: [항공사진으로 수정] 황갈(버프) 벽돌 + 석회석(기단, 1층 위 띠, 창대·인방, 중앙 파빌리온 모서리 퀸·입구 프론티스피스).
+// ■ 항공사진 대조 (ISU 가상투어 드론 파노라마 main_quad/f = 남면 정면, indiana_state_university/f = 북측 지붕, 비교 scratch/aerial/stalker.png):
+//   3 층·저경사 회베이지 힙지붕·중앙 진회색 급경사 힙 확인. 벽돌 색을 붉은색 → 버프로, 남면 중앙 파빌리온 2·3 층을 창 3 개 →
+//   폭 13.5 ft 2 개 층 통유리 베이(석재 틀) + 양옆 작은 사각창으로 고침. 날개 지붕 = 저경사 힙 → 평지붕 + 벽돌 파라펫(갈색 자갈),
+//   창 폭 4.4 → 5.6 ft, 북측 중정을 채우는 1층 유리 출입 증축(캐노피) 추가 (isu/f, holm/r). 중앙 진회색 힙 파빌리온은 유지.
 // ■ 창 리듬(가정): 남면 베이 피치 ≈ 8 ft (석재 틀 16 ft 간격 = 창 2 개 한 쌍), 창 4.5×6.5 (1 층 4.5×7.5), 동·서·북면 같은 리듬.
 // ■ 입구: 남면 중앙(석재 프론티스피스 + 2 짝 문 + 계단 5 단), 동·서 끝면 중앙 보조 출입문.
 import * as THREE from 'three';
@@ -81,7 +85,8 @@ function kit(M, G, parts) {
   function ring(poly, y, h, out, mat, { bottom = false, closed = true } = {}) {
     const o = G.offsetPoly(poly, -out);
     P(G.sideGeometry(o, y, y + h, 1 / 24, 1 / 12, closed), mat);
-    if (closed) { P(G.capGeometry(o, [], y + h), mat); if (bottom) capDown(o, y, mat); }
+    // 윗면은 띠 부분(바깥 오프셋 ~ 벽선)만 덮는다. 전체를 덮으면 지붕(WTOP+0.2) 위에 흰 판이 생겨 갈색 자갈 지붕이 가려졌다
+    if (closed) { P(G.capGeometry(o, [poly], y + h), mat); if (bottom) capDown(o, y, mat); }
   }
   function capDown(poly, y, mat) {
     const g = G.capGeometry(poly, [], 0); g.scale(1, -1, 1); g.translate(0, y, 0);
@@ -156,14 +161,16 @@ export function build(M, G) {
   const parts = [];
   const K = kit(M, G, parts);
   const { P, face, fbox, win, wall, ring } = K;
-  const brick = M.brick_red, ls = M.limestone, dark = M.dark;
-  const roofGray = M.roof_gravel.clone(); roofGray.color = new THREE.Color(0xa9a59c);
+  // 항공사진(main_quad/f 정오, indiana_state_university/f 아침): 붉은 벽돌이 아니라 황갈(버프) 벽돌 — 사진 평균 (175,135,95)
+  const brick = M.brick_tan.clone(); brick.color = new THREE.Color(1.0, 0.88, 0.74); brick.name = 'brick_buff_stalker';
+  const ls = M.limestone, dark = M.dark;
+  const roofGray = M.roof_gravel.clone(); roofGray.color = new THREE.Color(0x8f826f);   // 항공사진: 갈색 자갈 평지붕
   const slate = M.roof_gravel.clone(); slate.color = new THREE.Color(0x6f747d);
   const F = 13, WTOP = 40, EAVE = 41.5;
   const rows = [[3.2, 10.7], [16.3, 22.8], [29.3, 35.8]];
 
   /** 벽돌 입면: 베이 피치 pitch, 창 w, 층별 rows. skip 구간, 문(doors: s 중심) */
-  function facade(f, { pitch = 8.2, w = 4.4, margin = 3.5, skip = [], doors = [], noWall = false } = {}) {
+  function facade(f, { pitch = 8.2, w = 5.6, margin = 3.5, skip = [], doors = [], noWall = false } = {}) {
     const ops = [];
     const n = Math.max(1, Math.round((f.L - 2 * margin) / pitch)), p = (f.L - 2 * margin) / n;
     for (let i = 0; i < n; i++) {
@@ -203,7 +210,12 @@ export function build(M, G) {
     const s0 = cS - 15.5, s1 = cS + 15.5, ops = [];
     ops.push(K.door(fS, cS - 3.5, cS + 3.5, 8, 11.5, { wallMat: ls }));
     for (const dc of [-9, 9]) ops.push(win(fS, cS + dc - 2.2, cS + dc + 2.2, rows[0][0], rows[0][1], { wallMat: ls, nx: 2, rails: [7.5], sill: ls }));
-    for (const dc of [-9, 0, 9]) for (const r of [1, 2]) ops.push(win(fS, cS + dc - 2.4, cS + dc + 2.4, rows[r][0], rows[r][1], { wallMat: brick, nx: 2, rails: [rows[r][0] + 3.8], sill: ls, head: ls, headH: 0.8 }));
+    // 항공사진: 2·3 층 가운데 = 폭 13.5 ft 의 2 개 층 통유리 베이(석재 틀, 층 사이 석재 띠), 양옆은 작은 사각창 1 개씩
+    ops.push(win(fS, cS - 6.75, cS + 6.75, rows[1][0] - 1.2, rows[2][1] + 0.8, { wallMat: ls, nx: 4, rails: [rows[1][1] + 1.6, rows[2][0] - 0.8], frame: dark, fw: 0.3 }));
+    fbox(fS, cS - 7.6, cS + 7.6, rows[1][1] + 1.0, rows[1][1] + 2.4, 1.2, 0.5, ls);                                   // 층 사이 석재 띠
+    fbox(fS, cS - 7.6, cS - 6.75, rows[1][0] - 1.2, rows[2][1] + 0.8, 0.6, 0.25, ls); fbox(fS, cS + 6.75, cS + 7.6, rows[1][0] - 1.2, rows[2][1] + 0.8, 0.6, 0.25, ls);
+    fbox(fS, cS - 7.8, cS + 7.8, rows[2][1] + 0.8, rows[2][1] + 1.8, 1.2, 0.5, ls);
+    for (const dc of [-11.5, 11.5]) for (const r of [1, 2]) ops.push(win(fS, cS + dc - 1.8, cS + dc + 1.8, rows[r][0] + 1.5, rows[r][1] - 0.5, { wallMat: brick, nx: 1, sill: ls }));
     // 이 구간 벽은 facade 에서 skip → 여기서 다시 세움 (s0..s1 만): 별도 face
     const f = face(fS.at(s0), fS.at(s1));
     wall(f, -1, WTOP, ops.map(o => ({ ...o, s: o.s - s0, e: o.e - s0 })), brick);
@@ -220,14 +232,12 @@ export function build(M, G) {
   ring(POLY, -1, 2.8, 0.3, ls);                         // 석회석 기단
   ring(POLY, F - 0.2, 0.7, 0.2, ls);                    // 1 층 위 띠
   ring(POLY, WTOP - 0.4, 0.9, 0.3, ls);                 // 상부 띠
-  ring(POLY, WTOP + 0.5, 1.0, 1.4, M.white, { bottom: true });   // 처마 코니스
+  { const o = G.offsetPoly(POLY, -0.2); P(G.sideGeometry(o, WTOP, EAVE + 1.0, 1 / 24, 1 / 12, true), brick); }   // 파라펫 바깥면
   // ---- 지붕: 서·동 날개 저경사 힙 + 중앙 힙(진한 회색) + 평탄 연결부
   // 중정(x 277.4~349.7, z 228.5~258) 위는 비워 둠: 날개마다 남북 힙 + 남측 막대 힙으로 분할
-  K.hipRoof(229.5, 277.4, 228.6, 313.9, EAVE, 0.22, roofGray, { ov: 0.8 });
-  K.hipRoof(262, 296.5, 258.5, 313.9, EAVE, 0.22, roofGray, { ov: 0.8 });
-  K.hipRoof(349.7, 398.6, 228.1, 313.4, EAVE, 0.22, roofGray, { ov: 0.8 });
-  K.hipRoof(327, 364, 258.2, 313.4, EAVE, 0.22, roofGray, { ov: 0.8 });
-  P(G.capGeometry([[296.5, 258.3], [296.5, 313.8], [327, 313.6], [327, 258.2]], [], EAVE + 0.2), roofGray);
+  // 항공사진(isu/f, holm/r, main_quad/f): 날개 지붕은 저경사 힙이 아니라 평지붕 + 낮은 벽돌 파라펫 (갈색 자갈)
+  P(G.capGeometry(POLY, [], WTOP + 0.2), roofGray);
+  { const o = G.offsetPoly(POLY, 1.0); P(G.sideGeometry([...o].reverse(), WTOP, EAVE + 1.0, 1 / 24, 1 / 12, true), brick, false); P(G.capGeometry(POLY, [o], EAVE + 1.0), ls); }
   K.hipRoof(296.5, 327, 273, 311, EAVE + 0.2, 0.5, slate, { ov: 0.6 });
   // 펜트하우스 (x 268..290, z 255..268) — 날개 힙과 겹침, 벽돌 + 루버
   {
@@ -236,6 +246,16 @@ export function build(M, G) {
     ring(poly, EAVE + 7.5, 0.6, 0.3, ls); P(G.capGeometry(poly, [], EAVE + 8.1), M.roof_membrane);
   }
   for (const [x, z] of [[276, 236], [361, 236]]) P(G.cylinder(1.0, 2.2, x, EAVE + 3, z, 10), M.metal);
+  // 항공사진(isu/f, holm/r): 북측 중정은 1층(16 ft) 유리 출입 증축으로 채워짐 — 짙은 유리 + 금속 캐노피, 어두운 평지붕
+  {
+    const ga = [277.6, 229], gb = [349.6, 229], fN = face(gb, ga);
+    P(G.sideGeometry([gb, ga], 0, 15, 1 / 6, 1 / 15, false), M.pane, false);
+    for (let k = 0; k <= 12; k++) fbox(fN, k * fN.L / 12 - 0.2, k * fN.L / 12 + 0.2, 0, 15, 0.4, 0.1, dark);
+    fbox(fN, 0, fN.L, 8.8, 9.2, 0.4, 0.1, dark);
+    fbox(fN, 0, fN.L, 15, 16.5, 1.0, 0.2, ls);
+    fbox(fN, fN.L / 2 - 14, fN.L / 2 + 14, 10.5, 11.2, 7, 3.5, M.metal);                          // 출입 캐노피
+    P(G.capGeometry([[277.6, 229], [277.6, 258], [349.6, 258], [349.6, 229]], [], 16), M.roof_dark);
+  }
 
   const grp = new THREE.Group();
   for (const m of G.mergeByMaterial(parts)) grp.add(m);

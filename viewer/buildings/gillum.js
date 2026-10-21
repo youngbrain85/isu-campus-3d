@@ -2,7 +2,9 @@
 // 근거: scratch/sv/461428314 의 6장 중 vp33(5th St, 서쪽 450 ft)은 Burford Hall 에 가리고, vp34(Cherry St, 2026)는
 //   남쪽 신축 공사 현장만 보임 → Gillum 은 사진에 없음. 외관 패턴은 같은 1950 년대 ISU 벽돌 건물 일반형(가정),
 //   평면·지붕은 Esri z20 위성(scratch/gillum/sat_fp.png) 판독.
-//   층수: 4층 (building_facts: 1950, iv-buildings/14). 층고 13 ft → 지붕 52, 파라펫 상단 54.5 ft.
+//   [항공사진으로 수정] 층수: 4층 → 지상 3층 (14 ft, 지붕 42, 갓돌 44). 근거: ISU 가상투어 드론 파노라마 main_quad/l (동면 정면,
+//   비교 scratch/aerial/gillum.png) — 벽돌 2개 층 + 석재 띠 아래 밝은 1층(기둥·큰 창). 벽돌 = 중간 갈색(적벽돌 아님),
+//   동면 단창 15 열 + 중앙 북쪽 2·3층 통유리 계단창, 지붕 = 베이지 멤브레인 + 흰 금속 갓돌, 옥상 흰 펜트하우스·위성접시·AC 확인.
 //   본체: OSM 직사각형 x 47..129, z 737..888 (위성 지붕 윤곽과 2 ft 이내 일치).
 //   서측 반원 돌출부(OSM, 반지름 ≈ 20 ft, z 796..833): 위성에선 지붕이 밝은 포장색 → 1층 유리 로툰다(입구 홀)로 해석, 높이 15 ft.
 //   서측 중앙 파빌리온 x 47..63, z 797..835: 위성에 흰 갓돌 테두리 + 동쪽 그림자 → 지붕보다 ≈6 ft 높은 계단/로비 블록.
@@ -15,20 +17,21 @@ import * as THREE from 'three';
 
 export const meta = {
   id: 'gillum', name: 'Gillum Hall', osm: 'way/461428314',
-  anchor: [0, 0], rotation: 0, height: 58,
+  anchor: [0, 0], rotation: 0, height: 49,
   preset: { pos: [-250, 150, 1010], tgt: [88, 15, 812] },
   sheets: 'Esri imagery z20/z19 (no usable Street View of this building)',
 };
 
-const F = [0, 13, 26, 39], ROOF = 52, TOP = 54.5;
+const F = [0, 14, 28], ROOF = 42, TOP = 44, GF = 14;   // 항공사진: 지상 3 층 (4 층 아님)
 const MAIN = [[47.1, 737.1], [47.5, 888.1], [128.9, 887.8], [128.5, 736.8]];
-const PAV = { z0: 797, z1: 835, x1: 63, top: 58.5 };
+const PAV = { z0: 797, z1: 835, x1: 63, top: 48.5 };
 const ROT = [[47.3, 795.8], [38.6, 796.8], [33.3, 799.8], [29.5, 803.8], [27.0, 809.1], [26.4, 816.2], [27.7, 821.4], [30.4, 826.0], [33.8, 829.2], [37.5, 831.3], [40.6, 832.4], [47.3, 832.8]];
 
 export function build(M, G) {
   const parts = [];
   const K = makeKit(M, G, parts);
-  const brick = M.brick_red, stone = M.limestone;
+  // 항공사진(main_quad/l): 적벽돌이 아니라 중간 갈색 벽돌, 1층은 밝은 석재·큰 창
+  const brick = M.brick_brown, stone = M.limestone;
   const WO = { rev: brick, sill: stone, frame: M.dark };
 
   function facade(p0, p1, nb, { m0 = 3, m1 = 3, ww = 5.0, skip = () => false, extraOps = [], s0 = 0, s1 = null } = {}) {
@@ -36,12 +39,14 @@ export function build(M, G) {
     K.centers(d.L, nb, m0, m1).forEach((cx, i) => {
       for (let f = 0; f < F.length; f++) {
         if (skip(i, f, cx)) continue;
-        const b = F[f] + 3.0, t = F[f] + 9.0;
-        ops.push(K.win(p0, p1, cx - ww / 2, cx + ww / 2, b, t, { ...WO, muls: [ww / 2], rails: [b + 4.0] }));
+        const b = f === 0 ? 2.5 : F[f] + 3.0, t = f === 0 ? 11.5 : F[f] + 9.5, w = f === 0 ? ww : ww - 1.2;
+        ops.push(K.win(p0, p1, cx - w / 2, cx + w / 2, b, t, { ...WO, rev: f === 0 ? stone : brick, muls: f === 0 ? [w / 2] : [], rails: [b + 4.0] }));
       }
     });
-    K.wall(p0, p1, -1, TOP, ops, brick);
-    K.wbox(p0, p1, -0.1, d.L + 0.1, -1, 2.5, -0.05, 0.18, stone);
+    // 항공사진: 1층 = 밝은 석회석 피복 + 큰 창, 2·3층 = 갈색 벽돌 → 벽을 둘로 나눔
+    K.wall(p0, p1, -1, GF, ops.filter(o => o.t <= GF + 0.01), stone);
+    K.wall(p0, p1, GF, TOP, ops.filter(o => o.t > GF + 0.01).map(o => ({ ...o, b: Math.max(o.b, GF) })), brick);
+    K.wbox(p0, p1, -0.1, d.L + 0.1, GF - 0.2, GF + 1.0, -0.05, 0.35, stone);   // 1층 위 석재 띠
     return d;
   }
   const [A, B, C, D] = MAIN;
@@ -52,7 +57,7 @@ export function build(M, G) {
     // 파빌리온 정면: 석회석 피복 (벽 바깥 0.6) + 세로 창띠 3줄 (2~4층) — 1층은 로툰다 뒤
     // 석회석 파빌리온 면은 본 벽보다 0.6 ft 앞 → 따로 벽면을 세우고 창은 그 면 기준 0.5 안쪽(본 벽보다 앞)
     const q0 = K.at(A, d, sP0, 0.6), q1 = K.at(A, d, sP1, 0.6), ops = [];
-    for (const c of [7, 19, 31]) ops.push(K.win(q0, q1, c - 2.6, c + 2.6, 15.0, 50.0, { rev: stone, frame: M.dark, muls: [2.6], rails: [21.5, 23.5, 34.5, 36.5, 47.5], inset: 0.5 }));
+    for (const c of [7, 19, 31]) ops.push(K.win(q0, q1, c - 2.6, c + 2.6, 15.0, 40.0, { rev: stone, frame: M.dark, muls: [2.6], rails: [21.5, 23.5, 34.5, 36.5], inset: 0.5 }));
     K.wall(q0, q1, -1, PAV.top, ops, stone);
     K.wbox(A, B, sP0 - 0.3, sP0 + 0.3, -1, PAV.top, 0, 0.6, stone); K.wbox(A, B, sP1 - 0.3, sP1 + 0.3, -1, PAV.top, 0, 0.6, stone);
   }
@@ -70,7 +75,9 @@ export function build(M, G) {
     K.door(C, D, mid - 4.5, mid + 4.5, 8.5, { rev: stone });
     ops.push(K.win(C, D, mid - 4.5, mid + 4.5, 8.7, 11.5, { rev: stone, muls: [3, 6] }));
     ops[0] = { s: mid - 4.5, e: mid + 4.5, b: 0, t: 11.5 };
-    facade(C, D, 14, { skip: (i, f, cx) => f === 0 && Math.abs(cx - mid) < 7, extraOps: ops });
+    // 항공사진: 동면 가운데에서 약간 북쪽(s≈85) 에 2·3 층 통유리 계단창 (폭 10)
+    ops.push(K.win(C, D, 80, 90, 16.5, 39.5, { rev: brick, frame: M.dark, muls: [2.5, 5, 7.5], rails: [27.2, 28.8] }));
+    facade(C, D, 14, { skip: (i, f, cx) => (f === 0 && Math.abs(cx - mid) < 7) || (f > 0 && Math.abs(cx - 85) < 6.5), extraOps: ops });
     K.wbox(C, D, mid - 6.5, mid - 5, 0, 13.5, -0.05, 1.0, stone); K.wbox(C, D, mid + 5, mid + 6.5, 0, 13.5, -0.05, 1.0, stone);
     K.wbox(C, D, mid - 6.5, mid + 6.5, 11.7, 13.5, -0.05, 1.0, stone);
     K.wbox(C, D, mid - 8, mid + 8, 12.0, 12.8, 1.0, 7.0, stone);
@@ -78,7 +85,8 @@ export function build(M, G) {
   }
   // ------------------------------------------------------------ 북측 (x 129→47): 7 베이
   facade(D, A, 7);
-  K.roof(MAIN, ROOF, TOP, { par: brick, cope: stone });
+  { const rm = M.roof_gravel.clone(); rm.color = new THREE.Color(0xc8b9a0); rm.name = 'gillum_roof';   // 항공사진: 베이지 멤브레인 + 흰 금속 갓돌
+    K.roof(MAIN, ROOF, TOP, { par: brick, cope: M.white, mat: rm }); }
 
   // ------------------------------------------------------------ 서측 유리 로툰다 (1층, 15 ft)
   {
@@ -96,9 +104,9 @@ export function build(M, G) {
   }
 
   // ------------------------------------------------------------ 옥상 설비
-  K.unit(84, 790, 8, 14, ROOF, 6, M.dark);
+  K.unit(84, 790, 8, 14, ROOF, 6, M.white);   // 항공사진: 흰 펜트하우스
   K.unit(78, 795, 12, 10, ROOF, 3.5, M.metal);
-  K.unit(99, 838.5, 8, 13, ROOF, 6, M.dark);
+  K.unit(99, 838.5, 8, 13, ROOF, 6, M.white);
   for (const x of [83, 89, 95]) parts.push({ geom: G.cylinder(1.4, 2.5, x, ROOF, 812, 12), mat: M.metal });
   for (const [x, z, w, d, h] of [[68, 768, 3, 3, 2.5], [86, 759, 4, 3, 3], [119, 795, 5, 2.5, 2.5], [83, 862, 3, 2, 2.5], [105, 870, 3, 3, 2.5], [110, 760, 3, 3, 2.5]]) K.unit(x, z, w, d, ROOF, h, M.metal);
   {   // 위성 접시 (지름 8 ft, 남향 경사)

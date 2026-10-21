@@ -8,7 +8,9 @@
 //   E    동측 블록 x 760~785.8, z 300~406.8, 40 ft (7th St 쪽 높은 벽돌벽, vp49_315)
 //   S    남측 무대 박스 x 685.9~772.3, z 379~483.5, 52 ft (vp30: 모서리 높이 ≈ 50~53 ft 로 계산) — 프리캐스트 기단 0~9.5,
 //        프리캐스트 띠 33~34.6, 띠 위 작은 창(4×5.5) 열, 띠 아래 창 1~2
-// ■ 재료: 주황빛 붉은 벽돌, 밝은 회베이지 프리캐스트(기단·띠·코핑), 어두운 알루미늄 프레임 유리.
+// ■ 재료: 주황빛 황갈 벽돌, 밝은 회베이지 프리캐스트(기단·띠·코핑), 어두운 알루미늄 프레임 유리.
+// ■ 항공사진 대조 (ISU 가상투어 드론 파노라마 east_view_of_campus/l, indiana_state_university/f; 비교 scratch/aerial/landini.png):
+//   벽돌 색을 진한 적색 → 주황빛 황갈로, 무대 박스 지붕 동측 천창 추가. 계단식 볼륨·곡면 로비·회색 평지붕은 사진과 일치.
 // ■ 출입구: 북동 V 자 홈 2 곳(e22/e0, e2/e3) 유리 커튼월 + 캐노피(vp29_229), 동측 단차(e18) 유리 출입구 + 캐노피(vp49_270),
 //   남서 쐐기(e13) 유리 출입구. 로비 위 피라미드 천창 (705, 313) — 위성의 흰 테두리 사각.
 // ■ 가정: 서측 곡면 로비의 유리 비율, 북·북서 벽 창 배치, LOW 높이(북동 출입부는 실제로 약간 낮음 — 단일 28 ft 로 단순화).
@@ -159,7 +161,9 @@ export function build(M, G) {
   const parts = [];
   const K = kit(M, G, parts);
   const { P, face, fbox, win, wall, ring } = K;
-  const brick = M.brick_red, pc = M.precast, dark = M.dark;
+  // 항공사진(isu/f 아침, east_view/l 저녁, main_quad/f 정오): 진한 적벽돌이 아니라 주황빛 황갈 벽돌
+  const brick = M.brick_red.clone(); brick.color = new THREE.Color(1.08, 0.92, 0.78); brick.name = 'brick_landini';
+  const pc = M.precast, dark = M.dark;
   const LOW = 28, HH = 44, HE = 40, HS = 52;
   const fs = POLY.map((p, i) => face(p, POLY[(i + 1) % POLY.length]));
   const sub = (f, a, b) => face(f.at(a), f.at(b));
@@ -261,6 +265,8 @@ export function build(M, G) {
     const poly = [[685.9, 379], [685.9, 483.5], [772.3, 483.2], [772.3, 379]];
     P(G.capGeometry(poly, [], HS - 1.2), M.roof_membrane);
     // 옥상: 해치·유닛 (위성 x 735 z 392), 소형 팬
+    // 항공사진(east_view_of_campus/l): 무대 박스 지붕 동측에 낮은 경사 유리 천창 (≈ 24 × 10 ft)
+    P(G.box(25, 1.2, 11, 755, HS - 1.2, 395), pc); P(G.box(23.5, 0.6, 9.5, 755, HS, 395), M.pane, false);
     P(G.box(5, 3, 5, 735, HS - 1.2, 392), M.metal); P(G.box(8, 4, 6, 712, HS - 1.2, 440), M.metal); P(G.cylinder(1.2, 2, 752, HS - 1.2, 460, 10), M.metal);
   }
   // ======================================================== H 공연장 (대각 직사각)

@@ -7,7 +7,11 @@
 // ■ 층수·높이: 높은 지하층(러스티케이션, 0~7.5, 창 1.5~5.0) + 주층(도서관 열람실, 8~30, 창 10.5~26.5 트랜섬 22) = 2 층,
 //   엔타블러처 30~34 (코니스 2 ft 돌출), 파라펫 34~37 (본관만, 갓돌). 돔: 팔각 드럼 34~38 + 유리 팔각 돔 정점 46.
 // ■ 재료: 인디애나(베드퍼드) 석회석 전면. 주층은 매끈한 마름돌 + 베이 사이 자이언트 오더 필라스터(이오니아식).
-// ■ 정면(남): 가운데 36 ft 폭 로지아(깊이 8) 에 이오니아식 원기둥 4 개, 뒤 벽에 출입문 3 + 상부 창, 앞 계단 10 단 + 측벽 블록.
+// ■ 정면(남): [항공사진으로 수정] 로지아가 아니라 평면 5 베이 입면 — 가운데 3 베이 사이 세로홈 반원기둥 2 + 필라스터,
+//   가운데 베이 아래 출입문(삼각 페디먼트 + 카르투슈), 앞 계단 10 단 + 측벽 블록.
+// ■ 항공사진 대조 (ISU 가상투어 드론 파노라마 main_quad/f · indiana_state_university/f, 비교 scratch/aerial/normal_hall.png):
+//   모든 베이가 2 단 창 (아래 6.5~15 + 코니스 후드, 위 19.5~26.5 귀 달린 아키트레이브 + 키스톤) — 주층 통창 + 지하층 소창
+//   구성을 고침. 기단 러스티케이션 0~5.4. 유리 돔·흰 평지붕·난간형 파라펫은 사진과 일치.
 // ■ 가정: 창 수·필라스터 리듬(서 6 베이, 북 5 베이, 동 남측부 2 베이), 동측 증축의 좁고 긴 세로창(서고 성격), 높이 전체.
 import * as THREE from 'three';
 
@@ -177,17 +181,23 @@ export function build(M, G) {
     }
     if (list.length) quads(list, groove, false);
   }
-  /** 고전 베이: 주층 큰 창(아키트레이브 + 코니스 후드 + 창대) + 지하층 창 1 */
-  function bay(f, c, ops, w = 6.5) {
-    ops.push(win(f, c - w / 2, c + w / 2, WB, WT, { d: 1.0, wallMat: ls, nx: 2, rails: [22], frame: dark, fw: 0.3 }));
-    fbox(f, c - w / 2 - 0.8, c - w / 2, WB, WT + 0.8, 0.3, 0.12, ls);
-    fbox(f, c + w / 2, c + w / 2 + 0.8, WB, WT + 0.8, 0.3, 0.12, ls);
-    fbox(f, c - w / 2 - 0.8, c + w / 2 + 0.8, WT, WT + 0.8, 0.3, 0.12, ls);
-    fbox(f, c - w / 2 - 1.3, c + w / 2 + 1.3, WT + 0.8, WT + 1.5, 1.2, 0.4, ls);       // 코니스 후드
-    fbox(f, c - w / 2 - 1.2, c + w / 2 + 1.2, WT + 1.5, WT + 2.6, 0.4, 0.15, ls);      // 프리즈 판
-    fbox(f, c - w / 2 - 0.5, c + w / 2 + 0.5, WB - 0.5, WB, 0.8, 0.35, ls);            // 창대
-    fbox(f, c - 1.0, c + 1.0, WB - 2.6, WB - 0.5, 0.25, 0.1, ls);                      // 창대 밑 받침(브래킷 판)
-    ops.push(win(f, c - 2.0, c + 2.0, 1.5, 5.0, { d: 0.7, wallMat: ls, nx: 2, frame: dark }));
+  /** 고전 베이 (항공사진 main_quad/f): 아래 창(6.5~15, 코니스 후드) + 석재 판 + 위 창(19.5~26.5, 귀 달린 아키트레이브) */
+  function bay(f, c, ops, w = 5.2, lowerDoor = false) {
+    const LB = 6.5, LT = 15, UB = 19.5, UT = 26.5, uw = w - 0.6;
+    if (!lowerDoor) {
+      ops.push(win(f, c - w / 2, c + w / 2, LB, LT, { d: 0.9, wallMat: ls, nx: 2, rails: [LT - 3], frame: dark, fw: 0.3 }));
+      fbox(f, c - w / 2 - 0.5, c + w / 2 + 0.5, LB - 0.5, LB, 0.8, 0.35, ls);                 // 아래 창대
+    }
+    fbox(f, c - w / 2 - 0.7, c - w / 2, LB, LT, 0.3, 0.12, ls); fbox(f, c + w / 2, c + w / 2 + 0.7, LB, LT, 0.3, 0.12, ls);
+    fbox(f, c - w / 2 - 1.2, c + w / 2 + 1.2, LT, LT + 0.7, 0.5, 0.2, ls);                     // 프리즈
+    fbox(f, c - w / 2 - 1.6, c + w / 2 + 1.6, LT + 0.7, LT + 1.5, 1.3, 0.45, ls);              // 코니스 후드
+    fbox(f, c - w / 2 - 0.3, c + w / 2 + 0.3, LT + 2.2, UB - 0.6, 0.15, 0.06, ls);             // 창 사이 석재 판
+    ops.push(win(f, c - uw / 2, c + uw / 2, UB, UT, { d: 0.9, wallMat: ls, nx: 2, rails: [UT - 2.4], frame: dark, fw: 0.3 }));
+    fbox(f, c - uw / 2 - 0.8, c - uw / 2, UB, UT + 0.8, 0.3, 0.12, ls);                        // 아키트레이브
+    fbox(f, c + uw / 2, c + uw / 2 + 0.8, UB, UT + 0.8, 0.3, 0.12, ls);
+    fbox(f, c - uw / 2 - 1.2, c + uw / 2 + 1.2, UT + 0.2, UT + 0.9, 0.3, 0.12, ls);            // 귀(이어)
+    fbox(f, c - 0.7, c + 0.7, UT + 0.3, UT + 1.6, 0.4, 0.2, ls);                                 // 키스톤 블록
+    fbox(f, c - uw / 2 - 0.4, c + uw / 2 + 0.4, UB - 0.6, UB, 0.7, 0.3, ls);                   // 위 창대
   }
   /** 자이언트 오더 필라스터 (FL..EB): 받침, 몸체, 주두 */
   function pilaster(f, s) {
@@ -205,58 +215,48 @@ export function build(M, G) {
     const n = nBays[i] || 0;
     if (n) {
       const p = f.L / n;
-      for (let k = 0; k < n; k++) bay(f, p * (k + 0.5), ops, p < 14 ? 5.5 : 6.5);
+      for (let k = 0; k < n; k++) bay(f, p * (k + 0.5), ops, p < 14 ? 4.6 : 5.2);
       for (let k = 0; k <= n; k++) pilaster(f, Math.min(Math.max(p * k, 1.7), f.L - 1.7));
     } else if (curved.has(i) && f.L > 6) {
       const m = Math.max(1, Math.floor(f.L / 6));
       for (let k = 0; k < m; k++) { const c = f.L * (k + 0.5) / m; ops.push(win(f, c - 1.4, c + 1.4, WB, WT, { d: 0.9, wallMat: ls, rails: [14.5, 18.5, 22.5], frame: dark })); fbox(f, c - 1.9, c + 1.9, WB - 0.5, WB, 0.7, 0.3, ls); }
     }
     wall(f, -1, CT, ops, ls);
-    rustic(f, 0, FL - 0.8, ops);
+    rustic(f, 0, 5.4, ops);
   }
-  // ---- 남측 정면 (z 488.8, x 399.4→483): 양끝 베이 1 개씩 + 가운데 로지아 36 ft (원기둥 4)
+  // ---- 남측 정면 (z 488.8, x 399.4→483) — 항공사진(main_quad/f): 로지아 없음. 5 베이 평면 입면,
+  //   가운데 3 베이 사이 반원기둥 2 (세로 홈 이오니아식, 중심 ±8 ft) + 양쪽 필라스터, 가운데 베이 아래 = 출입문 + 삼각 페디먼트 + 카르투슈
   {
     const f = face(POLY[2], POLY[3]), ops = [];
-    const c = f.L / 2, hw = 18, DEP = 8;
-    bay(f, 11.5, ops); bay(f, f.L - 11.5, ops);
-    for (const s of [2, 21, f.L - 21, f.L - 2]) pilaster(f, s);
-    ops.push({ s: c - hw, e: c + hw, b: FL, t: EB - 1.5 });
+    const c = f.L / 2;
+    const bays = [9.5, 25, c, f.L - 25, f.L - 9.5];
+    bays.forEach((s, i) => bay(f, s, ops, 5.2, i === 2));
+    for (const s of [2, 17.6, f.L - 17.6, f.L - 2]) pilaster(f, s);
+    // 출입문 (FL..FL+8.5) + 트랜섬, 페디먼트, 카르투슈
+    ops.push(K.door(f, c - 3, c + 3, FL, FL + 9, { wallMat: ls }));
+    fbox(f, c - 3.8, c - 3, FL, FL + 9.6, 0.4, 0.15, ls); fbox(f, c + 3, c + 3.8, FL, FL + 9.6, 0.4, 0.15, ls);
+    fbox(f, c - 4.4, c + 4.4, FL + 9.6, FL + 10.4, 1.0, 0.4, ls);
+    quads([[ [f.at(c - 4.4, 0.9)[0], FL + 10.4, f.at(c - 4.4, 0.9)[1]], [f.at(c + 4.4, 0.9)[0], FL + 10.4, f.at(c + 4.4, 0.9)[1]],
+      [f.at(c, 0.9)[0], FL + 12.6, f.at(c, 0.9)[1]], [f.at(c, 0.9)[0], FL + 12.6, f.at(c, 0.9)[1]], [f.ez[0], 0, f.ez[1]] ]], ls);
+    fbox(f, c - 1.8, c + 1.8, FL + 13, FL + 13 + 2.6, 0.6, 0.3, ls);                                   // 카르투슈
     wall(f, -1, CT, ops, ls);
-    rustic(f, 0, FL - 0.8, ops);
-    // 로지아 뒷벽: 문 3 (2 짝, 트랜섬) + 문 위 창 3 (반원 대신 사각 + 후드)
-    const b0 = f.at(c - hw, -DEP), b1 = f.at(c + hw, -DEP), fb = face(b0, b1), bo = [];
-    for (const dx of [-11, 0, 11]) {
-      const s = hw + dx;
-      bo.push({ s: s - 3, e: s + 3, b: FL - 0.5, t: FL + 12 });
-      fbox(fb, s - 3, s + 3, FL, FL + 8.5, 0.2, -0.7, dark, false);
-      fbox(fb, s - 0.06, s + 0.06, FL, FL + 8.5, 0.1, -0.55, M.white, false);
-      win(fb, s - 3, s + 3, FL + 8.5, FL + 12, { d: 0.7, nx: 2 });
-      K.reveal(fb, s - 3, s + 3, FL, FL + 12, 0.7, ls);
-      fbox(fb, s - 3.8, s + 3.8, FL + 12, FL + 13, 0.5, 0.2, ls);
-      bo.push(win(fb, s - 2.5, s + 2.5, FL + 14.5, EB - 3.5, { d: 0.7, wallMat: ls, nx: 2, frame: dark }));
-    }
-    wall(fb, FL, EB - 1.5, bo, ls);
-    for (const [s, sgn] of [[c - hw, 1], [c + hw, -1]]) { const a = f.at(s, 0), b = f.at(s, -DEP); wall(sgn > 0 ? face(a, b) : face(b, a), FL, EB - 1.5, [], ls); }
-    const q = [f.at(c - hw, 0), f.at(c + hw, 0), f.at(c + hw, -DEP), f.at(c - hw, -DEP)];
-    K.capDown(q, EB - 1.5, ls); P(G.capGeometry(q, [], FL), ls);
-    // 원기둥 4 (r 1.5, 받침 FL..FL+1.2, 주두 EB-1.5..EB) — 정면선에서 1.8 ft 안쪽
-    for (let k = 0; k < 4; k++) {
-      const s = c - hw + 36 * (k + 0.5) / 4, p = f.at(s, -1.8);
-      P(G.box(3.8, 1.2, 3.8, p[0], FL, p[1]), ls);
-      P(G.cylinder(1.5, EB - FL - 2.7, p[0], FL + 1.2, p[1], 16), ls);
+    rustic(f, 0, 5.4, ops);
+    // 반원기둥 2 (r 1.5, 받침·주두)
+    for (const s of [c - 8, c + 8]) {
+      const p = f.at(s, 0.4);
+      P(G.box(3.8, 1.2, 3.0, p[0], FL - 1.2, p[1]), ls);
+      P(G.cylinder(1.5, EB - FL - 1.5, p[0], FL, p[1], 16), ls);
       P(G.box(3.9, 1.5, 3.2, p[0], EB - 1.5, p[1]), ls);
-      for (const ds of [-1.6, 1.6]) { const v = f.at(s + ds, -1.8); P(G.cylinder(0.55, 0.8, v[0], EB - 1.6, v[1], 10), ls); }
+      for (const ds of [-1.6, 1.6]) { const v = f.at(s + ds, 0.9); P(G.cylinder(0.55, 0.8, v[0], EB - 1.6, v[1], 10), ls); }
     }
     // 정면 계단 (x 418..464, z 488.8..499.8: 10 단) + 측벽 블록 2 + 화분(위성의 어두운 점)
     for (let k = 0; k < 10; k++) { const h = FL - k * 0.8; P(G.box(46, h, 1.1, 441.2, 0, 489.35 + k * 1.1), ls); }
     for (const x of [415.5, 466.9]) { P(G.box(5, FL + 0.6, 12, x, 0, 494.8), ls); P(G.cylinder(1.6, 2.2, x, FL + 0.6, 497.5, 12), ls); P(G.cylinder(1.4, 1.6, x, FL + 2.8, 497.5, 12), M.grass); }
-    // 로지아 위 명판(어두운 글자 띠 대신 석재 판) + 블로킹
-    fbox(f, c - 14, c + 14, EB + 0.6, EB + 3.0, 0.3, 0.1, ls);
   }
 
   // ---- 수평 띠: 기단, 지하층 상부 수경대, 엔타블러처(아키트레이브·프리즈·코니스), 파라펫(본관), 갓돌
   ring(POLY, -1, 1.4, 0.35, ls);
-  ring(POLY, FL - 0.8, 1.0, 0.45, ls);
+  ring(POLY, 5.0, 0.9, 0.45, ls);
   ring(POLY, EB, 1.0, 0.35, ls);
   ring(POLY, CT - 1.4, 1.4, 2.0, ls, { bottom: true });
   // 덴틸 (코니스 밑, 1.5 ft 간격)
@@ -284,11 +284,13 @@ export function build(M, G) {
     const oct = []; for (let i = 0; i < n; i++) { const t = -(i / n) * Math.PI * 2 + rot; oct.push([C[0] + R * Math.cos(t), C[1] + R * Math.sin(t)]); }
     P(G.sideGeometry(oct, CT - 0.3, 38, 1 / 24, 1 / 12, true), ls); ring(oct, 37.4, 0.8, 0.5, ls);
     const top = oct.map(() => C);
-    K.loft(oct, 38.2, top, 46, M.pane);
-    for (const p of oct) beam([p[0], 38.2, p[1]], [C[0], 46, C[1]], 0.5, 0.5, dark);
+    // 항공사진(main_quad/f, isu/f): 돔은 짙은 청색 유리가 아니라 흰 프레임 + 밝은 반투명 유리 (낮에 거의 흰색으로 보임)
+    const domeGlass = M.pane.clone(); domeGlass.color = new THREE.Color(0xe4ebef); domeGlass.map = null; domeGlass.metalness = 0.05; domeGlass.roughness = 0.35; domeGlass.name = 'normal_dome_glass';   // 청색 창 텍스처·금속 반사 제거
+    K.loft(oct, 38.2, top, 46, domeGlass);
+    for (const p of oct) beam([p[0], 38.2, p[1]], [C[0], 46, C[1]], 0.5, 0.5, M.white);
     // 중간 수평 링 (리브 사이)
     const mid = oct.map(p => [C[0] + (p[0] - C[0]) * 0.5, C[1] + (p[1] - C[1]) * 0.5]);
-    for (let i = 0; i < n; i++) { const a = mid[i], b = mid[(i + 1) % n]; beam([a[0], 42.1, a[1]], [b[0], 42.1, b[1]], 0.35, 0.35, dark); }
+    for (let i = 0; i < n; i++) { const a = mid[i], b = mid[(i + 1) % n]; beam([a[0], 42.1, a[1]], [b[0], 42.1, b[1]], 0.35, 0.35, M.white); }
     P(G.cylinder(1.4, 1.0, C[0], 45.6, C[1], 12), dark);
   }
   // 북측 띠 지붕 모니터(지붕창) 2 + 증축부 옥상기기 2 + 해치

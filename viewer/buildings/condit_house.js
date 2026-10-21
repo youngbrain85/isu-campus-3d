@@ -5,7 +5,9 @@
 //   (정면 = 북쪽, 2 층 돌출 베이), 뒤채 x 283~313, z 991~1035.7 (힙지붕), 뒤채 동측 2 층 베이창 x 313~316.4, z 996.8~1016.7
 //   (위성에서 청록색 = 동판 지붕), 남측 1 층 뒤 포치 x 288.5~308.2, z 1035.7~1043.5.
 // ■ 층수·높이: 2 층, 층고 13.5 (이탈리아네이트 높은 층) + 석조 기초 2.5 → 처마 28.5, 브래킷 코니스(2.5 ft 돌출),
-//   본채 힙 경사 0.35 (정점 ≈ 35), 지붕 중앙 쿠폴라(벨베데레) 9×9, 벽 35~41 (창 3 개씩), 힙지붕 정점 44.5.
+//   본채 힙 경사 0.35 (정점 ≈ 35). [항공사진으로 수정] 쿠폴라 없음, 정면 돌출부 = 북향 박공(페디먼트), 지붕 = 밝은 회색 슁글.
+//   근거: ISU 가상투어 드론 파노라마 main_quad/b (북측 정면 근경, 비교 scratch/aerial/condit_house.png) — 붉은 벽돌, 흰 코니스·창틀,
+//   진녹색 덧문, 굵은 벽돌 굴뚝, 뒤채 회색 힙지붕은 모델과 일치.
 // ■ 재료: 붉은 벽돌, 흰 목재 트림(코니스·브래킷·창 후드·포치), 석회석 기초·창대, 진녹색 덧문, 회색 지붕(아스팔트 슁글/슬레이트).
 // ■ 창: 긴 2-over-2 창 (1 층 3.2×8.6, 2 층 3.2×7.6), 흰 아치형 후드 대신 사각 후드 + 키스톤, 덧문.
 // ■ 정면 포치(가정): 북측 돌출부 앞 1 층 포치 26×7 (흰 기둥 4, 평지붕 + 난간) — 이탈리아네이트 일반형.
@@ -14,7 +16,7 @@ import * as THREE from 'three';
 const VIEW_ALT = /[?&]v=alt/.test(import.meta.url);
 export const meta = {
   id: 'condit', name: 'Condit House', osm: 'way/545265807',
-  anchor: [0, 0], rotation: 0, height: 46,
+  anchor: [0, 0], rotation: 0, height: 42,
   preset: VIEW_ALT ? { pos: [470, 130, 1190], tgt: [293, 12, 993] } : { pos: [140, 130, 790], tgt: [293, 12, 990] },
   sheets: 'Esri imagery z20/z19 (no usable Street View of this building)',
 };
@@ -157,7 +159,7 @@ export function build(M, G) {
   const K = kit(M, G, parts);
   const { P, face, fbox, win, wall, ring } = K;
   const brick = M.brick_red, ls = M.limestone, wt = M.white, dark = M.dark;
-  const roofM = M.roof_gravel.clone(); roofM.color = new THREE.Color(0x7d8088);
+  const roofM = M.roof_gravel.clone(); roofM.color = new THREE.Color(0xa2a6ab);   // 항공사진(main_quad/b): 밝은 회색 슁글
   const copper = new THREE.MeshStandardMaterial({ color: 0x6f9e93, roughness: 0.6, metalness: 0.3 });
   const shutter = new THREE.MeshStandardMaterial({ color: 0x2f4a36, roughness: 0.8 });
   const FND = 2.5, F2 = 16, EAVE = 28.5;
@@ -211,15 +213,9 @@ export function build(M, G) {
     cornice(outline, EAVE, 2.5);
     // 힙지붕 (본채) + 돌출부 작은 힙 + 쿠폴라
     const top = K.hipRoof(X0, X1, Z0, Z1, EAVE, 0.35, roofM, { ov: 2.5, fascia: wt });
-    K.hipRoof(PX0, PX1, PZ, Z0 + 2, EAVE, 0.35, roofM, { ov: 2.5, fascia: wt });
-    const cc = [(X0 + X1) / 2, (Z0 + Z1) / 2], cq = rectCCW(cc[0] - 4.5, cc[1] - 4.5, cc[0] + 4.5, cc[1] + 4.5);
-    for (let i = 0; i < 4; i++) {
-      const f = face(cq[i], cq[(i + 1) % 4]), ops = [];
-      for (const c of [1.9, 4.5, 7.1]) ops.push(win(f, c - 0.9, c + 0.9, top + 0.8, top + 5.0, { d: 0.3, frame: wt, rails: [top + 2.9] }));
-      wall(f, top - 3, top + 6, ops, wt);
-    }
-    cornice(cq, top + 6.8, 1.3);
-    K.hipRoof(cc[0] - 4.5, cc[0] + 4.5, cc[1] - 4.5, cc[1] + 4.5, top + 6.8, 0.6, roofM, { ov: 1.3, fascia: wt });
+    // 항공사진(main_quad/b, 북측 정면): 정면 돌출부 지붕은 힙이 아니라 북쪽으로 박공(페디먼트)을 내민 박공지붕, 지붕 위 쿠폴라 없음
+    K.gable(PX0, PX1, PZ, Z0 + 8, EAVE, 0.45, 'z', roofM, { ov: 2.5, ovg: 1.5, gableMat: wt });
+    void top;
     // 굴뚝 2 (위성 그림자: 서측 x 277 z 962, 동측 x 310 z 975) — 벽돌 + 갓
     for (const [x, z] of [[277, 962], [310, 975]]) { P(G.box(3.2, 41 - 20, 2.4, x, 20, z), brick); P(G.box(3.8, 0.8, 3.0, x, 41, z), brick); }
   }

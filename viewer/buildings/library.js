@@ -13,6 +13,9 @@
 //   서측 입구: 위성의 파란 캔버스 차양(z -606~-578, 7 ft 돌출) + 서쪽으로 난 보도. 남측 입구: x 340~360 (보도 2개가 닿는 곳).
 // ■ 지붕: 평지붕 + 2 ft 난간. 펜트하우스 2동(x 335~357 z -602~-574 h 10 / x 340~349 z -690~-662 h 7), 소형 설비,
 //   신축줄눈 2줄(z -699, -577 — 위성의 밝은 선), 루프 해치 9개, 남측 슬롯 뒤 경사 천창(위성의 줄무늬 어두운 사각형).
+// ■ 항공사진 대조 (ISU 가상투어 드론 파노라마 indiana_state_university/b, north_view_of_campus/l; 비교 scratch/aerial/library.png):
+//   유리 슬롯은 전 층이 아니라 최상층(40~52.5)만 움푹한 유리 — 아래는 패널 벽, 서·남·북면에 좁은 세로 쌍창 2 단 추가,
+//   지붕을 밝은 회색 → 갈색 자갈로. 펜트하우스·흰 신축줄눈·서측 파란 차양은 사진과 일치.
 // ■ 사진에 안 보여 가정한 것: 서·남·북면 1층 처리(무창 패널 + 입구만), 슬롯 유리 멀리언 간격(4.5 ft), 지하층 채광 없음.
 //   위성 지붕은 건물 기울기 때문에 북쪽으로 ≈ 6 ft 밀려 있어 모든 위치는 6 ft 남쪽으로 보정해 OSM 외곽선에 맞춤.
 import * as THREE from 'three';
@@ -117,6 +120,15 @@ export function build(M, G) {
       ops.push({ s: s0, e: s1, b: 0, t: 9 });
       slab(p0, p1, s0, s1, 0, 9, -0.6, 0.8, M.dark);
     }
+    // 항공사진(isu/b 서면, north_view/l 북면): 서·남·북면 패널 벽에 2·3층 좁은 세로 쌍창 (폭 1.4, 높이 5), 약 16 ft 간격
+    if ((west || north || south) && L > 14) {
+      const n = Math.floor((L - 8) / 16);
+      for (let k = 0; k < n; k++) {
+        const c = (L - (n - 1) * 16) / 2 + k * 16;
+        if (ops.some(o => c + 2 > o.s && c - 2 < o.e)) continue;
+        for (const y of [18, 30.5]) for (const dc of [-1.2, 1.2]) { ops.push({ s: c + dc - 0.7, e: c + dc + 0.7, b: y, t: y + 5 }); glazing(p0, p1, c + dc - 0.7, c + dc + 0.7, y, y + 5, { inset: 0.5, muls: [], rails: [], reveal: false }); }
+      }
+    }
     P(G.wallSeg(p0, p1, -1, ROOF, { openings: ops }), panel);
     // 층 경계 줄눈 띠 + 기단
     for (const f of FL.slice(1)) slab(p0, p1, 0, L, f - 0.3, f + 0.3, 0.15, 0, panel);
@@ -124,7 +136,12 @@ export function build(M, G) {
   }
   // ------------------------------------------------------------ 지붕
   const r = G.flatRoof(pts, ROOF, { parapet: PAR - ROOF, thick: 0.75 });
-  P(r.slab, M.roof_gravel); P(r.parapet, panel);
+  // 항공사진: 지붕 = 갈색 자갈 + 흰 신축줄눈 선
+  const roofBrown = M.roof_gravel.clone(); roofBrown.color = new THREE.Color(0x9a8a74); roofBrown.name = 'lib_roof';
+  P(r.slab, roofBrown); P(r.parapet, panel);
+  // 항공사진: 슬롯(움푹한 유리)은 전 층이 아니라 4층(최상층)만 — 아래 3개 층은 바깥면과 같은 패널 벽으로 채움
+  for (const z of SLOT_EW) for (const x of [X0 + SD / 2, X1 - SD / 2]) P(G.box(SD + 0.05, FL[3] + 1, SW + 0.05, x, -1, z), panel);
+  for (const x of SLOT_NS) for (const z of [ZN + SD / 2, ZS - SD / 2]) P(G.box(SW + 0.05, FL[3] + 1, SD + 0.05, x, -1, z), panel);
   // 난간 갓돌(밝은 띠): 외곽선을 따라 얇은 상판
   for (let i = 0; i < pts.length; i++) {
     const p0 = pts[i], p1 = pts[(i + 1) % pts.length], d = dir(p0, p1);

@@ -17,7 +17,8 @@
 //   1층: 기둥 뒤로 3.5 ft 후퇴한 유리 커튼(하부 유리 0.3..8.0, 연녹색 스팬드럴 8.0..9.8, 상부 유리 9.8..14.5, 멀리언 5 ft),
 //     긴 면 6베이(≈20 ft, Mills 정면 사진의 기둥 간격) — 남측 타워 남면 모서리 쪽 2베이 앞에 회색 금속 루버 스크린(높이 7 ft).
 //   지붕: 평지붕(123 ft), 파라펫 125.5, 파라펫 위 난간(기둥 8 ft 간격 + 상부 레일, vp11_187), 중앙 기계실/펜트하우스 80 × 28 ft
-//     높이 9.5 ft (z20 위성: 4칸으로 나뉜 어두운 직사각형), 커튼월 띠는 지붕 위로 유리 랜턴(깊이 12 ft)으로 올라감.
+//     [항공사진으로 수정] 높이 12.5 ft 반투명 패널 스크린 박스 (sycamore_towers/f 야경에서 내부 조명으로 빛나는 격자 상자; 비교
+//     scratch/aerial/sycamore_towers.png), 커튼월 띠는 지붕 위로 유리 랜턴(깊이 12 ft)으로 올라감.
 //   가정: 긴 안쪽 면에도 같은 격자, 사진에 없는 1층 출입구 위치(유리면에 포함), 계단실 창의 정확한 높이(층 사이 중간으로 둠).
 //
 // ■ 다이닝 커먼스 기단 (way/283611919, 1965)
@@ -31,7 +32,7 @@ import * as THREE from 'three';
 export const meta = {
   id: 'towers', name: 'Sycamore Towers (Mills, Blumberg, Rhoads, Cromwell Halls + dining commons)', osm: 'way/236260776',
   extraIds: ['way/236260171', 'way/236260775', 'way/236260173', 'way/283611919'],
-  anchor: [0, 0], rotation: 0, height: 133,
+  anchor: [0, 0], rotation: 0, height: 136,
   preset: { pos: [-290, 190, 880], tgt: [-560, 40, 595] },
   sheets: 'Street View vp2–vp13 (2019–2023), Esri imagery z20/z19',
 };
@@ -63,6 +64,7 @@ const INSET = 3.5;                          // 1층 유리면 후퇴
 const UP = new THREE.Vector3(0, 1, 0);
 
 export function build(M, G) {
+  const phPanel = M.precast.clone(); phPanel.color = new THREE.Color(1.12, 1.1, 1.0); phPanel.emissive = new THREE.Color(0x2a2618); phPanel.name = 'towers_ph_panel';   // 반투명 스크린 패널
   const parts = [];
   const P = (geom, mat, cast) => parts.push({ geom, mat, cast });
   const precast = M.precast.clone(); precast.color = new THREE.Color(1.13, 1.11, 1.07);
@@ -328,11 +330,20 @@ export function build(M, G) {
     // 펜트하우스 (주축 방향 80 × 28, 중심 = 본체 중심)
     const cx = poly.reduce((s, p) => s + p[0], 0) / n, cz = poly.reduce((s, p) => s + p[1], 0) / n;
     const ry = -Math.atan2(ax[1], ax[0]);
-    P(G.box(80, 9.5, 28, cx, Y_ROOF, cz, { ry }), M.metal);
-    P(G.box(81, 0.6, 29, cx, Y_ROOF + 9.5, cz, { ry }), M.dark);
-    for (const sx of [-20, 0, 20]) {      // 위성의 4칸 분할 → 칸막이 리브
-      const q = [cx + ax[0] * sx, cz + ax[1] * sx];
-      P(G.box(0.6, 1.5, 28.6, q[0], Y_ROOF + 9.5, q[1], { ry }), M.metal);
+    // 항공사진(sycamore_towers/f 야경, isu/r): 펜트하우스는 어두운 금속 상자가 아니라 반투명 패널(폴리카보네이트형) 스크린 박스 —
+    //   밤에 내부 조명으로 빛남, 세로 멀리언 ≈ 4 ft, 높이 ≈ 13 ft, 위 가는 흰 테두리.
+    P(G.box(79, 12.5, 27, cx, Y_ROOF, cz, { ry }), phPanel);
+    P(G.box(80, 0.6, 28, cx, Y_ROOF + 12.5, cz, { ry }), M.white);
+    for (const [L, W, axis] of [[80, 28, 0], [28, 80, 1]]) {
+      const nm = Math.round(L / 4);
+      for (let k = 0; k <= nm; k++) {
+        const t = -L / 2 + k * L / nm;
+        for (const sg of [-1, 1]) {
+          const u = axis === 0 ? t : sg * (W / 2 - 0.2), v = axis === 0 ? sg * (W / 2 - 0.2) : t;   // u = 주축, v = 직교축
+          const q = [cx + ax[0] * u - ax[1] * v, cz + ax[1] * u + ax[0] * v];
+          P(G.box(0.35, 12.5, 0.35, q[0], Y_ROOF, q[1], { ry }), M.white, false);
+        }
+      }
     }
   }
   for (const t of TOWERS) tower(t);

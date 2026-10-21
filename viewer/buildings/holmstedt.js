@@ -12,6 +12,9 @@
 //   부채꼴 강당: 중심 (357.5, -57.4), 처마(OSM 외곽) 반지름 106.3, 전면 유리벽 반지름 101.5 (5 ft 처마),
 //     지붕 18 ft, 흰 콘크리트 파시아 14.5~18, 벽돌 기둥 16베이 + 유리(사진 L-101 #2).
 // ■ 재료: 갈색 벽돌(brick_brown), 석회석 코핑·기단, 흰 파시아, 짙은 알루미늄 창.
+// ■ 항공사진 대조 (ISU 가상투어 드론 파노라마 holmstedt_hall_stalker_hall/f 근경, fountain/r; 비교 scratch/aerial/holmstedt.png):
+//   부채꼴 강당 지붕을 흰 평지붕 → 뒤로 7.5 ft 올라가는 저경사 회베이지 지붕으로 고침. 벽돌 기둥 + 유리 전면·흰 파시아·
+//   뒤쪽 무창 벽돌 매스는 사진과 일치.
 // ■ 광장 (도면 L-201 → 월드: x = 293.4 + (px - 372.5)/3, z = 27.4 + (py - 660)/3, 3 px/ft, 부채꼴 처마 양끝으로 정합):
 //   포장 = 도면 해치(격자) 셀을 자동 추출해 1 ft 격자 사각형 687개로 병합 (scratch/holmstedt/pave_mask.py),
 //   중앙 허브 + 벤치 4 + 석회석 너클 2, 방사형 보행로, 기둥 조명(L1) 14, 휴지통(C4), 벤치(C1),
@@ -133,7 +136,7 @@ export function build(M, G) {
       slab(p0, p1, -0.2, L + 0.2, FANH, FANH + 0.5, 0.3, 1.0, fascia);
     }
     // 뒤쪽 V 변 (연결 로비 위로 2 ft 노출)
-    for (const [p0, p1] of [[APEX, [317.3, -5]], [[388.4, -16], APEX]]) P(G.wallSeg(p0, p1, LINKH - 1, FANH, {}), brick);
+    for (const [p0, p1] of [[APEX, [317.3, -5]], [[388.4, -16], APEX]]) P(G.wallSeg(p0, p1, LINKH - 1, FANH + 8, {}), brick);
     // 전면: 반지름 R_WALL 의 원호, 16 베이 — 벽돌 기둥 + 유리, 출입문 2 베이 (φ 증가 = 서→동 = CCW 진행, 바깥 = 남)
     const NB = 16, dphi = (PHI1 - PHI0) / NB, doorPhi = [-18.4, 15.7];
     for (let k = 0; k < NB; k++) {
@@ -149,7 +152,14 @@ export function build(M, G) {
     const NA = 24, eave = [], wallArc = [];
     for (let k = 0; k <= NA; k++) { const f = PHI0 + (PHI1 - PHI0) * k / NA; eave.push(arcPt(R_EAVE, f)); wallArc.push(arcPt(R_WALL, f)); }
     const fanPoly = [APEX, [317.3, -5], ...eave, [388.4, -16]];
-    P(G.capGeometry(fanPoly, [], FANH), M.roof_membrane);
+    // 항공사진(holmstedt_hall_stalker_hall/f 근경): 흰 평지붕이 아니라 뒤(꼭짓점)로 갈수록 올라가는 저경사 부채꼴 지붕, 회베이지 자갈/싱글 질감
+    {
+      const g = G.capGeometry(fanPoly, [], FANH), pa = g.attributes.position;
+      for (let i = 0; i < pa.count; i++) { const r = Math.hypot(pa.getX(i) - C[0], pa.getZ(i) - C[1]); pa.setY(i, FANH + 7.5 * Math.max(0, 1 - r / R_EAVE)); }
+      g.computeVertexNormals();
+      const fanRoof = M.roof_gravel.clone(); fanRoof.color = new THREE.Color(0xb3a993); fanRoof.name = 'holm_fan_roof';
+      P(g, fanRoof);
+    }
     P(G.sideGeometry(eave, FAS0, FANH + 0.5, 1 / 24, 1 / 12, false), fascia);
     const lip = eave.map(p => [C[0] + (p[0] - C[0]) * 0.993, C[1] + (p[1] - C[1]) * 0.993]);
     P(G.sideGeometry([...lip].reverse(), FANH, FANH + 0.5, 1 / 24, 1 / 12, false), fascia);   // 파시아 안쪽 면

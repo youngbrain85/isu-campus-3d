@@ -20,11 +20,15 @@
 //   [S] 1층 복도 스트립 (x -679..-421, z -408..-377): 16 ft 백색 지붕.
 //   [N] 북측 증축 홀 (x -775..-421, z -711..-520): 40 ft, 탄 프리캐스트 + 상부 유리 밴드 (사진 없음 → vp77_211 원경의 탄 박스 참고).
 //   가정: 북·서면은 사진이 없어 재질·창 리듬을 추정. 층고 12–14 ft. 아레나 접이판 지붕 경사 0.36.
+// ■ 항공사진 대조 (ISU 가상투어 드론 파노라마 college_of_health_and_human_services/f = 서면 전체, indiana_state_university/r,
+//   sycamore_towers/b; 비교 scratch/aerial/hhs_arena.png): [C] 북쪽 129 ft 를 4층 60 ft 벽돌 블록(1층 석회석, 세로 쌍창, 통유리 계단창,
+//   어두운 펜트하우스)으로, 그 남쪽 35 ft 를 4층 유리 커튼월로 고침. [N] 은 서면 크림 석회석 + 세로 핀 유리 커튼월, 북·동면 금빛 황갈 골강판 + 벽돌 피어.
+//   아레나 7 스팬 접이판 지붕·[J] 옥상 설비는 사진과 일치.
 import * as THREE from 'three';
 
 export const meta = {
   id: 'hhs', name: 'Health and Human Services Building / Arena', osm: 'way/752686738',
-  anchor: [0, 0], rotation: 0, height: 48,
+  anchor: [0, 0], rotation: 0, height: 72,
   preset: { pos: [-210, 190, 230], tgt: [-560, 15, -180] },
   sheets: 'Street View 2019-2023 (vp75, vp76), Esri imagery z20/z19',
 };
@@ -233,22 +237,74 @@ export function build(M, G) {
   // ================= [N] 북측 증축 홀 (사진 없음 → 탄 프리캐스트 + 상부 띠창 가정) =================
   {
     const N = [[-774.2, -520], [-422.5, -520], [-422.7, -706.2], [-679.3, -705.6], [-679.3, -711.1], [-774.2, -710.9]];
-    block(parts, N, 0, 40, M, G, { mat: M.precast, roof: M.roof_membrane, parapet: 1.0 });
+    // 항공사진: 북·동면 = 금빛 황갈 골강판 패널 + 하부 벽돌 피어 (north_view_of_campus/r), 서면 = 크림 석회석 (cohhs/f)
+    const goldPanel = M.metal.clone(); goldPanel.color = new THREE.Color(1.45, 1.25, 0.82); goldPanel.roughness = 0.55; goldPanel.metalness = 0.3; goldPanel.name = 'hhs_gold_panel';
+    block(parts, N, 0, 40, M, G, { mat: goldPanel, roof: M.roof_membrane, parapet: 1.0 });
+    parts.push({ geom: G.sideGeometry([[-774.4, -710.9], [-774.4, -520]], 0, 41, 1 / 24, 1 / 12, false), mat: M.limestone });
+    for (let x = -760; x < -430; x += 24) parts.push({ geom: G.box(4, 12, 1.2, x, 0, x < -681 ? -711.6 : -706.8), mat: brick });   // 북면 하부 벽돌 피어
     for (const [p0, p1] of [[[-422.5, -520], [-422.7, -706.2]], [[-679.3, -711.1], [-774.2, -710.9]], [[-422.7, -706.2], [-679.3, -705.6]]]) {
       strip(parts, p0, p1, 26, 9, 0.3, M.glass, G);                          // 상부 띠창
       const len = Math.hypot(p1[0] - p0[0], p1[1] - p0[1]);
       for (let s = 6; s < len; s += 6) pier(parts, p0, p1, s, 0.3, 26, 9, 0.45, M.dark, G);
       strip(parts, p0, p1, 12, 1.0, 0.3, M.dark, G);
     }
+    // [항공사진] 서면(x -774): 석회석 기단 + 14..37 ft 유리 커튼월에 촘촘한 세로 핀(2 ft), 북단 30 ft 는 석회석 무창 + 세로 창 1 줄
+    {
+      const p0 = [-774.2, -710.9], p1 = [-774.2, -520];
+      strip(parts, [p0[0], -682], p1, 14, 23, 0.3, M.glass, G);
+      for (let z = -682; z <= -522; z += 2) parts.push({ geom: G.box(1.4, 23, 0.25, -774.9, 14, z), mat: M.trim });
+      strip(parts, [p0[0], -682], p1, 37, 1.2, 0.8, M.trim, G);
+      strip(parts, [p0[0], -704], [p0[0], -688], 12, 26, 0.25, M.glass, G);
+    }
     for (const x of [-625, -560, -495]) parts.push({ geom: G.cylinder(5, 4, x, 40, -616, 16), mat: M.metal });   // 원형 설비 3기
     for (const z of [-690, -660, -630, -600, -570, -540]) parts.push({ geom: G.box(12, 3, 2, -760, 40, z), mat: M.metal });
   }
 
   // ================= [C] 서측 2층 스트립 + [L] 남서 사선 연결동 =================
-  block(parts, rect(-768, -690, -520, -320), 0, 28, M, G, { mat: brick });
+  // [항공사진으로 수정] college_of_health_and_human_services/f (서쪽 3rd St 상공에서 동쪽을 본 사진, 비교 scratch/aerial/hhs_arena.png):
+  //   [C] 의 북쪽 129 ft (z -520..-391) 는 2층 28 ft 가 아니라 4층 60 ft — 1층 석회석(0..15) + 2~4층 주황빛 황갈 벽돌, 베이마다 세로 쌍창,
+  //   서면 가운데에 4층 통유리 계단창, 지붕 위 어두운 금속 펜트하우스. 그 남쪽 35 ft (z -391..-356) 는 4층 유리 커튼월 + 1층 출입 캐노피,
+  //   나머지 (z -356..-320) 는 2층 28 ft 석회석 + 벽돌.
   {
-    const w = G.windowGrid([-768, -320], [-768, -520], { y0: 0, rows: 2, rowH: 14, colW: 12, winW: 6, winH: 6, sill: 4, margin: 6, inset: 0.4 });
-    parts.push({ geom: w.wall, mat: brick }); parts.push({ geom: w.glass, mat: M.pane, cast: false });
+    const ls = M.limestone, tanBrick = M.brick_tan.clone(); tanBrick.color = new THREE.Color(1.04, 0.78, 0.66); tanBrick.name = 'hhs_brick_c';
+    const H4 = 60;
+    const C4 = rect(-768, -690, -520, -391);
+    // 벽 (서면은 개구 포함으로 별도)
+    const wpane = (p0, p1, s0, s1, y0, y1) => { const dx = p1[0] - p0[0], dz = p1[1] - p0[1], L = Math.hypot(dx, dz), ex = dx / L, ez = dz / L, nx = -ez, nz = ex, a = [p0[0] + ex * s0 - nx * 0.5, p0[1] + ez * s0 - nz * 0.5], b = [p0[0] + ex * s1 - nx * 0.5, p0[1] + ez * s1 - nz * 0.5]; parts.push({ geom: G.sideGeometry([a, b], y0, y1, 1 / (s1 - s0), 1 / (y1 - y0), false), mat: M.pane, cast: false }); };
+    const W0 = [-768, -520], W1 = [-768, -391], L = 129;
+    const opsB = [], opsL = [];
+    const nb = 12, bw = L / nb;
+    for (let k = 0; k < nb; k++) {
+      const c = (k + 0.5) * bw;
+      if (k === 5 || k === 6) continue;                                    // 가운데 통유리 계단창 자리
+      for (const [b0, t0] of [[18, 26.5], [32, 40.5], [46, 54.5]]) for (const d of [-1.5, 1.5]) opsB.push({ s: c + d - 1.1, e: c + d + 1.1, b: b0, t: t0 });
+      opsL.push({ s: c - 3, e: c + 3, b: 3, t: 11 });
+    }
+    opsB.push({ s: 5 * bw + 1, e: 7 * bw - 1, b: 15.5, t: 57 });
+    parts.push({ geom: G.wallSeg(W0, W1, 15, H4, { openings: opsB.map(o => ({ ...o })) }), mat: tanBrick });
+    parts.push({ geom: G.wallSeg(W0, W1, 0, 15, { openings: opsL }), mat: ls });
+    for (const o of [...opsB, ...opsL]) wpane(W0, W1, o.s, o.e, o.b, o.t);
+    for (let k = 0; k <= 6; k++) pier(parts, W0, W1, 5 * bw + 1 + k * (2 * bw - 2) / 6, 0.3, 15.5, 41.5, 0.5, M.dark, G, -0.5);   // 계단창 멀리언
+    for (const y of [29, 43]) strip(parts, [W0[0], -520 + 5 * bw + 1], [W0[0], -520 + 7 * bw - 1], y, 1.2, 0.6, M.dark, G, -0.5);
+    strip(parts, W0, W1, 14.6, 1.0, 0.4, ls, G); strip(parts, W0, W1, H4 - 0.5, 1.5, 0.5, ls, G);
+    for (const [a, b] of [[C4[0], C4[1]], [C4[1], C4[2]], [C4[2], C4[3]]]) {
+      parts.push({ geom: G.sideGeometry([a, b], 0, 15, 1 / 24, 1 / 12, false), mat: ls });
+      const w = G.windowGrid(a, b, { y0: 15, rows: 3, rowH: 15, colW: 10.75, winW: 4.4, winH: 8.5, sill: 3, margin: 4, inset: 0.4 });
+      parts.push({ geom: w.wall, mat: tanBrick }); parts.push({ geom: w.glass, mat: M.pane, cast: false });
+    }
+    roofOf(parts, C4, H4, M, G, { parapet: 1.5 });
+    parts.push({ geom: G.box(42, 11, 100, -728, H4, -455), mat: M.dark });                     // 어두운 금속 펜트하우스
+    // 유리 커튼월 구간 (z -391..-356, 58 ft)
+    const CG = rect(-768, -700, -391, -356);
+    block(parts, CG, 0, 58, M, G, { mat: M.glass, parapet: 1.0 });
+    for (let z = -391; z <= -356; z += 5) parts.push({ geom: G.box(0.5, 58, 0.6, -768.3, 0, z), mat: M.dark });
+    for (const y of [15, 30, 45]) parts.push({ geom: G.box(0.6, 1.2, 35, -768.3, y, -373.5), mat: M.dark });
+    parts.push({ geom: G.box(14, 1.2, 40, -775, 13, -373.5), mat: M.white });                     // 출입 캐노피
+    // 남쪽 2층 (z -356..-320)
+    const C2 = rect(-768, -690, -356, -320);
+    block(parts, C2, 0, 28, M, G, { mat: tanBrick });
+    { const w = G.windowGrid([-768, -356], [-768, -320], { y0: 0, rows: 2, rowH: 14, colW: 12, winW: 6, winH: 6, sill: 4, margin: 6, inset: 0.4 });
+      parts.push({ geom: w.wall, mat: ls }); parts.push({ geom: w.glass, mat: M.pane, cast: false }); }
   }
   for (const [x, z] of [[-740, -480], [-740, -420], [-740, -360]]) parts.push({ geom: G.box(10, 4, 8, x, 28, z), mat: M.metal });
   {

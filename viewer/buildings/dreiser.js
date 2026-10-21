@@ -6,7 +6,9 @@
 //   본체: OSM 외곽 중 x 25..128, z 536..687 (남서 모서리 20×10 ft 노치 포함) — 위성 지붕 윤곽과 일치.
 //     OSM 의 서측 띠(x 15..25, z 510..600) 와 북서 x 15..49 z 510..537 은 위성에서 지면(보도·포장)으로 보여 제외.
 //   북측 부속동: x 49..70, z 516..537 (위성에서 밝은 테두리의 낮은 사각 지붕, 본체 그림자 안) → 1층 14 ft 벽돌, 하역문.
-//   재료(가정): 적벽돌, 석회석 기초 띠(0~2.5 ft)·창대·갓돌, 정면 출입구 석회석 프레임.
+//   [항공사진으로 수정] 재료: ISU 가상투어 드론 파노라마 main_quad/l (동면, 비교 scratch/aerial/dreiser.png) — 중간 갈색 벽돌
+//   (적벽돌 아님) 2·3층 + 1층 밝은 석재 피복·큰 창, 흰 금속 갓돌, 짙은 갈색 멤브레인 지붕, 동면 가운데 왼쪽 2·3층 통유리 계단창,
+//   옥상 = 북서 모서리 벽돌 펜트하우스 + 중앙 긴 어두운 기계 하우징 + 원형 환기구 2 (위성 판독과 일치).
 //   창(가정): 각 면 ~10 ft 베이마다 강철 새시 창 5.0×6.5 ft (창대 = 층바닥+3), 중앙 멀리언 + 상부 레일.
 //   출입구(가정): 동측 중앙(정면, 캠퍼스 내부 방향) 석회석 프레임 2짝문×2 + 캐노피, 남서 노치 남면 출입문, 북측 서비스문.
 //   지붕(위성): 평지붕(밝은 멤브레인) + 파라펫. 서측 펜트하우스 x 30..48 z 560..581 (그림자로 ≈10 ft),
@@ -20,14 +22,15 @@ export const meta = {
   sheets: 'Esri imagery z20/z19 (no usable Street View of this building)',
 };
 
-const F = [0, 14, 28], ROOF = 42, TOP = 44.5;
+const F = [0, 14, 28], ROOF = 42, TOP = 44.5, GF = 14;
 const MAIN = [[25.4, 537.2], [26.3, 677.1], [46.6, 676.9], [46.8, 687.3], [127.9, 686.3], [126.1, 536.0]];
 const ANNEX = [[49.2, 516.3], [49.3, 537.0], [70.1, 536.7], [69.8, 516.1]];
 
 export function build(M, G) {
   const parts = [];
   const K = makeKit(M, G, parts);
-  const brick = M.brick_red, stone = M.limestone;
+  // 항공사진(main_quad/l): 중간 갈색 벽돌 + 1층 밝은 석재 피복
+  const brick = M.brick_brown, stone = M.limestone;
   const WO = { rev: brick, sill: stone, frame: M.dark };
 
   // 한 면: nb 베이, 층마다 창 (skip(i, f) 가 true 면 그 창 생략). extraOps = 문 등 추가 개구
@@ -37,12 +40,14 @@ export function build(M, G) {
       const [cx, i] = c;
       for (let f = 0; f < F.length; f++) {
         if (skip(i, f)) continue;
-        const b = F[f] + 3.0, t = F[f] + 9.5;
-        ops.push(K.win(p0, p1, cx - ww / 2, cx + ww / 2, b, t, { ...WO, muls: [ww / 2], rails: [b + 4.4] }));
+        const b = f === 0 ? 2.5 : F[f] + 3.0, t = f === 0 ? 11.8 : F[f] + 9.8, w = f === 0 ? ww : ww - 1.2;
+        ops.push(K.win(p0, p1, cx - w / 2, cx + w / 2, b, t, { ...WO, rev: f === 0 ? stone : brick, muls: f === 0 ? [w / 2] : [], rails: [b + 4.4] }));
       }
     }
-    K.wall(p0, p1, -1, y1, ops, brick);
-    K.wbox(p0, p1, -0.1, d.L + 0.1, -1, 2.5, -0.05, 0.18, stone);           // 석회석 기초 띠
+    // 항공사진: 1층 = 밝은 석회석 피복 + 큰 창, 2·3층 = 갈색 벽돌 → 벽을 둘로 나눔
+    K.wall(p0, p1, -1, GF, ops.filter(o => o.t <= GF + 0.01), stone);
+    K.wall(p0, p1, GF, y1, ops.filter(o => o.t > GF + 0.01).map(o => ({ ...o, b: Math.max(o.b, GF) })), brick);
+    K.wbox(p0, p1, -0.1, d.L + 0.1, GF - 0.2, GF + 1.0, -0.05, 0.35, stone);   // 1층 위 석재 띠
     return d;
   }
 
@@ -87,7 +92,8 @@ export function build(M, G) {
     const cs = K.centers(d.L, 10, 3, 3);
     facade(Fp, A, 10, { skip: (i, f) => (f === 0 && cs[i] > sAn0 - 3 && cs[i] < sAn1 + 3) || (f === 0 && cs[i] > d.L - 14), extraOps: ops });
   }
-  K.roof(MAIN, ROOF, TOP, { par: brick, cope: stone });
+  { const rm = M.roof_dark.clone(); rm.color = new THREE.Color(1.25, 1.15, 1.05); rm.name = 'dreiser_roof';   // 항공사진: 짙은 갈회색 멤브레인 + 흰 금속 갓돌
+    K.roof(MAIN, ROOF, TOP, { par: brick, cope: M.white, mat: rm }); }
 
   // ------------------------------------------------------------ 북측 부속동 (1층, 하역)
   {

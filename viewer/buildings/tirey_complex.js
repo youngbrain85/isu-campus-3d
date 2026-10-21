@@ -6,7 +6,8 @@
 // ■ 볼륨 구분 (위성 판독)
 //   AUD  Tilson 강당 박스 x 554.6~642.9, z 610~728 (흰 멤브레인 평지붕, 난간 46 ft) + 북측 낮은 무대 뒤 z 586~610 (34 ft, 옥상기기)
 //   EW   동서 날개 x 501~(NS 와 교차), z 738.4~783.6 — 2층 + 슬레이트 박공(용마루 z 761, 경사 0.65), 서단 박공벽
-//   CP   중앙 파빌리온 x 576~623.3, z 728~789.6 — 3층 평지붕(41 ft) + 정사각 탑(20×20, 47 ft) + 피라미드 지붕(56 ft), 남측 정문
+//   CP   중앙 파빌리온 x 576~623.3, z 728~789.6 — [항공사진 수정] 아르데코 매스 54 ft + 정면 가운데 탑(24×20, 61 ft) + 시계 + 피라미드(68 ft),
+//        남측 정문 = 큰 석재 포털 (tirey_plaza/f)
 //   NS   남북 날개 x 696.7~757.7, z 746~825 — 1층 캐스트스톤 피어 + 큰 창(사진), 2층 벽돌 펀치창, 다락 도머 6개, 박공(용마루 45 ft)
 //        북단 3층 벽돌 블록 x 712~757.7, z 728.5~746 (평지붕 38 ft, vp45_264)
 //   L1   강당·NS 사이 2층 연결부 (평지붕 27 ft)
@@ -27,7 +28,7 @@ import * as THREE from 'three';
 const VIEW_ALT = /[?&]v=alt/.test(import.meta.url);      // 미리보기용: ?v=alt 로 불러오면 반대편(서측) 프리셋
 export const meta = {
   id: 'tirey', name: 'Tirey Hall / Rankin Hall / Parsons Hall', osm: 'way/545265796',
-  anchor: [0, 0], rotation: 0, height: 56,
+  anchor: [0, 0], rotation: 0, height: 72,
   preset: VIEW_ALT ? { pos: [380, 170, 960], tgt: [660, 15, 830] } : { pos: [1060, 160, 930], tgt: [690, 15, 830] },
   sheets: 'Street View vp53/vp54 (2019, 2023), vp45; Esri imagery z20/z19',
 };
@@ -239,43 +240,44 @@ export function build(M, G) {
   }
 
   // ======================================================== CP: 중앙 파빌리온 (x 576..623.3, z 728.3..789.6) + 탑
+  // [항공사진으로 수정] tirey_plaza/f (남측 광장 정면 사진, 비교 scratch/aerial/tirey_complex.png): 파빌리온은 3층 41 ft 가 아니라
+  //   날개 처마(25.5) 의 2 배가 넘는 아르데코 매스 — 측부 파라펫 54 ft, 정면 가운데 24 ft 폭 탑이 61 ft 까지 솟고 시계 + 슬레이트
+  //   피라미드(68 ft) + 청동 피니얼. 1층 가운데 석재 포털(폭 24, 높이 27, 반쯤 내려간 출입구 + 양쪽 계단), 포털 위 3 연창 2 단,
+  //   양쪽 베이는 2~4층 통 세로 창띠, 벽돌 피어가 파라펫 위로 돌출.
   {
-    const X0 = 576, X1 = 623.3, ZN = 728.3, ZS = 789.6, H = 41;
+    const X0 = 576, X1 = 623.3, ZN = 728.3, ZS = 789.6, H = 54, TT = 61;
     const fS = face([X0, ZS], [X1, ZS]), fE = face([X1, ZS], [X1, 783.6]), fW = face([X0, 783.6], [X0, ZS]);
-    // 남면 정문: 석재 문틀(포털) + 2 짝 문 + 반원 대신 사각 트랜섬, 양옆 창 + 2·3층 창
     const ops = [];
     const cx = fS.L / 2;
-    ops.push(K.door(fS, cx - 4, cx + 4, 8, 12, { wallMat: stone }));
-    fbox(fS, cx - 6.5, cx + 6.5, -1, 14.5, 1.2, 0.4, stone);          // 석재 포털 틀 (돌출)
-    fbox(fS, cx - 7.2, cx + 7.2, 14.5, 16.0, 2.2, 0.9, stone);         // 포털 엔타블러처
+    ops.push(K.door(fS, cx - 4, cx + 4, 9, 12, { wallMat: stone }));
+    fbox(fS, cx - 12, cx + 12, -1, 27, 1.4, 0.5, stone);              // 석재 포털 (돌출)
+    fbox(fS, cx - 12.6, cx + 12.6, 25.5, 27.2, 2.0, 0.8, stone);       // 포털 갓
+    for (const c of [cx - 5.5, cx, cx + 5.5]) fbox(fS, c - 1.6, c + 1.6, 16, 24, 0.3, 1.25, dark, false);   // 포털 상부 3 연창 (석재 안)
     for (const c of [cx - 14, cx + 14]) ops.push(win(fS, c - 2.2, c + 2.2, 3.6, 10.2, { wallMat: brick, nx: 2, rails: [7.5], sill: stone, head: stone }));
-    for (const c of [cx - 14, cx - 4.5, cx + 4.5, cx + 14]) {
-      ops.push(win(fS, c - 2.2, c + 2.2, 17.4, 24.6, { wallMat: brick, nx: 2, rails: [21.6], sill: stone, head: stone }));
-      ops.push(win(fS, c - 2.2, c + 2.2, 29.4, 35.0, { wallMat: brick, nx: 2, rails: [32.4], sill: stone, head: stone }));
-    }
-    // 정면 개구가 포털 상자와 겹치지 않도록 포털 위치(2층 창 cx±4.5) 는 포털 위 (17.4~) 이므로 OK
+    for (const c of [cx - 14.5, cx + 14.5]) ops.push(win(fS, c - 1.4, c + 1.4, 15, 46, { wallMat: brick, nx: 1, rails: [26, 36], sill: stone }));   // 통 세로 창띠
+    for (const c of [cx - 5.5, cx, cx + 5.5]) for (const [b0, t0] of [[30, 37], [40.5, 47]]) ops.push(win(fS, c - 1.9, c + 1.9, b0, t0, { wallMat: brick, nx: 2, sill: stone }));
+    for (const c of [cx - 9, cx + 9]) fbox(fS, c - 1.2, c + 1.2, 27, H + 1.5, 0.8, 0.4, brick);     // 벽돌 피어 (파라펫 위 돌출)
+    for (const c of [cx - 9, cx + 9]) for (const y of [36.5, 47.5]) fbox(fS, c - 1.3, c + 1.3, y, y + 2.5, 0.9, 0.45, stone);   // 피어 석재 블록
     wall(fS, -1, H, ops, brick);
     for (const f of [fE, fW]) wall(f, -1, H, [win(f, 1.2, 4.6, 17.4, 24.6, { wallMat: brick, sill: stone })], brick);
-    // EW 지붕 위로 드러나는 측벽 (x 576 / 623.3, z 728.3..783.6)
     wall(face([X0, ZN], [X0, 783.6]), 20, H, [], brick);
     wall(face([X1, 783.6], [X1, ZN]), 20, H, [], brick);
     wall(face([X1, ZN], [X0, ZN]), 44, H, [], brick);
     const poly = rectCCW(X0, ZN, X1, ZS);
-    ring(poly, -1, 2.6, 0.3, stone); ring(poly, 12.6, 0.8, 0.25, stone); ring(poly, 26.2, 0.8, 0.25, stone);
-    ring(poly, H - 2.6, 1.6, 0.8, stone, { bottom: true });
+    ring(poly, -1, 2.6, 0.3, stone); ring(poly, 12.6, 0.8, 0.25, stone);
+    ring(poly, H - 1.6, 1.6, 0.5, stone, { bottom: true });
     P(G.capGeometry(poly, [], H - 0.8), M.roof_gravel);
-    ring(poly, H - 1.0, 1.4, 0.0, stone);
-    // 남측 계단·테라스 (위성: z 790~800 밝은 포장)
-    for (let i = 0; i < 3; i++) P(G.box(18 - i * 0, 0.5, 3 - 0, X0 + cx, i * 0.5 - 0.5, ZS + 6 - i * 2), stone);
-    // 탑: 20×20 벽돌 (41→47) + 석재 갓 + 피라미드 슬레이트 (→56) + 첨탑
-    const tc = [603, 772], tp = rectCCW(tc[0] - 10, tc[1] - 10, tc[0] + 10, tc[1] + 10);
-    for (let i = 0; i < 4; i++) {
-      const f = face(tp[i], tp[(i + 1) % 4]);
-      wall(f, H - 1, 47, [win(f, 6.5, 13.5, 42.2, 46.0, { wallMat: brick, nx: 3, glass: dark })], brick);
-    }
-    ring(tp, 46.6, 0.9, 0.5, stone);
-    K.loft(G.offsetPoly(tp, -1.2), 47.5, tp.map(() => tc), 56, slate);
-    P(G.cylinder(0.25, 4, tc[0], 56, tc[1], 6), M.metal);
+    // 남측 계단 (포털 앞, 양쪽으로 갈라짐)
+    for (let i = 0; i < 3; i++) P(G.box(24, 0.5, 3, X0 + cx, i * 0.5 - 0.5, ZS + 6 - i * 2), stone);
+    // 정면 탑: 폭 24, 깊이 20 (x 587.6..611.6, z 769.6..789.6), H → 61 + 시계 + 피라미드 68
+    const tx0 = X0 + cx - 12, tx1 = X0 + cx + 12, tz0 = ZS - 20, tz1 = ZS + 0.3;
+    const tp = rectCCW(tx0, tz0, tx1, tz1), tc = [(tx0 + tx1) / 2, (tz0 + tz1) / 2];
+    for (let i = 0; i < 4; i++) { const f = face(tp[i], tp[(i + 1) % 4]); wall(f, H - 1, TT, [], brick); }
+    ring(tp, TT - 1.2, 1.2, 0.5, stone);
+    { const d = new THREE.CircleGeometry(3.2, 24); d.translate(tc[0], 56.5, tz1 + 0.05); P(d, stone, false);
+      const h1 = new THREE.CircleGeometry(2.6, 24); h1.translate(tc[0], 56.5, tz1 + 0.1); P(h1, dark, false); }
+    K.loft(G.offsetPoly(tp, -1.0), TT, tp.map(() => tc), 68, slate);
+    P(G.cylinder(0.35, 4, tc[0], 68, tc[1], 6), M.metal);
   }
 
   // ======================================================== EW 날개 (x 501..576 / 623.3..~697, z 738.4..783.6)

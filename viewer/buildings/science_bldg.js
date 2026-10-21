@@ -14,6 +14,9 @@
 //   [S] 남서 저층부 (점 8–11, x 26..100, z 37..74): 2층 28 ft. [L] 남측 연결 (x 78..100, z 21..37): 18 ft (위성에서 남측 동 그림자 안).
 //   [E] 동측 입구 (점 14–21, x 203..232, z -141..-105): 1층 16 ft, 유리문 + 캐노피.
 // 가정: 모든 입면 패턴·재질(사진 없음), 층고, 북측 동 높이, 증축부 유리 형태.
+// ■ 항공사진 대조 (ISU 가상투어 드론 파노라마 fountain/r 근경·fountain/f, holmstedt_hall_stalker_hall/b; 비교 scratch/aerial/science_bldg.png):
+//   [S] 남서부는 2층이 아니라 본관과 같은 4층, 서면 전체가 유리 커튼월(층마다 검은 수평 차양) + 앞 판석 광장.
+//   지붕은 흰색이 아닌 회갈색 자갈. 관측 돔·온실·덕트 스파인·배기 스택은 사진과 일치. 벽돌은 갈색(유지).
 import * as THREE from 'three';
 
 export const meta = {
@@ -78,9 +81,11 @@ export function build(M, G) {
     wall(p0, p1, y0, y1, ops, mat);
   }
   function coping(poly, y0, y1, mat, out = 0.4, inIn = 1.0) { for (const [a, b] of edges(poly)) bx(a, b, 0, E(a, b).L, y0, y1, -inIn, inIn + out, mat); }
-  const cap = (poly, y, mat = M.roof_gravel) => P(G.capGeometry(poly, [], y), mat);
+  // 항공사진(fountain/r 근경): 지붕 = 회갈색 자갈 (사진 평균 ≈ (150,137,119)) — 기본 roof_gravel 보다 어둡고 따뜻함
+  const gravel = cached('sci_gravel', () => { const m = M.roof_gravel.clone(); m.color = new THREE.Color(0.92, 0.84, 0.74); return m; });
+  const cap = (poly, y, mat = gravel) => P(G.capGeometry(poly, [], y), mat);
   /** 외곽선 블록: skip(edgeIndex) 인 변은 벽 생략 (다른 볼륨과 맞닿음) */
-  function block(poly, H, floors, { skip = () => false, roofMat = M.roof_gravel, par = 2.8, mull = 6, margin = 3 } = {}) {
+  function block(poly, H, floors, { skip = () => false, roofMat = gravel, par = 2.8, mull = 6, margin = 3 } = {}) {
     poly.forEach((p0, i) => { const p1 = poly[(i + 1) % poly.length]; if (!skip(p0, p1)) ribbon(p0, p1, 0, H, floors, { mull, margin }); });
     cap(poly, H - 0.2, roofMat);
     coping(poly, H, H + par, ls, 0.35, 1.0);
@@ -174,10 +179,24 @@ export function build(M, G) {
     cap(inner, 30.2, M.roof_gravel); coping(inner, 30.2, 31.6, ls, 0.3, 0.8);
   }
 
-  // ================================================================ [S] 남서 저층부 2층 + [L] 남측 연결
+  // ================================================================ [S] 남서부 (항공사진으로 수정: 2층 → 4층) + [L] 남측 연결
+  //   fountain/r 근경: 이 블록은 본관과 같은 4층 높이이고, 서면(x≈25.8, 37 ft) 전체가 유리 커튼월 —
+  //   층마다 검은 수평 차양(1.5 ft 돌출) + 검은 멀리언 5 ft, 양끝 벽돌 피어. 앞(서측)은 밝은 회색 판석 광장 + 내려가는 계단.
   {
     const S = ccw(pick([8, 9, 10, 11, [100, 73.6], [100, 36.5]]));
-    block(S, 28, fl(2, 14), { skip: (p0, p1) => (Math.abs(p0[0] - 100) < 0.5 && Math.abs(p1[0] - 100) < 0.5) || (Math.abs(p0[1] - 73.6) < 0.5 && Math.abs(p1[1] - 73.6) < 0.5 && Math.min(p0[0], p1[0]) > 76) });
+    const isWest = (p0, p1) => Math.abs(p0[0] - 25.8) < 0.5 && Math.abs(p1[0] - 25.8) < 0.5;
+    block(S, H4, fl(4, 13.5), { skip: (p0, p1) => isWest(p0, p1) || (Math.abs(p0[0] - 100) < 0.5 && Math.abs(p1[0] - 100) < 0.5) || (Math.abs(p0[1] - 73.6) < 0.5 && Math.abs(p1[1] - 73.6) < 0.5 && Math.min(p0[0], p1[0]) > 76) });
+    const w0 = SP[10], w1 = SP[9];   // 서면: 북(z 36.8)→남(z 73.9) 이 바깥(서)을 향하도록 CCW 순서로 고름
+    const [a, b] = area([[w0[0], w0[1]], [w1[0], w1[1]], [60, 55]]) > 0 ? [w0, w1] : [w1, w0];
+    const e = E(a, b), m = 3.5;
+    wall(a, b, 0, H4, [{ s: m, e: e.L - m, b: 0.3, t: H4 - 2 }], brick);
+    pane(a, b, m, e.L - m, 0.3, H4 - 2, 0.8);
+    const nm = Math.round((e.L - 2 * m) / 5);
+    for (let k = 0; k <= nm; k++) { const c = m + k * (e.L - 2 * m) / nm; bx(a, b, c - 0.2, c + 0.2, 0.3, H4 - 2, -0.8, 0.6, M.dark); }
+    for (let f = 0; f < 4; f++) { const y = f === 0 ? 10.5 : 13.5 * f + 10.5; bx(a, b, m, e.L - m, y, y + 0.5, -0.6, 2.1, M.dark); bx(a, b, m, e.L - m, 13.5 * (f + 1) - 0.6, 13.5 * (f + 1) + 0.4, -0.8, 0.7, M.dark); }
+    bx(a, b, m + 8, e.L - m - 8, 9.5, 10.2, 0, 5, M.dark);   // 출입 캐노피
+    // 광장 판석 (서측 50 × 40 ft, 밝은 회색)
+    P(G.capGeometry(ccw(rectXZ(-12, 25.6, 30, 80)), [], 0.12), cached('sci_pavers', () => { const m2 = M.walk.clone(); m2.color = new THREE.Color(1.08, 1.08, 1.1); return m2; }), false);
     const Lk = rectXZ(77.6, 100, 21.2, 36.5);
     Lk.forEach((p0, i) => { const p1 = Lk[(i + 1) % 4], e = E(p0, p1); if (e.n[0] < -0.9) ribbon(p0, p1, 0, 18, [[0, 3, 10]], { margin: 2 }); });
     cap(Lk, 18, M.roof_gravel); coping(Lk, 18, 19.5, ls, 0.3, 0.8);

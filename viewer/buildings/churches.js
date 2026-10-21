@@ -20,6 +20,11 @@
 //     + 밝은 파라펫 테두리, 서측 2층 로비동(아치 출입구 3개, 가정), 서측 모서리 1층 동 2개 + 흰 피라미드 천창(위성), 동측 1층 출입 스트립.
 // [6] United Campus Ministries (way/545275294): 1층(17 ft) 평지붕 갈색 벽돌, 남서 홈에 출입구·캐노피, 천창 4 + 큰 천창(위성).
 // 사진이 없어 창 개수·문 위치·탑 높이·재료 색은 모두 가정이며, 지붕 형태·볼륨 분할만 위성에서 읽었다.
+// ■ 항공사진 대조 (ISU 가상투어 드론 파노라마 east_view_of_campus/b·l, indiana_state_university/f; 비교 scratch/aerial/churches.png):
+//   [1] St. Stephen's: 탑은 안뜰 남쪽이 아니라 북측(Chestnut St) 익랑·동측 동 사이 — 밝은 석재 사각 탑 + 구리빛 갈색 급경사 첨탑.
+//       지붕은 회색이 아니라 갈색 혼합 슬레이트. 옛 안뜰 총안 탑 자리는 26 ft 평지붕 블록으로.
+//   [2] Centenary: 적벽돌 → 회색 석재. 탑은 북측 첨탑이 아니라 남동 모서리의 총안 + 높은 피너클 4 + 랜턴 석재 탑 (첨탑 없음).
+//   [4] Masonic Temple: 북면 상부는 창 없는 황갈 벽돌 + 같은 벽돌 필라스터 + 움푹한 무늬 패널, 기단층은 흰 석재 + 3 연창. 흰 평지붕 확인.
 import * as THREE from 'three';
 
 export const meta = {
@@ -362,9 +367,12 @@ export function build(M, G) {
   const metal = M.dark;
   const CS = { wall: stone, trim: stoneTrim, roof: slate, glass: stained, door, hood: true, spire: slateDark, metal };
 
-  stStephens(parts, M, G, CS);
-  const brickR = M.brick_red.clone(); brickR.color = new THREE.Color(0.95, 0.85, 0.8);
-  centenary(parts, M, G, { ...CS, wall: brickR }, M.brick_brown);
+  // 항공사진(east_view_of_campus/b·l, indiana_state_university/f): St. Stephen's 지붕 = 갈색·회갈색 혼합 슬레이트, 첨탑 = 구리빛 갈색
+  const slateBrown = new THREE.MeshStandardMaterial({ color: 0x7d6a5d, roughness: 0.85 });
+  const copper = new THREE.MeshStandardMaterial({ color: 0x8c5a33, roughness: 0.55, metalness: 0.35 });
+  stStephens(parts, M, G, { ...CS, roof: slateBrown, spire: copper });
+  // 항공사진: Centenary 는 적벽돌이 아니라 회색 거친 석재 (탑·본당 모두)
+  centenary(parts, M, G, CS, M.brick_brown);
   presbyterian(parts, M, G, CS, M.brick_brown);
   masonic(parts, M, G, { ...CS, wall: M.brick_tan, glass: M.pane, hood: false });
   zorah(parts, M, G, { ...CS, wall: M.brick_tan, glass: M.pane, hood: false, roof: slateDark });
@@ -396,8 +404,10 @@ function stStephens(parts, M, G, C) {
     sides: { W: { gwin: { w: 6, b: 7, sp: 20 } }, E: { skip: true }, S: { skip: true }, N: { skip: true } } });
   // 탑과 동측 동 사이 낮은 연결 x 953.5..962, z 620.9..638.9
   flatBlock(parts, M, G, C, R4(953.5, 962.2, 620.9, 638.9), 15, { roof: M.roof_dark, skip: [0, 1, 2, 3], rows: 0 });
-  // [F] 탑 18×18, 총안 난간 + 피너클, 서면(안뜰) 출입문
-  tower(parts, M, G, C, { x0: 935.5, z0: 620.9, w: 18, h: 60, top: 'battlement', doorSide: 'W', hidden: ['E'] });
+  // [F] (항공사진으로 수정) 안뜰 모서리 총안 탑 → 낮은 평지붕 블록. 실제 탑은 북측 거리(Chestnut) 쪽 익랑·동측 동 사이에 있고
+  //     밝은 석재 사각 탑 + 구리빛 갈색 급경사 첨탑 (east_view_of_campus/l 근경, isu/f 원경)
+  flatBlock(parts, M, G, C, R4(935.5, 953.5, 620.9, 638.9), 26, { roof: M.roof_dark, skip: [1], rows: 1, winK: 'lancet', winW: 3 });
+  tower(parts, M, G, { ...C, wall: C.trim }, { x0: 950, z0: 562, w: 16, h: 46, top: 'spire', doorSide: 'N', hidden: ['S'] });
   // [G] 교구관 (평지붕): 북측 띠 2층 26 ft (어두운 지붕), 남측 1.5층 20 ft (백색 멤브레인), 서측 소부속 12 ft
   flatBlock(parts, M, G, C, R4(863, 997.3, 664.7, 684), 26, { roof: M.roof_dark, skip: [], rows: 2, winK: 'lancet', winW: 3.5, winH: 5, storey: 12 });
   flatBlock(parts, M, G, C, R4(903.4, 997.3, 684, 711), 20, { roof: M.roof_membrane, skip: [2], rows: 1, winW: 5, winH: 7, doors: { 0: [47] } });
@@ -421,8 +431,19 @@ function centenary(parts, M, G, C, brick2) {
   // 동측 성단/익랑 (남북 용마루, 양端 모임) x 976..1001.3, z 407.6..453.6
   gothicHall(parts, M, G, C, { x0: 976, x1: 1001.3, z0: 407.6, z1: 453.6, axis: 'z', E: 26, pitch: 1.0, hip: { N: true, S: true },
     sides: { N: { gwin: null, wins: [12.6] }, S: { skip: true }, E: { bays: 3, win: { w: 5, b: 8, sp: 20 } }, W: { skip: true } } });
-  // 종탑 (북측 거리 쪽 모서리) 18×18, 높이 70, 피라미드 첨탑, 북면 출입문
-  tower(parts, M, G, C, { x0: 958, z0: 404.4, w: 18, h: 66, top: 'spire', doorSide: 'N', hidden: ['S'] });
+  // (항공사진으로 수정) 첨탑 종탑 → 북측 모서리는 낮은 현관 블록, 실제 탑은 남동 모서리(7th St 쪽)의 회색 석재 고딕 탑:
+  //   총안 난간 + 모서리 높은 피너클 4 + 가운데 작은 랜턴(첨탑 없음) — east_view_of_campus/l, isu/f
+  flatBlock(parts, M, G, C, R4(958, 976, 404.4, 418), 24, { roof: M.roof_dark, skip: [0], rows: 1, winK: 'lancet', winW: 3, doors: { 2: [9] }, doorK: 'lancet' });
+  {
+    const x0 = 977, z0 = 478, w = 18, h = 60;
+    tower(parts, M, G, C, { x0, z0, w, h, top: 'battlement', doorSide: 'E', hidden: ['N'] });
+    for (const [x, z] of [[x0 + 0.6, z0 + 0.6], [x0 + w - 0.6, z0 + 0.6], [x0 + w - 0.6, z0 + w - 0.6], [x0 + 0.6, z0 + w - 0.6]]) {
+      parts.push({ geom: G.box(2.8, 8, 2.8, x, h + 5, z), mat: C.wall });
+      pyramid(parts, x, z, 1.6, h + 13, h + 22, C.trim);
+    }
+    parts.push({ geom: G.box(6, 9, 6, x0 + w / 2, h, z0 + w / 2), mat: C.wall });
+    pyramid(parts, x0 + w / 2, z0 + w / 2, 3.6, h + 9, h + 16, C.trim);
+  }
   // 남측 교육관 (2층 평지붕 26 ft, 갈색 벽돌, 모서리 모따기) — OSM 꼭짓점
   const S = [[867, 453.7], [867.2, 484.8], [873.5, 494.2], [883.3, 497.3], [910.6, 497.1], [910.5, 486.8], [955.7, 486.5], [962.8, 496.7], [986.6, 496.5], [995.3, 490.1], [995.1, 453.6]];
   flatBlock(parts, M, G, { ...C, hood: false, glass: M.pane }, S, 24, { wall: brick2, roof: M.roof_membrane, skip: [10], rows: 2, storey: 11, sill: 3.5, winW: 5, winH: 5, bay: 10, doors: { 5: [22.6] } });
@@ -457,6 +478,7 @@ function masonic(parts, M, G, C) {
   const lime = C.trim;
   const tan = C.wall;
   const glassC = { ...C, glass: M.pane, hood: false };
+  const panelBrick = M.brick_tan.clone(); panelBrick.color = new THREE.Color(1.1, 1.02, 0.9); panelBrick.name = 'masonic_panel';
   for (let i = 0; i < 4; i++) {
     const p0 = P[i], p1 = P[(i + 1) % 4], B = basis(p0, p1);
     const front = i === 3;                       // 서면 (8th St) 이 정면
@@ -467,19 +489,23 @@ function masonic(parts, M, G, C) {
     for (let j = 0; j < nb; j++) {
       const s = (j + 0.5) * pitchB;
       if (front && j === 3) low.push({ s, w: 8, b: 0, h: 10, k: 'round', fill: 'door', sp: 7 });
+      else if (i === 2) { for (const d of [-2.6, 0, 2.6]) low.push({ s: s + d, w: 2.0, b: 4, h: 6, k: 'rect' }); }   // 항공사진: 북면 기단층 3 연창
       else low.push({ s, w: 4, b: 4, h: 6, k: 'rect' });
-      if (i !== 1) { up.push({ s, w: 6, b: 18, h: 18, k: front ? 'round' : 'rect', sp: 34 }); up.push({ s, w: 5, b: 44, h: 6, k: 'rect' }); }
+      if (i !== 1 && i !== 2) { up.push({ s, w: 6, b: 18, h: 18, k: front ? 'round' : 'rect', sp: 34 }); up.push({ s, w: 5, b: 44, h: 6, k: 'rect' }); }
     }
     wall(parts, M, G, p0, p1, 0, BASE, lime, low, glassC);
     wall(parts, M, G, p0, p1, BASE, H, tan, up, glassC);
     // 대형 필라스터 (석회석) 베이 경계, 14..52
+    // 항공사진(east_view_of_campus/b 근경, 북면): 필라스터는 같은 황갈 벽돌, 상부는 무창 — 베이마다 움푹한 무늬 벽돌 패널
+    const pil = (i === 2 || i === 1) ? tan : lime;
     for (let j = 0; j <= nb; j++) {
       const s = Math.min(Math.max(j * pitchB, 1.2), B.len - 1.2);
-      wbox(parts, G, p0, B, s, 2.4, BASE, 38, 1.0, 0.5, lime);
-      wbox(parts, G, p0, B, s, 3.0, BASE + 38, 1.2, 1.3, 0.65, lime);   // 주두
+      wbox(parts, G, p0, B, s, 2.4, BASE, 38, 1.0, 0.5, pil);
+      wbox(parts, G, p0, B, s, 3.0, BASE + 38, 1.2, 1.3, 0.65, pil);   // 주두
     }
+    if (i === 2 || i === 1) for (let j = 0; j < nb; j++) wbox(parts, G, p0, B, (j + 0.5) * pitchB, pitchB - 5, BASE + 4, 32, 0.15, 0.02, panelBrick, false);
     // 2층 창 사이 스팬드럴 패널 (어두운) — 창 18..34 와 44..50 사이 (36..42)
-    if (i !== 1) for (let j = 0; j < nb; j++) wbox(parts, G, p0, B, (j + 0.5) * pitchB, 6, 38.5, 4.5, 0.3, 0.05, M.dark, false);
+    if (i !== 1 && i !== 2) for (let j = 0; j < nb; j++) wbox(parts, G, p0, B, (j + 0.5) * pitchB, 6, 38.5, 4.5, 0.3, 0.05, M.dark, false);
   }
   band(parts, G, P, 0, 3, 0.4, lime);
   band(parts, G, P, BASE, 1.5, 0.5, lime);
