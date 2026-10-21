@@ -247,3 +247,19 @@ save(to_normal(asf, 1.2), "asphalt_n.jpg")
 curb = concrete(256, seed=43).astype(np.float32) * 1.25
 save(curb, "curb.jpg")
 print("extra textures done")
+
+# ---------------------------------------------------------------- 수관(foliage) 타일 텍스처: 잎 덩어리 명암 (3D 수관 메시용)
+n = 256
+im = Image.new("RGB", (n, n), (52, 82, 34)); d = ImageDraw.Draw(im)
+r = np.random.default_rng(55)
+for k in range(2200):
+    x, y = r.uniform(0, n), r.uniform(0, n); s = r.uniform(2, 6)
+    l = r.uniform(0.6, 1.35)
+    col = tuple(int(min(255, c * l)) for c in (70, 108, 44))
+    for ox in (-n, 0, n):
+        for oy in (-n, 0, n):
+            d.ellipse([x + ox - s, y + oy - s * 0.7, x + ox + s, y + oy + s * 0.7], fill=col)
+save(im, "foliage.jpg")
+fn = np.asarray(im.convert("L")).astype(np.float32) / 255.0
+save(to_normal(fn, 3.0), "foliage_n.jpg")
+print("foliage done")
