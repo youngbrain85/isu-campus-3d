@@ -12,4 +12,5 @@ export const MODULES = {
   'way/752686738': () => import('./hhs_arena.js'),
   'way/545275306': () => import('./parking_garage.js'),
   'way/545275301': () => import('./aacc.js'),
+  'way/236260776': () => import('./sycamore_towers.js'),
 };
