@@ -36,7 +36,7 @@
   @media (max-width:640px) { #info { left:16px; right:16px; top:auto; bottom:16px; width:auto; max-height:45vh; } }
 </style>
 <script type="importmap">
-{ "imports": { "three": "__THREE__", "three/addons/": "__ADDONS__" } }
+{ "imports": { "three": "__THREE__", "three/addons/": "__ADDONS__", "three/examples/jsm/": "__ADDONS__", "n8ao": "__N8AO__", "postprocessing": "__PP__" } }
 </script>
 </head>
 <body>
@@ -90,6 +90,7 @@
     <label><input type="checkbox" id="tgGrass" checked> Grass</label>
     <label><input type="checkbox" id="tgGround"> Satellite overlay</label>
     <label><input type="checkbox" id="tgShadow" checked> Shadows</label>
+    <label><input type="checkbox" id="tgAO" checked> Ambient occlusion</label>
   </div>
   <button id="btnExport">Export GLB (Windows 3D Viewer / Blender)</button>
   <div style="font-size:11px;color:var(--muted);margin-top:6px">Drag: orbit · Wheel: zoom · Right-drag: pan · Click a building for details</div>

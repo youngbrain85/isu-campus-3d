@@ -14,11 +14,13 @@ import { buildMasses } from './lib/mass.js';
 import { buildTrees, buildGrassTufts } from './lib/trees.js';
 import { buildLabels } from './lib/labels.js';
 import { MODULES } from './buildings/index.js';
+import { makePost } from './lib/post.js';
 
 const ASSET = (window.ASSET_BASE || 'assets/');
 const params = new URLSearchParams(location.search);
 const SHOT = params.get('shot');           // 헤드리스 스크린샷 모드 (프리셋 이름)
 const LOW = params.get('low') === '1';
+const AO = params.get('ao') !== '0';         // ?ao=0 : 주변광 차폐 끄기 (전후 비교용)
 
 // ------------------------------------------------------------------ renderer / scene
 const canvas = document.getElementById('c');
@@ -314,6 +316,10 @@ async function main() {
   tg('tgGround', v => { imagery.visible = v; });
   tg('tgGrass', v => { tufts.visible = v; });
   tg('tgShadow', v => { sun.castShadow = v; renderer.shadowMap.needsUpdate = true; });
+  const post = makePost(renderer, scene, camera, { ao: AO, low: LOW }); window.__post = post;   // 진단용
+  const aoBox = document.getElementById('tgAO'); if (aoBox) aoBox.checked = AO;
+  tg('tgAO', v => post.setAO(v));
+  addEventListener('resize', () => post.setSize(innerWidth, innerHeight));
   const exBtn = document.getElementById('btnExport');
   if (exBtn) exBtn.addEventListener('click', async () => { exBtn.textContent = 'Exporting…'; const n = await exportGLB(); exBtn.textContent = 'GLB exported (' + (n / 1e6).toFixed(1) + ' MB)'; });
   const hud = document.getElementById('hud'), hudBtn = document.getElementById('hudToggle');
@@ -332,7 +338,7 @@ async function main() {
   function animate() {
     controls.update();
     if (camera.position.y < 6) camera.position.y = 6;
-    renderer.render(scene, camera);
+    post.render();
     frames++;
     if (frames === 3) window.__ready = true;
     if (!SHOT || frames < 6) requestAnimationFrame(animate);
