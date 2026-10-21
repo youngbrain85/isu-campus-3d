@@ -206,7 +206,7 @@ async function exportGLB() {
     trees_conifer: (() => { const g = new THREE.ConeGeometry(0.46, 0.85, 8); g.translate(0, 0.72, 0); return g; })(),
   };
   for (const im of toReplace) {   // 인스턴스 → 병합 지오메트리
-    if (!im.count || im.name === 'grass_tufts') { im.parent.remove(im); continue; }   // 빈 인스턴스(차량 LOD 등)와 풀 포기는 제외
+    if (!im.count || im.name === 'grass_tufts' || im.name.endsWith('_core')) { im.parent.remove(im); continue; }   // 빈 인스턴스(차량 LOD 등)·풀 포기·수관 심은 제외 (수관은 단순 대체물로)
     const base = proxy[im.name] || im.geometry;
     const geos = []; const mtx = new THREE.Matrix4();
     for (let i = 0; i < im.count; i++) { im.getMatrixAt(i, mtx); const g = base.clone(); for (const k of Object.keys(g.attributes)) if (!['position', 'normal', 'uv'].includes(k)) g.deleteAttribute(k); g.applyMatrix4(mtx); geos.push(g.index ? g.toNonIndexed() : g); }
@@ -341,6 +341,8 @@ async function main() {
   document.querySelectorAll('[data-view]').forEach(b => b.addEventListener('click', () => applyPreset(b.dataset.view)));
   const tg = (id, fn) => { const el = document.getElementById(id); if (el) { el.addEventListener('change', () => { fn(el.checked); requestRender(); }); fn(el.checked); } };
   tg('tgTrees', v => { trees.visible = v; });
+  let windOn = false; const wind = trees.userData.wind;
+  tg('tgWind', v => { windOn = v; wind.uWind.value = v ? 1 : 0; });   // 바람: 켜면 매 프레임 렌더
   tg('tgMass', v => { masses.group.visible = v; });
   tg('tgLabels', v => { labels.visible = v; });
   tg('tgGround', v => { imagery.visible = v; });
@@ -367,6 +369,7 @@ async function main() {
   let frames = 0;
   function animate() {
     controls.update();                                   // 감쇠 중이면 change 이벤트 → requestRender
+    if (windOn) { wind.uTime.value = performance.now() / 1000; requestRender(1); }
     if (dirty > 0) {
       dirty--;
       if (camera.position.y < 6) camera.position.y = 6;

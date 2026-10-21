@@ -29,6 +29,18 @@ the evidence it was modelled from.
 **Live viewer:** https://youngbrain85.github.io/isu-campus-3d/viewer/ (GitHub Pages from the `main` branch; the root
 `index.html` redirects to the viewer).
 
+## Lighting and rendering
+
+* **Real sun for any date and time.** The HUD's *Sun & time* panel sets the date and Terre Haute local time
+  (daylight saving included); the sun's elevation and compass bearing come from the SunCalc formulas for
+  39.471 N, 87.410 W. *Now* jumps to the current time, ▶ plays the day. Light colour and strength follow the sun
+  (warm and low at dusk, dim blue after sunset). URL: `?sun=2026-06-21T19:30`.
+* **Cascaded shadow maps** (4 × 2048 px over 5,000 ft) keep shadows sharp near the camera and still cover the campus.
+* **Ambient occlusion** (N8AO, log-depth aware) darkens corners, eaves and the ground under trees and cars;
+  SMAA anti-aliasing. Toggle in the HUD or `?ao=0`.
+* **Leaf-card trees** with a dark inner core, and an optional *Wind* toggle that sways the crowns in the shader.
+* The viewer renders only when something changes, so it idles when the view is still.
+
 ## What is in the repository
 
 | Path | Contents |
