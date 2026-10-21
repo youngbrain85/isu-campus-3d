@@ -43,15 +43,30 @@ def classify(png, bounds_json, building_rings_ll, clip):
     win = max(3, int(20 / ft_per_px))
     peaks = (dt == ndimage.maximum_filter(dt, size=win)) & (dt > 5.5 / ft_per_px)
     ys, xs = np.nonzero(peaks)
+    # 비최대 억제: 거리변환 평탄 구간에서 같은 수관에 피크가 여러 개 잡히는 문제 → 큰 수관부터 채택, 겹치는 피크 제거
+    order = np.argsort(-dt[ys, xs])
     rng = np.random.default_rng(7)
-    trees = []
+    trees, acc = [], []          # acc: (x, z, r) 채택된 수관
+    cell = 30.0; grid = {}
     x0, z0, x1, z1 = clip
-    for y, x in zip(ys, xs):
+    for k in order:
+        y, x = ys[k], xs[k]
         lat, lon = m.ll_of(x + 0.5, y + 0.5)
         xl, zl = geo.ll_to_xz(lat, lon)
         if not (x0 <= xl <= x1 and z0 <= zl <= z1):
             continue
         r = min(float(dt[y, x]) * ft_per_px * 1.15 + 2.0, 32.0)   # 수관 반지름 (ft), 거리변환 과소평가 보정
+        gx, gz = int(xl // cell), int(zl // cell); ok = True
+        for i in (-2, -1, 0, 1, 2):
+            for j in (-2, -1, 0, 1, 2):
+                for (ax, az, ar) in grid.get((gx + i, gz + j), ()):
+                    if (ax - xl) ** 2 + (az - zl) ** 2 < (0.75 * max(ar, r)) ** 2:
+                        ok = False; break
+                if not ok: break
+            if not ok: break
+        if not ok:
+            continue
+        grid.setdefault((gx, gz), []).append((xl, zl, r))
         h = float(np.clip(r * 2.0 + 10 + rng.uniform(-4, 4), 16, 65))
         trees.append([round(xl, 1), round(zl, 1), round(h, 1), int(rng.integers(0, 3)), 1, round(r, 1)])
 

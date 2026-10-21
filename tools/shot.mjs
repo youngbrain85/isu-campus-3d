@@ -23,7 +23,7 @@ try {
     page.on('console', m => logs.push(m.type() + ': ' + m.text()));
     page.on('pageerror', e => logs.push('PAGEERROR: ' + e.message));
     const t0 = Date.now();
-    await page.goto(`http://localhost:${port}/viewer/index_local.html?shot=${p}&low=${process.env.LOW || '0'}${process.env.MOD ? '&mod=' + process.env.MOD : ''}`, { waitUntil: 'load' });
+    await page.goto(`http://localhost:${port}/viewer/index_local.html?shot=${p}&low=${process.env.LOW || '0'}${process.env.MOD ? '&mod=' + process.env.MOD : ''}${process.env.QS || ''}`, { waitUntil: 'load' });
     try {
       await page.waitForFunction(() => window.__ready === true || document.getElementById('status')?.textContent?.startsWith('Error'), null, { timeout: parseInt(process.env.TMO || '300000') });
     } catch (e) { logs.push('TIMEOUT waiting for __ready'); }
@@ -36,7 +36,7 @@ try {
       console.log('GLB exported', (size / 1e6).toFixed(1), 'MB');
     }
     console.log(p, 'done in', ((Date.now() - t0) / 1000).toFixed(1), 's');
-    const bad = logs.filter(l => /error|PAGEERROR|TIMEOUT|status|site:/i.test(l));
+    const bad = logs.filter(l => /error|PAGEERROR|TIMEOUT|status|site:|cull/i.test(l));
     if (bad.length) console.log(bad.slice(0, 15).join('\n'));
     await page.close();
   }

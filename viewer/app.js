@@ -88,6 +88,53 @@ function applyPreset(name) {
   camera.position.set(...p.pos); controls.target.set(...p.tgt); controls.update();
 }
 
+// ------------------------------------------------------------------ 건물과 겹치는 나무 제거
+// 위성 판독 나무는 신축·증축(예: Technology Building 2025 증축) 자리에도 남아 있으므로, 실제 건물 형상을
+// 위에서 내려다본 높이 지도(2 ft/px)를 GPU 로 한 번 렌더해 수관 중심이 건물 위/안이면 제거, 가장자리가 걸리면 수관을 줄인다.
+function cullTreesUnderBuildings(list, roots, clip) {
+  const res = 2, W = Math.ceil((clip[2] - clip[0]) / res), H = Math.ceil((clip[3] - clip[1]) / res);
+  const rt = new THREE.WebGLRenderTarget(W, H);
+  const cam = new THREE.OrthographicCamera(clip[0], clip[2], -clip[1], -clip[3], 1, 2000);
+  cam.position.set(0, 1000, 0); cam.up.set(0, 0, -1); cam.lookAt(0, 0, 0);
+  const mat = new THREE.ShaderMaterial({
+    vertexShader: 'varying float vY; void main(){ vec4 w = modelMatrix * vec4(position,1.0); vY = w.y; gl_Position = projectionMatrix * viewMatrix * w; }',
+    fragmentShader: 'varying float vY; void main(){ gl_FragColor = vec4(clamp(vY/255.0,0.0,1.0), 0.0, 0.0, 1.0); }',
+    side: THREE.DoubleSide,
+  });
+  const tmp = new THREE.Scene(); tmp.overrideMaterial = mat;
+  const parents = roots.map(r => [r, r.parent]);
+  for (const r of roots) tmp.add(r);
+  renderer.setRenderTarget(rt); renderer.setClearColor(0x000000, 1); renderer.clear(); renderer.render(tmp, cam); renderer.setRenderTarget(null);
+  for (const [r, p] of parents) p.add(r);
+  const px = new Uint8Array(W * H * 4); renderer.readRenderTargetPixels(rt, 0, 0, W, H, px); rt.dispose(); mat.dispose();
+  let nz = 0; for (let i = 0; i < W * H; i++) if (px[i * 4] > 3) nz++;
+  console.log('tree-cull heightmap', W, H, 'building px', nz, 'roots', roots.length);
+  // 렌더 타겟 축 방향은 드라이버/three 버전에 따라 헷갈리므로, 건물 중심점(대부분 건물 위)으로 4가지 조합을 검증해 고른다
+  const mk = (fx, fz) => (x, z) => {
+    let i = Math.floor((x - clip[0]) / res), j = Math.floor((z - clip[1]) / res);
+    if (fx) i = W - 1 - i; if (fz) j = H - 1 - j;
+    if (i < 0 || j < 0 || i >= W || j >= H) return 0;
+    return px[(j * W + i) * 4];
+  };
+  let hAt = null, best = -1;
+  for (const fx of [false, true]) for (const fz of [false, true]) {
+    const f = mk(fx, fz); let hit = 0;
+    for (const c of (cullTreesUnderBuildings.centers || [])) if (f(c[0], c[1]) > 3) hit++;
+    if (hit > best) { best = hit; hAt = f; }
+  }
+  console.log('tree-cull orientation hits', best, '/', (cullTreesUnderBuildings.centers || []).length);
+  const out = [];
+  for (const t of list) {
+    const r = t[5] || 12;
+    if (hAt(t[0], t[1]) > 3) continue;                                    // 중심이 건물 안/위
+    let edge = 0;
+    for (let k = 0; k < 8; k++) { const a = k * Math.PI / 4; edge = Math.max(edge, hAt(t[0] + Math.cos(a) * r * 0.7, t[1] + Math.sin(a) * r * 0.7)); }
+    if (edge > 3) { const t2 = t.slice(); t2[5] = r * 0.55; t2[2] = Math.max(16, t[2] * 0.8); out.push(t2); }   // 벽에 걸리면 축소
+    else out.push(t);
+  }
+  return out;
+}
+
 // ------------------------------------------------------------------ GLB export
 async function exportGLB() {
   const exp = new GLTFExporter();
@@ -148,7 +195,11 @@ async function main() {
     } catch (e) { console.error('module failed', id, e); }
   }
   say('Placing trees…');
-  const treeList = LOW ? site.trees.filter((_, i) => i % 2 === 0) : site.trees;
+  const buildingRoots = scene.children.filter(o => o.name === 'masses' || o.name.startsWith('bldg_'));
+  cullTreesUnderBuildings.centers = site.buildings.map(b => G.centroid(b.poly));
+  const culled = cullTreesUnderBuildings(site.trees, buildingRoots, site.clip);
+  console.log('trees culled by buildings:', site.trees.length - culled.length);
+  const treeList = LOW ? culled.filter((_, i) => i % 2 === 0) : culled;
   const trees = buildTrees(treeList, tex, M); scene.add(trees);
   const tuftList = await (await fetch(ASSET + 'tufts.json')).json();
   const tufts = buildGrassTufts(LOW ? tuftList.filter((_, i) => i % 2 === 0) : tuftList, tex); scene.add(tufts);
