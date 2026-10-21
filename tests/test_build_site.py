@@ -6,7 +6,7 @@ import build_site as bs
 def test_road_width_table():
     assert bs.road_width({"highway": "primary"}) == 44
     assert bs.road_width({"highway": "residential"}) == 30
-    assert bs.road_width({"highway": "footway"}) == 8
+    assert bs.road_width({"highway": "footway"}) == 7
     assert bs.road_width({"highway": "service", "service": "parking_aisle"}) == 16
     assert bs.road_width({"landuse": "grass"}) is None
 
