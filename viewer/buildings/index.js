@@ -8,4 +8,8 @@ export const MODULES = {
   'way/545265789': () => import('./fine_arts.js'),
   'way/544686556': () => import('./reeve_hall.js'),
   'way/544686559': () => import('./rec_center.js'),   // extraIds: way/1348752763 (mirrored twin)
+  // 사진(스트리트뷰)·위성 기반 모델 — 월드 좌표로 직접 작성 (anchor 0, rotation 0)
+  'way/752686738': () => import('./hhs_arena.js'),
+  'way/545275306': () => import('./parking_garage.js'),
+  'way/545275301': () => import('./aacc.js'),
 };
