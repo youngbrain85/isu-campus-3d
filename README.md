@@ -1,9 +1,12 @@
 # Indiana State University – 3D Campus Model
 
 A browser-viewable 3D model of the **Indiana State University main campus** (Terre Haute, Indiana).
-Eight buildings for which construction drawings were available are modelled from those drawings; the other
-~400 footprints inside the campus bounding box are massed from OpenStreetMap outlines and storey counts, placed
-on Esri World Imagery with OSM roads, parking lots and trees.
+The model covers the campus between 3rd and 9th Streets and between Tippecanoe and Cherry Streets. Eight buildings
+for which construction drawings were available are modelled from those drawings. Every other building is modelled
+in 3D from Google Street View photos and Esri satellite imagery: storey counts, wall materials, window rhythm,
+entrances, roof forms and rooftop plant. The ground is built as real surfaces rather than a draped photo: asphalt
+streets with curbs and lane markings, brick-paver and concrete walks, striped parking lots with cars, lawns with
+grass tufts, lamp posts, and 3D trees placed on the tree crowns detected in summer imagery.
 
 ![Campus aerial](renders/campus.png)
 
@@ -19,11 +22,11 @@ on Esri World Imagery with OSM roads, parking lots and trees.
 | Path | Contents |
 |---|---|
 | `viewer/` | Three.js r170 viewer (ES modules from jsDelivr). `index.html` = CDN build, `index_local.html` = uses `node_modules/three`. |
-| `viewer/app.js`, `viewer/lib/*.js` | Scene assembly, geometry/material helpers, ground, mass buildings, trees, labels. |
-| `viewer/buildings/*.js` | One module per drawing-based building (local frame, feet) + `index.js` registry keyed by OSM id. |
-| `viewer/assets/` | `site.json` (all footprints, roads, areas, trees in local feet), 2×2 ground tiles (4096² JPEG), procedural textures. |
+| `viewer/app.js`, `viewer/lib/*.js` | Scene assembly, geometry/material helpers, ground surfaces (streets, walks, lots, lamps, cars), trees, labels. |
+| `viewer/buildings/*.js` | One module per building or building group (drawing-based ones in their drawing frame, photo-based ones in world feet) + `index.js` registry keyed by OSM id. |
+| `viewer/assets/` | `site.json` (footprints, roads, areas, trees in local feet), tree and grass placements, an optional satellite overlay, procedural textures. |
 | `model/isu_campus.glb` | Whole scene as glTF binary (feet, Y-up). Opens in Windows 3D Viewer, Blender, Unity, Unreal… |
-| `renders/` | Twelve preset camera views, 1600×900. |
+| `renders/` | Preset camera views, 1600×900. |
 | `data/` | Collected inputs: OSM GeoJSON, imagery mosaics (+ bounds), official campus map PDF, drawing inventory, building list. |
 | `tools/` | Collection, inventory, site builder, texture generator, footprint fitter, sheet renderer, HTML builder, Playwright renderer. |
 | `tests/` | pytest unit tests for the Python tools (`python -m pytest tests -q`). |
@@ -39,7 +42,8 @@ python -m http.server 8000
 ```
 
 Open http://localhost:8000/. Controls: drag = orbit, wheel = zoom, right-drag = pan. The HUD (collapsible) has
-twelve camera presets, toggles for trees / mass buildings / labels / ground imagery / shadows, and a GLB export button.
+camera presets for the campus and for each modelled building, toggles for trees / remaining mass buildings /
+grass / labels / satellite overlay / shadows, and a GLB export button.
 
 ## Regenerating everything
 
@@ -71,8 +75,11 @@ The zoom-20 imagery mosaic (139 MB) exceeds GitHub's file limit and is attached 
   The full catalogue is in [`data/drawings_inventory.md`](data/drawings_inventory.md).
 * **OpenStreetMap** building footprints, roads, paths, parking, land use and tree nodes (© OpenStreetMap
   contributors, ODbL), fetched through the Overpass API.
-* **Esri World Imagery** tiles (zoom 19 and 20) used as the ground texture and for roof colours and tree
-  placement. Imagery is used under Esri's World Imagery terms for non-commercial display.
+* **Esri World Imagery** tiles (zoom 19 and 20) used to read roof forms, rooftop plant and building heights (shadows),
+  to detect tree crowns, and as an optional overlay. Imagery is used under Esri's World Imagery terms for
+  non-commercial display.
+* **Google Street View** (2019–2023 imagery, about 200 views from 85 viewpoints on the campus streets) used as
+  modelling reference for facades; photos are not included in the repository.
 * **ISU campus map** (`data/ref/university-map.pdf`, revised May 2023) for building numbers and names.
 * **ISU Sycamore Scholars "University Buildings" archive**, ISU news releases, Wikipedia for construction years,
   architects and storey counts (`data/building_facts.csv`, with the source for each row).
@@ -90,9 +97,22 @@ The zoom-20 imagery mosaic (139 MB) exceeds GitHub's file limit and is attached 
 | Former School of Nursing Building | way/545275293 | Gen Const sheets 1, 4, 9, 10 | 4 + basement, roof 49.75 ft, stair tower 59 ft | 0.8 ft | OSM names this polygon "College of Nursing"; the drawings' site plan (8th & Chestnut) confirms it. |
 | John T. Myers Technology Center (40) | way/461428304 | master-set plans 342–346 | 3 + penthouse (heights **estimated**: 15/14/14 ft) | 1.1 ft | Plans only – no elevations exist; facades inferred from the column grid. |
 
-Every other building is an OSM footprint extruded to `levels × storey height` (`data/buildings.csv`, column
-`source` says whether the storey count is published, from OSM, or an estimate), with a facade texture chosen by
-material notes / construction era and a roof colour sampled from the imagery.
+## Buildings modelled from photos and imagery
+
+| Module | Buildings | Main evidence | Notes |
+|---|---|---|---|
+| `sycamore_towers.js` | Mills, Blumberg, Rhoads, Cromwell Halls + dining commons | Street View (several views per tower) | 12 storeys, precast window grid, brick ends, glass stair strip, roof penthouse. |
+| `hmsu.js` | Hulman Memorial Student Union, Dede Activity Center, west tower | Street View, imagery | Fin towers with blue hip roofs, hexagonal hall, lettered entrance pavilion. |
+| `res_halls_6th.js` | Erickson, Pickerl, Burford Halls | Street View | Photos show 6 storeys (records said 3–4). |
+| `hhs_arena.js` | Health and Human Services Building / Arena | Street View, imagery | Volumes split by roof shadows. |
+| `library.js` | Cunningham Memorial Library + east colonnade | Street View, imagery | Precast panels with full-height glass slots. |
+| `holmstedt.js` | Holmstedt Hall + plaza | Imagery, 2010 plaza drawings L-201 | Plaza paving traced from the drawing. |
+| `tirey_complex.js`, `fairbanks.js`, `landini.js` | Tirey/Rankin/Parsons, Fairbanks, Landini | Street View, imagery | |
+| `parking_garage.js`, `aacc.js`, `aec_police.js`, `health_center.js`, `art_annex.js`, `new_theater.js`, `root_hall.js`, `chestnut_bldg.js`, `service_bldgs.js` | Garage, 8th St warehouse, AEC/Police, Health Center, Art Annex, New Theater, Root Hall, Chestnut Building, Recycle Center/Grounds | Street View, imagery | |
+| `science_bldg.js`, `normal_hall.js`, `stalker.js`, `condit_house.js`, `dreiser.js`, `gillum.js`, `career_center.js`, `power_plant.js`, `churches.js` | Science, Normal Hall, Stalker, Condit House, Dreiser, Gillum, Career Center, Power Plant, churches and lodges | Imagery only (no usable Street View) | Facades follow the building's era and style; roof forms and volumes are read from imagery. |
+| `minor_bldgs.js` | Houses, garages and small commercial buildings at the campus edge | Imagery | Generic small-building treatment per footprint. |
+
+Each module's header comment (Korean) lists the photos used, the dimensions read and what is assumed.
 
 ## Coordinate frame
 
@@ -104,13 +124,16 @@ with `tools/fit_footprint.py`; the RMS distance between the drawing outline and 
 ## Assumptions and limits
 
 * Terrain is flat. Hulman Center's below-grade levels, basements and the Technology Building's sloping site are not modelled.
-* Heights of mass buildings are estimates unless `data/building_facts.csv` cites a source; most ISU storey counts are unpublished.
-* No Street View imagery was available (no API key), so facade materials come from the drawings, published photos
-  and era-based rules; window patterns on mass buildings are generic.
+* Photo-based buildings: facades not visible from any street are assumed to repeat the photographed ones, and storey
+  heights are read from photo proportions and shadows, not measured.
+* Several buildings (Science, Normal Hall, Stalker, Condit House, Dreiser, Gillum, Career Center, the churches) had no
+  usable Street View coverage; their facades are stylistic reconstructions on imagery-derived volumes.
 * The imagery (Esri, c. 2024) predates the Technology Building renovation; the model shows the 2025 drawings.
 * Lincoln Quad (demolished 2021) and the former Nursing building's interiors, MEP and structure are not modelled.
 * The Hulman Center bid-set geometry differs from the built arena (see table); the model is a hybrid.
-* Trees are placed from OSM nodes/wood polygons and an imagery green-mask; species, heights and positions are plausible, not surveyed.
+* Trees are placed on crowns detected in summer imagery (crown radius → height); species are generic (two broadleaf
+  forms and a conifer). Lawn is everything that is not building, street, walk, lot or tree crown.
+* Only the campus area is modelled; the surrounding city is not.
 
 ## Credits
 

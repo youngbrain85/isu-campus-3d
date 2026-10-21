@@ -43,9 +43,10 @@
     <button data-view="campus">Campus aerial</button>
     <button data-view="hmsu">Hulman Memorial Student Union</button>
     <button data-view="library">Cunningham Memorial Library</button>
-    <button data-view="towers">Residence halls</button>
+    <button data-view="towers">Sycamore Towers</button>
+    <button data-view="reshalls">Residence halls</button>
   </div>
-  <div class="grp">Buildings from drawings</div>
+  <div class="grp">Buildings from construction drawings</div>
   <div class="views">
     <button data-view="hulman">Hulman Center</button>
     <button data-view="rec">Student Recreation Center</button>
@@ -55,6 +56,19 @@
     <button data-view="welcome">Welcome Center</button>
     <button data-view="nursing">Former Nursing Building</button>
     <button data-view="myers">Myers Technology Center</button>
+  </div>
+  <div class="grp">Buildings from photos &amp; imagery</div>
+  <div class="views">
+    <button data-view="science">Science</button>
+    <button data-view="holmstedt">Holmstedt</button>
+    <button data-view="tirey">Tirey Hall</button>
+    <button data-view="fairbanks">Fairbanks</button>
+    <button data-view="normal">Normal Hall</button>
+    <button data-view="hhs">HHS Arena</button>
+    <button data-view="landini">Landini</button>
+    <button data-view="garage">Parking Garage</button>
+    <button data-view="churches">Churches</button>
+    <button data-view="power">Power Plant</button>
   </div>
   <div class="toggles">
     <label><input type="checkbox" id="tgTrees" checked> Trees</label>
@@ -68,7 +82,7 @@
   <div style="font-size:11px;color:var(--muted);margin-top:6px">Drag: orbit · Wheel: zoom · Right-drag: pan</div>
 </div>
 <div id="legend">
-  <b>How this model was made</b> — Buildings with construction drawings (Hulman Center, Student Recreation Center, Reeve Hall, Fine Arts, Technology Building, Welcome Center, former Nursing Building, Myers Technology Center) are modelled from the drawings. All other buildings are OpenStreetMap footprints extruded by storey count (published or estimated). Ground surfaces (brick-paved walks, concrete walks, asphalt streets with curbs and markings, striped parking lots, lamp posts) follow OSM geometry and Google Street View photos; trees are placed on tree crowns detected in Esri World Imagery; lawns fill the rest. Units feet, X east, Z south, origin 39.4710 N 87.4100 W.
+  <b>How this model was made</b> — Buildings with construction drawings (Hulman Center, Student Recreation Center, Reeve Hall, Fine Arts, Technology Building, Welcome Center, former Nursing Building, Myers Technology Center) are modelled from the drawings. Every other campus building is modelled from Google Street View photos and Esri satellite imagery (storeys, materials, window rhythm, roofs and rooftop plant), on its OpenStreetMap footprint. Ground surfaces (brick-paved walks, concrete walks, asphalt streets with curbs and markings, striped parking lots, lamp posts) follow OSM geometry and Google Street View photos; trees are placed on tree crowns detected in Esri World Imagery; lawns fill the rest. Units feet, X east, Z south, origin 39.4710 N 87.4100 W.
 </div>
 <script>window.ASSET_BASE = 'assets/';</script>
 <script type="module" src="__APP__"></script>

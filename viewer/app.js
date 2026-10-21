@@ -20,7 +20,7 @@ const LOW = params.get('low') === '1';
 
 // ------------------------------------------------------------------ renderer / scene
 const canvas = document.getElementById('c');
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: !!SHOT, powerPreference: 'high-performance' });
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, logarithmicDepthBuffer: true, preserveDrawingBuffer: !!SHOT, powerPreference: 'high-performance' });   // 로그 깊이: 원거리 지면 레이어 z-fighting(반짝임) 방지
 renderer.setPixelRatio(SHOT ? 1 : Math.min(devicePixelRatio, 1.5));
 renderer.setSize(innerWidth, innerHeight);
 renderer.shadowMap.enabled = true;
@@ -32,7 +32,7 @@ renderer.outputColorSpace = THREE.SRGBColorSpace;
 const scene = new THREE.Scene();
 scene.fog = new THREE.FogExp2(0xdde6ee, 0.00007);
 
-const camera = new THREE.PerspectiveCamera(50, innerWidth / innerHeight, 2, 30000);
+const camera = new THREE.PerspectiveCamera(50, innerWidth / innerHeight, 1, 30000);
 const controls = new OrbitControls(camera, canvas);
 controls.enableDamping = true; controls.dampingFactor = 0.08;
 controls.maxPolarAngle = Math.PI * 0.495;
