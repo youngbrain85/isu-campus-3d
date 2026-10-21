@@ -15,6 +15,7 @@ import { buildLabels } from './lib/labels.js';
 import { MODULES } from './buildings/index.js';
 import { makePost } from './lib/post.js';
 import { makeSun } from './lib/sun.js';
+import { sunPosition, localToDate } from './lib/solar.js';
 
 const ASSET = (window.ASSET_BASE || 'assets/');
 const params = new URLSearchParams(location.search);
@@ -42,6 +43,13 @@ const controls = new OrbitControls(camera, canvas);
 controls.enableDamping = true; controls.dampingFactor = 0.08;
 controls.maxPolarAngle = Math.PI * 0.495;
 controls.minDistance = 15; controls.maxDistance = 9000;
+// 필요할 때만 렌더 (AO·캐스케이드 그림자로 프레임이 무거워져, 화면이 그대로일 때는 GPU 를 쉬게 한다)
+let dirty = 120;
+function requestRender(n = 2) { dirty = Math.max(dirty, n); }
+window.__requestRender = requestRender;
+controls.addEventListener('change', () => requestRender());
+THREE.DefaultLoadingManager.onLoad = () => requestRender(10);
+THREE.DefaultLoadingManager.onProgress = () => requestRender(4);
 
 // ------------------------------------------------------------------ loaders
 const texLoader = new THREE.TextureLoader();
@@ -70,7 +78,7 @@ function lookAtBuilding(site, id, { dist = 420, elev = 180, azDeg = 0, tgtY = 20
   return { pos: [c[0] + Math.sin(a) * dist, elev, c[1] + Math.cos(a) * dist], tgt: [c[0], tgtY, c[1]] };
 }
 function applyPreset(name) {
-  const p = PRESETS[name] || PRESETS.campus;
+  const p = PRESETS[name] || PRESETS.campus; requestRender();
   camera.position.set(...p.pos); controls.target.set(...p.tgt); controls.update();
 }
 
@@ -155,10 +163,10 @@ function setupPicking(site, info, roots) {
       row('Height', d.height_ft ? Math.round(d.height_ft) + ' ft (' + Math.round(d.height_ft * 0.3048) + ' m)' : '') +
       row('Notes', esc(d.notes)) + row('OSM', `<a href="https://www.openstreetmap.org/${id}" target="_blank" rel="noopener" style="color:var(--accent)">${id}</a>`) +
       `</dl><div class="src"><b>Modelled from:</b> ${esc(d.sources)}</div>`;
-    panel.classList.add('open');
+    panel.classList.add('open'); requestRender();
   };
   const esc = (t) => String(t ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-  document.getElementById('infoClose').addEventListener('click', () => { panel.classList.remove('open'); hl.clear(); });
+  document.getElementById('infoClose').addEventListener('click', () => { panel.classList.remove('open'); hl.clear(); requestRender(); });
   // 드래그(궤도 회전)와 클릭 구분
   let down = null;
   canvas.addEventListener('pointerdown', e => { down = [e.clientX, e.clientY]; });
@@ -169,7 +177,7 @@ function setupPicking(site, info, roots) {
     ray.setFromCamera(ndc, camera);
     const hits = ray.intersectObjects(roots.filter(o => o.visible), true);
     const h = hits.find(x => x.object.visible && !x.object.isSprite);
-    if (!h) { panel.classList.remove('open'); hl.clear(); return; }
+    if (!h) { panel.classList.remove('open'); hl.clear(); requestRender(); return; }
     // 벽면을 클릭한 경우 바깥으로 약간 밀린 점이 나올 수 있으므로 법선 반대로 1 ft 들어간 점으로 판정
     const pt = h.point.clone(); if (h.face) { const n = h.face.normal.clone().transformDirection(h.object.matrixWorld); pt.addScaledVector(n, -1); }
     show(nearest(pt.x, pt.z));
@@ -215,6 +223,47 @@ async function exportGLB() {
   return blob.size;
 }
 window.exportGLB = exportGLB;
+
+// ------------------------------------------------------------------ 태양 위치 (날짜·시각 → 실제 태양 고도·방위)
+// 기준점 = 좌표 원점 (39.471 N, 87.410 W). ?sun=YYYY-MM-DDTHH:MM 로 지정, 렌더(?shot)는 재현성을 위해 하지 오후 3 시가 기본.
+const LAT = 39.471, LON = -87.410, TZ = 'America/Indiana/Indianapolis';
+function setupSunUI(sun) {
+  const dateEl = document.getElementById('sunDate'), timeEl = document.getElementById('sunTime'), label = document.getElementById('sunLabel');
+  const todayLocal = () => new Intl.DateTimeFormat('en-CA', { timeZone: TZ }).format(new Date());
+  const q = params.get('sun');
+  let ymd = SHOT ? '2026-06-21' : todayLocal(), hours = 15;
+  if (q && /^\d{4}-\d{2}-\d{2}T\d{1,2}:\d{2}$/.test(q)) { const [d, t] = q.split('T'); ymd = d; hours = +t.split(':')[0] + +t.split(':')[1] / 60; }
+  const state = { ymd, hours };
+  const fmt = h => { const H = Math.floor(h), M = Math.round((h - H) * 60); return `${((H + 11) % 12) + 1}:${String(M).padStart(2, '0')} ${H < 12 ? 'AM' : 'PM'}`; };
+  const compass = a => ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'][Math.round(a / 45) % 8];
+  let pending = false;
+  function apply() {
+    pending = false;
+    const p = sunPosition(localToDate(state.ymd, state.hours, TZ), LAT, LON);
+    sun.setSun(p.elev, p.az); requestRender();
+    if (label) label.textContent = `${state.ymd} ${fmt(state.hours)} · sun ${p.elev.toFixed(0)}° high, ${compass(p.az)} (${p.az.toFixed(0)}°)${p.elev < 0 ? ' · below horizon' : ''}`;
+  }
+  const schedule = () => { if (!pending) { pending = true; requestAnimationFrame(apply); } };   // 슬라이더 드래그 중 환경광 재계산을 프레임당 1 회로
+  if (dateEl) { dateEl.value = state.ymd; dateEl.addEventListener('input', () => { if (dateEl.value) { state.ymd = dateEl.value; schedule(); } }); }
+  if (timeEl) { timeEl.value = state.hours; timeEl.addEventListener('input', () => { state.hours = +timeEl.value; schedule(); }); }
+  const now = document.getElementById('sunNow');
+  if (now) now.addEventListener('click', () => {
+    const p = Object.fromEntries(new Intl.DateTimeFormat('en-US', { timeZone: TZ, hourCycle: 'h23', hour: '2-digit', minute: '2-digit' }).formatToParts(new Date()).map(x => [x.type, x.value]));
+    state.ymd = todayLocal(); state.hours = Math.min(21, Math.max(5, +p.hour + +p.minute / 60));
+    if (dateEl) dateEl.value = state.ymd; if (timeEl) timeEl.value = state.hours; schedule();
+  });
+  const play = document.getElementById('sunPlay'); let timer = null;
+  if (play) play.addEventListener('click', () => {
+    if (timer) { clearInterval(timer); timer = null; play.textContent = '▶'; return; }
+    if (state.hours >= 21) state.hours = 5;
+    play.textContent = '❚❚';
+    timer = setInterval(() => {
+      state.hours = Math.min(21, state.hours + 0.1); if (timeEl) timeEl.value = state.hours; schedule();
+      if (state.hours >= 21) { clearInterval(timer); timer = null; play.textContent = '▶'; }
+    }, 60);
+  });
+  apply();
+}
 
 // ------------------------------------------------------------------ main
 async function main() {
@@ -281,6 +330,7 @@ async function main() {
   const labels = buildLabels(site, detailHeights); labels.visible = false; scene.add(labels);
   const sun = makeSun(renderer, scene, camera, { low: LOW });
   console.log('csm materials:', sun.setupMaterials(scene));
+  setupSunUI(sun);
 
   // ---- 건물 클릭 → 오른쪽 정보 패널
   // 여러 건물을 한 모듈로 병합한 경우(교회, 타워, 소형 건물)도 구분되도록, 맞은 지점을 지면에 투영해 OSM 외곽선으로 판정한다
@@ -289,7 +339,7 @@ async function main() {
 
   // UI
   document.querySelectorAll('[data-view]').forEach(b => b.addEventListener('click', () => applyPreset(b.dataset.view)));
-  const tg = (id, fn) => { const el = document.getElementById(id); if (el) { el.addEventListener('change', () => fn(el.checked)); fn(el.checked); } };
+  const tg = (id, fn) => { const el = document.getElementById(id); if (el) { el.addEventListener('change', () => { fn(el.checked); requestRender(); }); fn(el.checked); } };
   tg('tgTrees', v => { trees.visible = v; });
   tg('tgMass', v => { masses.group.visible = v; });
   tg('tgLabels', v => { labels.visible = v; });
@@ -299,7 +349,7 @@ async function main() {
   const post = makePost(renderer, scene, camera, { ao: AO, low: LOW }); window.__post = post;   // 진단용
   const aoBox = document.getElementById('tgAO'); if (aoBox) aoBox.checked = AO;
   tg('tgAO', v => post.setAO(v));
-  addEventListener('resize', () => { post.setSize(innerWidth, innerHeight); sun.resize(); });
+  addEventListener('resize', () => { post.setSize(innerWidth, innerHeight); sun.resize(); requestRender(); });
   const exBtn = document.getElementById('btnExport');
   if (exBtn) exBtn.addEventListener('click', async () => { exBtn.textContent = 'Exporting…'; const n = await exportGLB(); exBtn.textContent = 'GLB exported (' + (n / 1e6).toFixed(1) + ' MB)'; });
   const hud = document.getElementById('hud'), hudBtn = document.getElementById('hudToggle');
@@ -316,12 +366,15 @@ async function main() {
 
   let frames = 0;
   function animate() {
-    controls.update();
-    if (camera.position.y < 6) camera.position.y = 6;
-    sun.update();
-    post.render();
-    frames++;
-    if (frames === 3) window.__ready = true;
+    controls.update();                                   // 감쇠 중이면 change 이벤트 → requestRender
+    if (dirty > 0) {
+      dirty--;
+      if (camera.position.y < 6) camera.position.y = 6;
+      sun.update();
+      post.render();
+      frames++;
+      if (frames === 3) window.__ready = true;
+    }
     if (!SHOT || frames < 6) requestAnimationFrame(animate);
   }
   if (SHOT) await new Promise(r => setTimeout(r, 3000));   // 텍스처 로딩 대기
