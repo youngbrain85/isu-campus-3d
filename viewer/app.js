@@ -9,6 +9,7 @@ import * as G from './lib/geom.js';
 import { makeMaterials } from './lib/materials.js';
 import { buildGrassBase, buildImagery, buildPaving } from './lib/ground.js';
 import { buildStreet } from './lib/street.js';
+import { buildSports, sportsCover } from './lib/sports.js';
 import { buildMasses } from './lib/mass.js';
 import { buildTrees, buildGrassTufts } from './lib/trees.js';
 import { buildLabels } from './lib/labels.js';
@@ -77,6 +78,8 @@ function setupSkyAndLights() {
 // ------------------------------------------------------------------ view presets (world ft)
 const PRESETS = {
   campus: { pos: [-500, 1700, 2400], tgt: [220, 0, -150] },
+  softball: { pos: [-1080, 160, -1140], tgt: [-900, 0, -1320] },   // St. John Softball Complex (홈 뒤 남서쪽 위)
+  tennis: { pos: [-380, 140, -760], tgt: [-560, 0, -940] },        // 테니스·피클볼 단지 (남동쪽 위)
 };
 // 건물 OSM id 로 프리셋 생성: 중심에서 방위 azDeg(0=남쪽에서 바라봄, 시계방향) 방향으로 dist 만큼 떨어져 높이 elev 에서 바라봄
 function lookAtBuilding(site, id, { dist = 420, elev = 180, azDeg = 0, tgtY = 20 } = {}) {
@@ -207,14 +210,24 @@ async function exportGLB() {
   const clone = scene.clone(true);
   const toReplace = [];
   clone.traverse(o => { if (o.isInstancedMesh) toReplace.push(o); });
+  // 내보내기용 단순 수관: 화면용 울퉁불퉁 수관(덩어리 9 개)은 나무 1,800 그루 × 병합 시 100 MB 이상이 되므로 구 1 개 / 원뿔 1 개로 대체
+  const proxy = {
+    trees_round: (() => { const g = new THREE.IcosahedronGeometry(0.5, 1); g.translate(0, 0.5, 0); return g; })(),
+    trees_oval: (() => { const g = new THREE.IcosahedronGeometry(0.5, 1); g.scale(0.9, 1, 0.9); g.translate(0, 0.5, 0); return g; })(),
+    trees_conifer: (() => { const g = new THREE.ConeGeometry(0.46, 0.85, 8); g.translate(0, 0.72, 0); return g; })(),
+  };
   for (const im of toReplace) {   // 인스턴스 → 병합 지오메트리
+    if (!im.count || im.name === 'grass_tufts') { im.parent.remove(im); continue; }   // 빈 인스턴스(차량 LOD 등)와 풀 포기는 제외
+    const base = proxy[im.name] || im.geometry;
     const geos = []; const mtx = new THREE.Matrix4();
-    for (let i = 0; i < im.count; i++) { im.getMatrixAt(i, mtx); const g = im.geometry.clone(); g.applyMatrix4(mtx); geos.push(g); }
+    for (let i = 0; i < im.count; i++) { im.getMatrixAt(i, mtx); const g = base.clone(); for (const k of Object.keys(g.attributes)) if (!['position', 'normal', 'uv'].includes(k)) g.deleteAttribute(k); g.applyMatrix4(mtx); geos.push(g.index ? g.toNonIndexed() : g); }
     const mesh = new THREE.Mesh(BufferGeometryUtils.mergeGeometries(geos), im.material); mesh.name = im.name;
     im.parent.add(mesh); im.parent.remove(im);
   }
   const drop = []; clone.traverse(o => { if (o.name === 'sky' || o.name === 'skirt' || o.name === 'labels' || o.isSprite || o.isLight) drop.push(o); });
   drop.forEach(o => o.parent && o.parent.remove(o));
+  // 비인덱스 메시는 같은 정점을 합쳐 인덱스화 (용량 약 1/2~1/3)
+  clone.traverse(o => { if (o.isMesh && !o.geometry.index) { try { o.geometry = BufferGeometryUtils.mergeVertices(o.geometry, 1e-3); } catch (e) {} } });
   const result = await new Promise((res, rej) => exp.parse(clone, res, rej, { binary: true, onlyVisible: true, maxTextureSize: 2048 }));
   const blob = new Blob([result], { type: 'model/gltf-binary' });
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'isu_campus.glb'; a.click();
@@ -235,6 +248,13 @@ async function main() {
   say('Building ground…');
   const ground = buildGrassBase(site, M, tex); scene.add(ground);
   const imagery = buildImagery(site, tex); imagery.visible = false; scene.add(imagery);
+  // 운동 시설 (소프트볼·테니스·피클볼·야구·축구·비치발리볼): 경기장 폴리곤은 sports.js 가 그리므로 지면 레이어에서는 뺀다
+  let sports = null, inSports = null;
+  try {
+    const spj = await (await fetch(ASSET + 'sports.json')).json();
+    sports = buildSports(spj, M, tex); scene.add(sports); inSports = sportsCover(spj);
+    site.areas = site.areas.filter(a => a.kind !== 'pitch');
+  } catch (e) { console.error('sports layer failed', e); }
   const paving = buildPaving(site, M, tex); scene.add(paving);
   // 가로 레이어: 영상 검출 주차 차량, 횡단보도·정지선·화살표·황색 연석, 신호·표지·소화전·벤치 등 (tools/street_data.py → street.json)
   let street = null;
@@ -274,7 +294,8 @@ async function main() {
   console.log('trees culled by buildings:', site.trees.length - culled.length);
   const treeList = LOW ? culled.filter((_, i) => i % 2 === 0) : culled;
   const trees = buildTrees(treeList, tex, M); scene.add(trees);
-  const tuftList = await (await fetch(ASSET + 'tufts.json')).json();
+  let tuftList = await (await fetch(ASSET + 'tufts.json')).json();
+  if (inSports) tuftList = tuftList.filter(t => !inSports(t[0], t[1]));   // 코트·내야 위 풀 포기 제거
   const tufts = buildGrassTufts(LOW ? tuftList.filter((_, i) => i % 2 === 0) : tuftList, tex); scene.add(tufts);
   const labels = buildLabels(site, detailHeights); labels.visible = false; scene.add(labels);
   const sun = setupSkyAndLights();
