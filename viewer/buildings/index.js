@@ -21,4 +21,7 @@ export const MODULES = {
   'way/545275297': () => import('./service_bldgs.js'),
   'way/545266789': () => import('./power_plant.js'),
   'way/545275302': () => import('./churches.js'),
+  'way/545265769': () => import('./health_center.js'),
+  'way/956551298': () => import('./art_annex.js'),
+  'way/544686558': () => import('./new_theater.js'),
 };
