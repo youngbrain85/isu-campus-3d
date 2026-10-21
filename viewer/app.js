@@ -2,7 +2,6 @@
 // 단위 피트. 월드 X=동, Y=위, Z=남. 원점 = 캠퍼스 중심 (39.4710, -87.4100).
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { Sky } from 'three/addons/objects/Sky.js';
 import { GLTFExporter } from 'three/addons/exporters/GLTFExporter.js';
 import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
 import * as G from './lib/geom.js';
@@ -15,6 +14,7 @@ import { buildTrees, buildGrassTufts } from './lib/trees.js';
 import { buildLabels } from './lib/labels.js';
 import { MODULES } from './buildings/index.js';
 import { makePost } from './lib/post.js';
+import { makeSun } from './lib/sun.js';
 
 const ASSET = (window.ASSET_BASE || 'assets/');
 const params = new URLSearchParams(location.search);
@@ -54,28 +54,7 @@ function tex(name, { srgb = true, repeat = null, aniso = 8 } = {}) {
   return t;
 }
 
-// ------------------------------------------------------------------ sky / lights
-function setupSkyAndLights() {
-  const sky = new Sky(); sky.scale.setScalar(60000); sky.name = 'sky'; scene.add(sky);
-  const sun = new THREE.Vector3();
-  const elev = 48, az = 205;    // 오후 남남서 태양
-  sun.setFromSphericalCoords(1, THREE.MathUtils.degToRad(90 - elev), THREE.MathUtils.degToRad(az));
-  sky.material.uniforms.sunPosition.value.copy(sun);
-  sky.material.uniforms.turbidity.value = 4; sky.material.uniforms.rayleigh.value = 1.6;
-  sky.material.uniforms.mieCoefficient.value = 0.004; sky.material.uniforms.mieDirectionalG.value = 0.85;
-  const pmrem = new THREE.PMREMGenerator(renderer);
-  scene.environment = pmrem.fromScene(sky, 0.02).texture;
-  scene.environmentIntensity = 0.5;
-  const dir = new THREE.DirectionalLight(0xfff2dd, 2.6);
-  dir.position.copy(sun).multiplyScalar(6000);
-  dir.castShadow = true;
-  dir.shadow.mapSize.set(LOW ? 2048 : 4096, LOW ? 2048 : 4096);
-  const sc = dir.shadow.camera; sc.left = -1700; sc.right = 1700; sc.top = 1700; sc.bottom = -1700; sc.near = 2000; sc.far = 10000;
-  dir.shadow.bias = -0.0003; dir.shadow.normalBias = 1.2; dir.shadow.radius = 2;
-  dir.target.position.set(0, 0, 0); scene.add(dir.target); scene.add(dir);
-  scene.add(new THREE.HemisphereLight(0xbfd4ee, 0x6a7a4a, 0.55));
-  return dir;
-}
+// 하늘·태양·캐스케이드 그림자는 lib/sun.js (makeSun)
 
 // ------------------------------------------------------------------ view presets (world ft)
 const PRESETS = {
@@ -300,7 +279,8 @@ async function main() {
   if (inSports) tuftList = tuftList.filter(t => !inSports(t[0], t[1]));   // 코트·내야 위 풀 포기 제거
   const tufts = buildGrassTufts(LOW ? tuftList.filter((_, i) => i % 2 === 0) : tuftList, tex); scene.add(tufts);
   const labels = buildLabels(site, detailHeights); labels.visible = false; scene.add(labels);
-  const sun = setupSkyAndLights();
+  const sun = makeSun(renderer, scene, camera, { low: LOW });
+  console.log('csm materials:', sun.setupMaterials(scene));
 
   // ---- 건물 클릭 → 오른쪽 정보 패널
   // 여러 건물을 한 모듈로 병합한 경우(교회, 타워, 소형 건물)도 구분되도록, 맞은 지점을 지면에 투영해 OSM 외곽선으로 판정한다
@@ -315,11 +295,11 @@ async function main() {
   tg('tgLabels', v => { labels.visible = v; });
   tg('tgGround', v => { imagery.visible = v; });
   tg('tgGrass', v => { tufts.visible = v; });
-  tg('tgShadow', v => { sun.castShadow = v; renderer.shadowMap.needsUpdate = true; });
+  tg('tgShadow', v => sun.setShadows(v));
   const post = makePost(renderer, scene, camera, { ao: AO, low: LOW }); window.__post = post;   // 진단용
   const aoBox = document.getElementById('tgAO'); if (aoBox) aoBox.checked = AO;
   tg('tgAO', v => post.setAO(v));
-  addEventListener('resize', () => post.setSize(innerWidth, innerHeight));
+  addEventListener('resize', () => { post.setSize(innerWidth, innerHeight); sun.resize(); });
   const exBtn = document.getElementById('btnExport');
   if (exBtn) exBtn.addEventListener('click', async () => { exBtn.textContent = 'Exporting…'; const n = await exportGLB(); exBtn.textContent = 'GLB exported (' + (n / 1e6).toFixed(1) + ' MB)'; });
   const hud = document.getElementById('hud'), hudBtn = document.getElementById('hudToggle');
@@ -338,6 +318,7 @@ async function main() {
   function animate() {
     controls.update();
     if (camera.position.y < 6) camera.position.y = 6;
+    sun.update();
     post.render();
     frames++;
     if (frames === 3) window.__ready = true;
