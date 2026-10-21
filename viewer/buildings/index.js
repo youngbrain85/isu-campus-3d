@@ -24,4 +24,12 @@ export const MODULES = {
   'way/545265769': () => import('./health_center.js'),
   'way/956551298': () => import('./art_annex.js'),
   'way/544686558': () => import('./new_theater.js'),
+  'way/545265796': () => import('./tirey_complex.js'),
+  'way/545265788': () => import('./fairbanks.js'),
+  'way/545265790': () => import('./normal_hall.js'),
+  'way/461428312': () => import('./stalker.js'),
+  'way/545265791': () => import('./landini.js'),
+  'way/545265807': () => import('./condit_house.js'),
+  'way/544820727': () => import('./hmsu.js'),
+  'way/461428306': () => import('./science_bldg.js'),
 };
