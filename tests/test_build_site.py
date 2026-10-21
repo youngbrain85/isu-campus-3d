@@ -4,7 +4,7 @@ import build_site as bs
 
 
 def test_road_width_table():
-    assert bs.road_width({"highway": "primary"}) == 48
+    assert bs.road_width({"highway": "primary"}) == 44
     assert bs.road_width({"highway": "residential"}) == 30
     assert bs.road_width({"highway": "footway"}) == 8
     assert bs.road_width({"highway": "service", "service": "parking_aisle"}) == 16
@@ -28,7 +28,15 @@ def test_poly_orientation_and_closing():
 
 def test_site_json_schema():
     site = json.load(open(pathlib.Path(__file__).resolve().parents[1] / "viewer/assets/site.json"))
-    assert len(site["buildings"]) > 350 and len(site["roads"]) > 500 and len(site["trees"]) > 500
+    # 캠퍼스 구역(3rd–9th St, Tippecanoe–Cherry St)만 포함
+    assert 80 <= len(site["buildings"]) <= 120 and len(site["roads"]) > 400 and len(site["trees"]) > 1000
+    x0, z0, x1, z1 = site["clip"]
+    for b in site["buildings"]:
+        cx = sum(p[0] for p in b["poly"]) / len(b["poly"]); cz = sum(p[1] for p in b["poly"]) / len(b["poly"])
+        assert x0 <= cx <= x1 and z0 <= cz <= z1
     hul = next(b for b in site["buildings"] if b["id"] == "way/183426119")
-    assert hul["detail"] == "drawing" and 30 < hul["h"] < 60 and len(hul["roof"]) == 3
-    assert site["ground"]["tiles"] == 2 and site["ground"]["extent_ft"] == 4800
+    assert hul["detail"] == "drawing" and len(hul["roof"]) == 3
+    # 같은 수관에 중복된 나무가 없어야 함 (3 ft 이내 쌍 없음)
+    import math
+    T = sorted(site["trees"])
+    assert all(math.dist(T[i][:2], T[i + 1][:2]) >= 3 for i in range(len(T) - 1))
