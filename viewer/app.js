@@ -135,6 +135,70 @@ function cullTreesUnderBuildings(list, roots, clip) {
   return out;
 }
 
+// ------------------------------------------------------------------ 건물 선택
+function setupPicking(site, info, roots) {
+  const panel = document.getElementById('info'), body = document.getElementById('infoBody');
+  if (!panel) return;
+  const ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
+  const polys = site.buildings.map(b => ({ id: b.id, poly: b.poly, c: G.centroid(b.poly) }));
+  const inPoly = (x, z, p) => { let k = false; for (let i = 0, j = p.length - 1; i < p.length; j = i++) { const a = p[i], b = p[j]; if ((a[1] > z) !== (b[1] > z) && x < (b[0] - a[0]) * (z - a[1]) / (b[1] - a[1]) + a[0]) k = !k; } return k; };
+  const nearest = (x, z) => {   // 외곽선 안이면 그 건물, 아니면 6 ft 이내 가장 가까운 외곽선(캐노피·차양 등 외곽선 밖 부속물)
+    for (const p of polys) if (inPoly(x, z, p.poly)) return p.id;
+    let best = null, bd = 36;
+    for (const p of polys) for (let i = 0; i < p.poly.length; i++) {
+      const a = p.poly[i], b = p.poly[(i + 1) % p.poly.length], dx = b[0] - a[0], dz = b[1] - a[1], L = dx * dx + dz * dz || 1;
+      const t = Math.max(0, Math.min(1, ((x - a[0]) * dx + (z - a[1]) * dz) / L)), ex = a[0] + t * dx - x, ez = a[1] + t * dz - z, d = ex * ex + ez * ez;
+      if (d < bd) { bd = d; best = p.id; }
+    }
+    return best;
+  };
+  // 선택 강조: 외곽선을 따라 바닥에 얇은 띠 + 꼭대기 테두리
+  const hl = new THREE.Group(); hl.name = 'selection'; scene.add(hl);
+  const hlMat = new THREE.LineBasicMaterial({ color: 0x7fc1ff, depthTest: false, transparent: true });
+  const show = (id) => {
+    hl.clear();
+    const d = info[id]; if (!d) { panel.classList.remove('open'); return; }
+    const p = polys.find(q => q.id === id), top = (d.height_ft || 30) + 1;
+    for (const y of [0.6, top]) {
+      const pts = p.poly.map(q => new THREE.Vector3(q[0], y, q[1])); pts.push(pts[0].clone());
+      const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), hlMat); line.renderOrder = 10; hl.add(line);
+    }
+    const row = (k, v) => v !== '' && v != null ? `<dt>${k}</dt><dd>${v}</dd>` : '';
+    body.innerHTML = `<h2>${esc(d.name)}</h2><span class="tag">${esc(d.model)}</span><dl>` +
+      row('Campus map no.', esc(d.map_no)) + row('Built', esc(d.year)) + row('Storeys', esc(d.storeys)) +
+      row('Height', d.height_ft ? Math.round(d.height_ft) + ' ft (' + Math.round(d.height_ft * 0.3048) + ' m)' : '') +
+      row('Notes', esc(d.notes)) + row('OSM', `<a href="https://www.openstreetmap.org/${id}" target="_blank" rel="noopener" style="color:var(--accent)">${id}</a>`) +
+      `</dl><div class="src"><b>Modelled from:</b> ${esc(d.sources)}</div>`;
+    panel.classList.add('open');
+  };
+  const esc = (t) => String(t ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  document.getElementById('infoClose').addEventListener('click', () => { panel.classList.remove('open'); hl.clear(); });
+  // 드래그(궤도 회전)와 클릭 구분
+  let down = null;
+  canvas.addEventListener('pointerdown', e => { down = [e.clientX, e.clientY]; });
+  canvas.addEventListener('pointerup', e => {
+    if (!down || Math.hypot(e.clientX - down[0], e.clientY - down[1]) > 5 || e.button !== 0) return;
+    const r = canvas.getBoundingClientRect();
+    ndc.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+    ray.setFromCamera(ndc, camera);
+    const hits = ray.intersectObjects(roots.filter(o => o.visible), true);
+    const h = hits.find(x => x.object.visible && !x.object.isSprite);
+    if (!h) { panel.classList.remove('open'); hl.clear(); return; }
+    // 벽면을 클릭한 경우 바깥으로 약간 밀린 점이 나올 수 있으므로 법선 반대로 1 ft 들어간 점으로 판정
+    const pt = h.point.clone(); if (h.face) { const n = h.face.normal.clone().transformDirection(h.object.matrixWorld); pt.addScaledVector(n, -1); }
+    show(nearest(pt.x, pt.z));
+  });
+  window.__pickBuilding = (id) => show(id);   // 테스트용
+  window.__pickAt = (cx, cy) => {             // 진단용: 화면 좌표의 첫 히트
+    const r = canvas.getBoundingClientRect();
+    ndc.set(((cx - r.left) / r.width) * 2 - 1, -((cy - r.top) / r.height) * 2 + 1); ray.setFromCamera(ndc, camera);
+    const hits = ray.intersectObjects(roots.filter(o => o.visible), true);
+    const h = hits[0]; if (!h) return null;
+    const pt = h.point.clone(); if (h.face) { const n = h.face.normal.clone().transformDirection(h.object.matrixWorld); pt.addScaledVector(n, -1); }
+    return { hit: h.point.toArray().map(v => Math.round(v)), probe: pt.toArray().map(v => Math.round(v)), id: nearest(pt.x, pt.z) };
+  };
+}
+
 // ------------------------------------------------------------------ GLB export
 async function exportGLB() {
   const exp = new GLTFExporter();
@@ -205,6 +269,11 @@ async function main() {
   const tufts = buildGrassTufts(LOW ? tuftList.filter((_, i) => i % 2 === 0) : tuftList, tex); scene.add(tufts);
   const labels = buildLabels(site, detailHeights); labels.visible = false; scene.add(labels);
   const sun = setupSkyAndLights();
+
+  // ---- 건물 클릭 → 오른쪽 정보 패널
+  // 여러 건물을 한 모듈로 병합한 경우(교회, 타워, 소형 건물)도 구분되도록, 맞은 지점을 지면에 투영해 OSM 외곽선으로 판정한다
+  const info = await (await fetch(ASSET + 'info.json')).json();
+  setupPicking(site, info, buildingRoots);
 
   // UI
   document.querySelectorAll('[data-view]').forEach(b => b.addEventListener('click', () => applyPreset(b.dataset.view)));
