@@ -32,4 +32,8 @@ export const MODULES = {
   'way/545265807': () => import('./condit_house.js'),
   'way/544820727': () => import('./hmsu.js'),
   'way/461428306': () => import('./science_bldg.js'),
+  'way/349907334': () => import('./library.js'),
+  'way/461428308': () => import('./holmstedt.js'),
+  'way/461428309': () => import('./root_hall.js'),
+  'way/236260172': () => import('./chestnut_bldg.js'),
 };
