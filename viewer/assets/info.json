@@ -158,7 +158,7 @@
 "map_no": "9",
 "year": "",
 "storeys": "2",
-"height_ft": 36.0,
+"height_ft": 25.0,
 "model": "Satellite imagery (no usable Street View)",
 "sources": "Esri imagery z20/z19 (no usable Street View of this building)",
 "notes": "",
@@ -506,26 +506,26 @@
 "module": "parking_garage.js"
 },
 "way/640437205": {
-"name": "Highland Quarters",
+"name": "Scott College of Business (Federal Hall)",
 "map_no": "",
 "year": "",
 "storeys": "3",
-"height_ft": 38,
-"model": "OpenStreetMap footprint (simple mass)",
-"sources": "OpenStreetMap",
+"height_ft": 63.0,
+"model": "Street View photos + satellite imagery",
+"sources": "Street View 2020-06 / 2023-06 / 2026-04, Esri imagery",
 "notes": "",
-"module": ""
+"module": "scott_business.js"
 },
 "way/724476296": {
 "name": "500 Wabash Apartments",
 "map_no": "",
 "year": "",
 "storeys": "5",
-"height_ft": 62,
-"model": "OpenStreetMap footprint (simple mass)",
-"sources": "OpenStreetMap",
+"height_ft": 66.0,
+"model": "Street View photos + satellite imagery",
+"sources": "Street View 2024-06 / 2026-04, Esri imagery",
 "notes": "",
-"module": ""
+"module": "wabash500.js"
 },
 "way/724476306": {
 "name": "Unnamed building",
@@ -608,12 +608,12 @@
 "name": "Facilities Management",
 "map_no": "",
 "year": "",
-"storeys": "2",
-"height_ft": 26,
-"model": "OpenStreetMap footprint (simple mass)",
-"sources": "OpenStreetMap",
+"storeys": "1",
+"height_ft": 25.0,
+"model": "Street View photos + satellite imagery",
+"sources": "Street View 2022-10, Esri imagery",
 "notes": "",
-"module": ""
+"module": "facilities_mgmt.js"
 },
 "way/1348635036": {
 "name": "Hulman Memorial Student Union",
@@ -1059,11 +1059,11 @@
 "name": "The Annex",
 "map_no": "",
 "year": "",
-"storeys": "",
-"height_ft": null,
-"model": "OpenStreetMap footprint (simple mass)",
-"sources": "OpenStreetMap",
+"storeys": "5",
+"height_ft": 62.0,
+"model": "Street View photos + satellite imagery",
+"sources": "Street View 2024-06, Esri imagery",
 "notes": "",
-"module": ""
+"module": "the_annex.js"
 }
 }

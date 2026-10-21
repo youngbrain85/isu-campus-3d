@@ -1,4 +1,4 @@
-// 지면: 잔디 기본면 + 차도(아스팔트·경계석·차선) + 보도(벽돌 포장/콘크리트) + 주차장(아스팔트·주차선·차량) + 가로등.
+// 지면: 잔디 기본면 + 차도(아스팔트·경계석·차선) + 보도(벽돌 포장/콘크리트) + 주차장(아스팔트·주차선) + 가로등. (차량·가로 시설은 street.js)
 // 위성영상 타일은 선택적 오버레이(기본 꺼짐). 스트리트뷰(2020–2023) 확인: 핵심부 보도 벽돌 포장, 외곽 콘크리트, 경계석, 검은 가로등.
 import * as THREE from 'three';
 import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
@@ -9,7 +9,8 @@ const Y_LOT = 0.12, Y_ROAD = 0.15, Y_PATH = 0.35, Y_LINE = 0.03, CURB_H = 0.5, C
 /** 잔디 기본면 (범위 사각형) — 2 단계 디테일 텍스처 + 저주파 색 변이 */
 export function buildGrassBase(site, M, tex) {
   const c = site.clip, w = c[2] - c[0], h = c[3] - c[1];
-  const geo = new THREE.PlaneGeometry(w, h); geo.rotateX(-Math.PI / 2);
+  // 큰 단일 사각형은 카메라 뒤까지 뻗으면 로그 깊이 보간이 깨져 아래 층이 위로 비친다 → 약 100 ft 격자로 분할
+  const geo = new THREE.PlaneGeometry(w, h, Math.ceil(w / 100), Math.ceil(h / 100)); geo.rotateX(-Math.PI / 2);
   const detail = tex('grass_detail.jpg'), vari = tex('grass_var.jpg'), nrm = tex('grass_n.jpg', { srgb: false });
   const mat = new THREE.MeshStandardMaterial({ map: detail, normalMap: nrm, normalScale: new THREE.Vector2(0.35, 0.35), roughness: 1.0, color: 0x8ca65a });
   mat.map.repeat.set(w / 14, h / 14); mat.normalMap.repeat.set(w / 14, h / 14);
@@ -26,8 +27,15 @@ export function buildGrassBase(site, M, tex) {
   mat.customProgramCacheKey = () => 'grass-base';
   const m = new THREE.Mesh(geo, mat);
   m.position.set((c[0] + c[2]) / 2, 0, (c[1] + c[3]) / 2); m.receiveShadow = true; m.name = 'grass_base';
-  const skirt = new THREE.Mesh(new THREE.PlaneGeometry(40000, 40000), M.ground_flat);
-  skirt.rotation.x = -Math.PI / 2; skirt.position.y = -0.3; skirt.receiveShadow = true; skirt.name = 'skirt';
+  // 범위 밖 지면(스커트): 범위 사각형과 겹치지 않도록 둘레 4 개 띠로 만든다. 겹치면 특정 시점에서 깊이 정밀도 문제로
+  // 스커트가 잔디·아스팔트 위로 비쳐 보였다 (Scott 프리셋에서 재현). 각 띠도 격자로 분할.
+  const R = 20000, bands = [[-R, -R, R, c[1]], [-R, c[3], R, R], [-R, c[1], c[0], c[3]], [c[2], c[1], R, c[3]]];
+  const sk = bands.map(([x0, z0, x1, z1]) => {
+    const g = new THREE.PlaneGeometry(x1 - x0, z1 - z0, Math.max(1, Math.ceil((x1 - x0) / 800)), Math.max(1, Math.ceil((z1 - z0) / 800)));
+    g.rotateX(-Math.PI / 2); g.translate((x0 + x1) / 2, 0, (z0 + z1) / 2); return g;
+  });
+  const skirt = new THREE.Mesh(BufferGeometryUtils.mergeGeometries(sk), M.ground_flat);
+  skirt.position.y = -0.05; skirt.receiveShadow = true; skirt.name = 'skirt';
   const grp = new THREE.Group(); grp.name = 'ground'; grp.add(m, skirt);
   return grp;
 }
@@ -87,7 +95,7 @@ export function buildPaving(site, M, tex) {
   if (white.length || stripes.length) parts.push({ geom: BufferGeometryUtils.mergeGeometries([...white, ...stripes]), mat: M.paintWhite, cast: false, name: 'lines_white' });
   const grp = new THREE.Group(); grp.name = 'paving';
   for (const m of mergeByMaterial(parts)) grp.add(m);
-  grp.add(buildCars(site, M));
+  // 주차 차량은 viewer/lib/street.js (영상 검출 위치, tools/street_data.py) 에서 배치
   grp.add(buildLamps(site, M));
   return grp;
 }
@@ -169,44 +177,6 @@ function lotStripes(poly) {
   return out;
 }
 
-/** 주차 차량(단순 2박스)을 주차칸의 35% 에 인스턴스 배치 */
-function buildCars(site, M) {
-  const G = new THREE.Group(); G.name = 'cars';
-  const body = new THREE.BoxGeometry(6.2, 2.0, 14.5); body.translate(0, 1.2, 0);
-  const cab = new THREE.BoxGeometry(5.4, 1.6, 7.5); cab.translate(0, 3.0, -0.6);
-  const geo = BufferGeometryUtils.mergeGeometries([body, cab]);
-  const spots = [];
-  let seed = 17; const rnd = () => { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
-  for (const a of site.areas) {
-    if (a.kind !== 'parking' || a.poly.length < 3) continue;
-    const { c, s, u0, u1, v0, v1 } = obb(a.poly);
-    const toW = (u, v) => [u * c - v * s, u * s + v * c];
-    let v = v0 + 2;
-    while (v + 18 < v1) {
-      for (const vv of [v, v + 18 + 24]) {
-        if (vv + 18 > v1) continue;
-        for (let u = u0 + 8.5; u < u1 - 8.5; u += 9) {
-          if (rnd() > 0.35) continue;
-          const p = toW(u, vv + 9), q0 = toW(u, vv + 1), q1 = toW(u, vv + 17);
-          if (pointInPoly(q0, a.poly) && pointInPoly(q1, a.poly)) spots.push([p[0], p[1], Math.atan2(s, c)]);
-        }
-      }
-      v += 18 + 24 + 18;
-    }
-  }
-  if (!spots.length) return G;
-  const mat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.4, metalness: 0.5 });
-  const im = new THREE.InstancedMesh(geo, mat, spots.length);
-  const palette = [0xd8d8d8, 0x2b2b2b, 0x8c8c8c, 0xa32020, 0x1f3a6e, 0xe6e6e6, 0x5a5a5a, 0xf2f2f2, 0x3a2a1a];
-  const mtx = new THREE.Matrix4(), q = new THREE.Quaternion(), p = new THREE.Vector3(), sc = new THREE.Vector3(1, 1, 1), axis = new THREE.Vector3(0, 1, 0);
-  spots.forEach((sp, i) => {
-    p.set(sp[0], Y_LOT, sp[1]); q.setFromAxisAngle(axis, -sp[2] + (rnd() < 0.5 ? 0 : Math.PI));
-    mtx.compose(p, q, sc); im.setMatrixAt(i, mtx); im.setColorAt(i, new THREE.Color(palette[Math.floor(rnd() * palette.length)]));
-  });
-  im.castShadow = true; im.name = 'cars'; G.add(im);
-  return G;
-}
-
 /** 가로등: 핵심부 보도를 따라 90 ft 간격, 보도 가장자리에서 3 ft (검은 기둥 12 ft + 등기구) */
 function buildLamps(site, M) {
   const G = new THREE.Group(); G.name = 'lamps';
@@ -225,14 +195,17 @@ function buildLamps(site, M) {
     }
   }
   if (!pts.length) return G;
-  const pole = new THREE.CylinderGeometry(0.3, 0.4, 12, 8); pole.translate(0, 6, 0);
-  const head = new THREE.CylinderGeometry(0.9, 0.6, 1.6, 8); head.translate(0, 12.8, 0);
-  const cap = new THREE.ConeGeometry(1.1, 0.6, 8); cap.translate(0, 13.9, 0);
-  const geo = BufferGeometryUtils.mergeGeometries([pole, head, cap]);
-  const im = new THREE.InstancedMesh(geo, M.dark, pts.length);
+  // 스트리트뷰: 검은 받침 + 가는 기둥 + 육각 랜턴(유리) + 갓 + 꼭지 장식
+  const cy = (r0, r1, h, y, seg = 8) => { const g = new THREE.CylinderGeometry(r1, r0, h, seg); g.translate(0, y + h / 2, 0); return g.toNonIndexed(); };
+  const geo = BufferGeometryUtils.mergeGeometries([cy(0.5, 0.42, 1.8, 0), cy(0.24, 0.18, 10.4, 1.8), cy(0.3, 0.3, 0.4, 12.2),
+    cy(0.62, 0.38, 0.25, 12.6, 6), cy(0.8, 0.12, 0.9, 14.55, 6), cy(0.05, 0.05, 0.6, 15.45, 4)]);
+  const glass = cy(0.45, 0.72, 1.7, 12.85, 6);
+  const dark = new THREE.MeshStandardMaterial({ color: 0x15171a, roughness: 0.45, metalness: 0.55 });
+  const glassMat = new THREE.MeshStandardMaterial({ color: 0xfff3d6, emissive: 0xffe2a6, emissiveIntensity: 0.35, roughness: 0.3 });
+  const im = new THREE.InstancedMesh(geo, dark, pts.length), ig = new THREE.InstancedMesh(glass, glassMat, pts.length);
   const mtx = new THREE.Matrix4();
-  pts.forEach((p, i) => { mtx.makeTranslation(p[0], 0, p[1]); im.setMatrixAt(i, mtx); });
-  im.castShadow = true; im.name = 'lamps'; G.add(im);
+  pts.forEach((p, i) => { mtx.makeTranslation(p[0], 0, p[1]); im.setMatrixAt(i, mtx); ig.setMatrixAt(i, mtx); });
+  im.castShadow = true; im.name = 'lamps'; ig.name = 'lamp_glass'; G.add(im, ig);
   return G;
 }
 

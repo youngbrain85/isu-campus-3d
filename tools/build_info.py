@@ -30,7 +30,7 @@ for f in sorted((ROOT / "viewer/buildings").glob("*.js")):
     body = m.group(1)
     g = lambda k: (re.search(k + r":\s*'([^']*)'", body) or [None, ""])[1]
     osm = g("osm")
-    extra = re.findall(r"way/\d+", (re.search(r"extraIds:\s*\[([^\]]*)\]", body) or [None, ""])[1] or "")
+    extra = re.findall(r"(?:way|relation)/\d+", (re.search(r"extraIds:\s*\[([^\]]*)\]", body) or [None, ""])[1] or "")
     h = re.search(r"height:\s*([\d.]+)", body)
     drawing = "fit_footprint" in s or "RMS" in body
     sheets = g("sheets")
@@ -38,18 +38,18 @@ for f in sorted((ROOT / "viewer/buildings").glob("*.js")):
         mods[oid] = {"module": f.name, "mod_name": g("name"), "height": float(h.group(1)) if h else None,
                      "drawing": drawing, "sheets": sheets, "shared": len(extra) > 0}
 
-reg = set(re.findall(r"'(way/\d+)'", (ROOT / "viewer/buildings/index.js").read_text(encoding="utf-8")))
+reg = set(re.findall(r"'((?:way|relation)/\d+)'", (ROOT / "viewer/buildings/index.js").read_text(encoding="utf-8")))
 active = set()
 for oid, m in mods.items():
     pass
 for f in sorted((ROOT / "viewer/buildings").glob("*.js")):
     s = f.read_text(encoding="utf-8")
-    o = re.search(r"osm:\s*'(way/\d+)'", s)
+    o = re.search(r"osm:\s*'((?:way|relation)/\d+)'", s)
     if o and o.group(1) in reg:
         active.add(o.group(1))
         ex = re.search(r"extraIds:\s*\[([^\]]*)\]", s)
         if ex:
-            active |= set(re.findall(r"way/\d+", ex.group(1)))
+            active |= set(re.findall(r"(?:way|relation)/\d+", ex.group(1)))
 
 HANGUL = re.compile(r"[ㄱ-힝][^,;)]*")
 def clean(t):

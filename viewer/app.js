@@ -8,6 +8,7 @@ import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js'
 import * as G from './lib/geom.js';
 import { makeMaterials } from './lib/materials.js';
 import { buildGrassBase, buildImagery, buildPaving } from './lib/ground.js';
+import { buildStreet } from './lib/street.js';
 import { buildMasses } from './lib/mass.js';
 import { buildTrees, buildGrassTufts } from './lib/trees.js';
 import { buildLabels } from './lib/labels.js';
@@ -30,6 +31,7 @@ renderer.toneMappingExposure = 0.95;
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 
 const scene = new THREE.Scene();
+window.__scene = scene;   // 진단용
 scene.fog = new THREE.FogExp2(0xdde6ee, 0.00007);
 
 const camera = new THREE.PerspectiveCamera(50, innerWidth / innerHeight, 1, 30000);
@@ -234,6 +236,13 @@ async function main() {
   const ground = buildGrassBase(site, M, tex); scene.add(ground);
   const imagery = buildImagery(site, tex); imagery.visible = false; scene.add(imagery);
   const paving = buildPaving(site, M, tex); scene.add(paving);
+  // 가로 레이어: 영상 검출 주차 차량, 횡단보도·정지선·화살표·황색 연석, 신호·표지·소화전·벤치 등 (tools/street_data.py → street.json)
+  let street = null;
+  try {
+    const sj = await (await fetch(ASSET + 'street.json')).json();
+    street = buildStreet(site, sj, M); scene.add(street);
+    console.log('street:', JSON.stringify(street.userData.stats));
+  } catch (e) { console.error('street layer failed', e); }
   say('Building masses…');
   // ?mod=buildings/foo.js : 레지스트리에 없는 모듈을 임시로 추가 로드 (모델링 중 미리보기용)
   const extraMod = params.get('mod');
@@ -291,6 +300,9 @@ async function main() {
 
   console.log('site:', site.buildings.length, 'buildings,', masses.byId.size, 'masses,', detailedIds.size, 'detailed,', treeList.length, 'trees, mass tris', masses.tris);
   applyPreset(SHOT || 'campus');
+  const camQ = params.get('cam');      // ?cam=px,py,pz,tx,ty,tz (거리 눈높이 렌더 등 임의 시점)
+  if (camQ) { const v = camQ.split(',').map(Number); camera.position.set(v[0], v[1], v[2]); controls.target.set(v[3], v[4], v[5]); if (v[6]) { camera.fov = v[6]; camera.updateProjectionMatrix(); } controls.update(); }
+  if (street) street.userData.updateCars(camera);
   if (SHOT) { const h = document.getElementById('hud'); if (h) h.classList.add('collapsed'); }   // 렌더용: HUD 접기
   say('');
   const loader = document.getElementById('loader'); if (loader) loader.style.display = 'none';

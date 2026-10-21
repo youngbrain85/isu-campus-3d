@@ -37,4 +37,9 @@ export const MODULES = {
   'way/461428309': () => import('./root_hall.js'),
   'way/236260172': () => import('./chestnut_bldg.js'),
   'way/752686727': () => import('./minor_bldgs.js'),
+  // ISU 가상투어 지도에서 추가된 건물 (스트리트뷰 기반)
+  'way/640437205': () => import('./scott_business.js'),
+  'way/724476296': () => import('./wabash500.js'),
+  'way/1245721408': () => import('./facilities_mgmt.js'),
+  'relation/11267893': () => import('./the_annex.js'),
 };
