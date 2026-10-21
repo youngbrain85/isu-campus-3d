@@ -13,4 +13,9 @@ export const MODULES = {
   'way/545275306': () => import('./parking_garage.js'),
   'way/545275301': () => import('./aacc.js'),
   'way/236260776': () => import('./sycamore_towers.js'),
+  'way/461428313': () => import('./dreiser.js'),
+  'way/461428314': () => import('./gillum.js'),
+  'way/461428311': () => import('./career_center.js'),
+  'way/545265800': () => import('./aec_police.js'),
+  'way/545265798': () => import('./res_halls_6th.js'),
 };
