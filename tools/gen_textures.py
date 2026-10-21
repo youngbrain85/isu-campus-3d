@@ -208,3 +208,42 @@ d.line([128, 0, 128, 256], fill=(50, 52, 56), width=4); d.line([0, 128, 256, 128
 save(im, "window_glass.jpg")
 
 print("textures done:", len(list(OUT.glob("*.jpg"))) + len(list(OUT.glob("*.png"))), "files")
+
+# ---------------------------------------------------------------- 벽돌 포장(헤링본) — 캠퍼스 핵심부 보도·광장 (스트리트뷰: 적갈색/황갈색 혼합 벽돌)
+n = 512
+pv = np.zeros((n, n, 3), np.float32); pv[:] = (176, 166, 150)   # 모래 줄눈
+r = np.random.default_rng(77)
+bw, bl = 16, 32    # 벽돌 4"x8" → 1 타일 = 512 px = 10.7 ft (repeat 로 환산)
+for j in range(0, n, bw):
+    for i in range(0, n, bl):
+        # 헤링본: (i/bl + j/bw) 홀짝으로 가로/세로 교대
+        k = (i // bl + j // bw) % 2
+        c = np.array([(168, 92, 70), (182, 110, 84), (150, 84, 66), (196, 140, 104)][r.integers(0, 4)], np.float32) + r.uniform(-8, 8, 3)
+        if k == 0:
+            pv[j + 1:j + bw - 1, i + 1:i + bl - 1] = c
+        else:
+            # 세로 벽돌 2장
+            for t in range(2):
+                pv[j + 1:j + bw - 1, i + t * bw + 1:i + t * bw + bw - 1] = c + r.uniform(-6, 6)
+pv *= (0.9 + 0.2 * tile_noise(n, [(32, 1.0), (256, 0.6)], seed=78))[..., None]
+save(pv, "pavers.jpg")
+
+# ---------------------------------------------------------------- 잔디 색 변이(저주파) + 풀 포기 스프라이트
+gvar = tile_noise(256, [(2, 1.0), (4, 0.7), (16, 0.4)], seed=91)
+v = 0.75 + (gvar - 0.5) * 0.5
+save(np.stack([v * 255 * 0.92, v * 255, v * 255 * 0.8], -1), "grass_var.jpg")
+W = H = 256
+im = Image.new("RGBA", (W, H), (0, 0, 0, 0)); d = ImageDraw.Draw(im)
+r = np.random.default_rng(7)
+for k in range(140):
+    x0 = r.uniform(W * 0.2, W * 0.8); top = r.uniform(H * 0.05, H * 0.5)
+    bend = r.uniform(-50, 50)
+    gcol = (int(r.uniform(90, 140)), int(r.uniform(130, 175)), int(r.uniform(40, 70)), 255)
+    d.line([(x0, H), (x0 + bend * 0.3, (H + top) / 2), (x0 + bend, top)], fill=gcol, width=int(r.uniform(2, 5)), joint="curve")
+save(im, "grass_tuft.png")
+
+# ---------------------------------------------------------------- 아스팔트 노멀 + 콘크리트 경계석/보도 밝은 톤
+save(to_normal(asf, 1.2), "asphalt_n.jpg")
+curb = concrete(256, seed=43).astype(np.float32) * 1.25
+save(curb, "curb.jpg")
+print("extra textures done")

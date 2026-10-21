@@ -58,15 +58,11 @@ export function build(M, G) {
   // ---- 지붕: 평탄 막지붕 + 보울 위 완만히 솟은 중앙부(A7 SLOPE, 트러스 상현 ≈ +6') + 펜트하우스 + 옥상 설비
   const r = G.flatRoof(rect, H_ROOF, { parapet: PAR, thick: 1.0 });
   parts.push({ geom: r.slab, mat: M.roof_membrane }); parts.push({ geom: r.parapet, mat: M.metal });
-  const RA = 138, RB = 118, RK = 0.78, RH = 5.5;                                                        // 솟은 중앙부: 초타원 반축, 상단 비율, 높이
-  const outer = superEllipse(RA, RB, 36), inner = superEllipse(RA * RK, RB * RK, 36);
-  parts.push({ geom: slopeBand(outer, inner, H_ROOF + 0.05, H_ROOF + RH), mat: M.roof_membrane });
-  parts.push({ geom: G.capGeometry(inner, [], H_ROOF + RH), mat: M.roof_membrane });
-  parts.push({ geom: G.box(45, 14, 36, 0, H_ROOF + RH, 0), mat: M.metal });                              // 중앙 펜트하우스 (HVAC)
-  const roofY = (x, z) => {                                                                               // 솟은 중앙부 위 높이 (경사면 보간)
-    const s = Math.pow(Math.pow(Math.abs(x / RA), 3.2) + Math.pow(Math.abs(z / RB), 3.2), 1 / 3.2);
-    return H_ROOF + RH * Math.min(1, Math.max(0, (1 - s) / (1 - RK)));
-  };
+  // 지붕면: A11–A13 단면의 트러스 상현이 외주에서 중앙 펜트하우스로 완만히 올라감(A7 "SLOPE") → 매끄러운 타원형 돔(격자 메시), 중앙 +6'
+  const RH = 6.0;
+  const roofY = (x, z) => { const r = Math.min(1, Math.hypot(x / (HX - 4), z / (HZ - 4))); const t = 1 - r * r; return H_ROOF + 0.05 + RH * t * t; };
+  parts.push({ geom: gridSurface(-HX + 1, HX - 1, -HZ + 1, HZ - 1, 28, 24, roofY), mat: M.roof_membrane });
+  parts.push({ geom: G.box(45, 14, 36, 0, roofY(0, 0) - 0.3, 0), mat: M.metal });                      // 중앙 펜트하우스 (HVAC)
   for (const x of [-124, -35, 24, 115]) for (const z of [-85, 91])                                        // 옥상 설비 2열 × 4행 (위성)
     parts.push({ geom: G.box(11, 9, 11, x, roofY(x, z) - 0.4, z), mat: M.dark });
 
@@ -91,6 +87,24 @@ export function build(M, G) {
   const grp = new THREE.Group();
   for (const m of G.mergeByMaterial(parts)) grp.add(m);
   return grp;
+}
+
+/** 높이 함수 f(x,z) 로 만든 직사각 격자 곡면 (법선 위) */
+function gridSurface(x0, x1, z0, z1, nx, nz, f) {
+  const pos = [], uv = [], idx = [];
+  for (let j = 0; j <= nz; j++) for (let i = 0; i <= nx; i++) {
+    const x = x0 + (x1 - x0) * i / nx, z = z0 + (z1 - z0) * j / nz;
+    pos.push(x, f(x, z), z); uv.push(x / 24, z / 24);
+  }
+  for (let j = 0; j < nz; j++) for (let i = 0; i < nx; i++) {
+    const a = j * (nx + 1) + i, b = a + 1, c = a + nx + 1, d = c + 1;
+    idx.push(a, c, b, b, c, d);
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+  g.setIndex(idx); g.computeVertexNormals();
+  return g;
 }
 
 /** 초타원 폴리곤 (a = x 반축, b = z 반축), 평면 CCW ((x,-z) 양의 면적) */

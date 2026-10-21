@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""OSM + buildings.csv + Esri 모자이크 → viewer/assets/site.json, ground 타일, 수목 목록.
+"""OSM + buildings.csv + Esri 모자이크 → viewer/assets/site.json, 지면 타일, 수목·잔디 데이터 (캠퍼스 구역만).
 
 site.json 좌표: 로컬 평면 피트, x=동, z=남. 폴리곤은 위에서 봤을 때 반시계(CCW), 닫는 점 제거.
-ground_{r}_{c}.jpg: EXTENT ft 정사각형을 TILES×TILES 로 나눈 타일, 픽셀 (0,0)=북서 모서리.
+범위 CLIP = 3rd St ~ 9th St, Tippecanoe St ~ Cherry St (ISU 메인 캠퍼스).
 """
 import csv, json, math, sys
 from pathlib import Path
@@ -14,15 +14,17 @@ try:
 except Exception:
     pass
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-import geo
+import geo, vegetation
 Image.MAX_IMAGE_PIXELS = None
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA, OUT = ROOT / "data", ROOT / "viewer" / "assets"
-EXTENT, TILES, TILE_PX = 4800, 2, 4096           # 지면 4800 ft 정사각형, 2×2 타일
+CLIP = (-1250.0, -1600.0, 1700.0, 1330.0)        # x0, z0, x1, z1 (ft): 3rd St 서측 ~ 9th St 동측, Tippecanoe ~ Cherry St 남측
+TILES, TILE_PX = 2, 2048                          # 위성 오버레이 타일 (선택 표시용)
+CORE = (-420.0, -1480.0, 1190.0, 520.0)           # 벽돌 포장 보도 구역: 5th–8th St, Tippecanoe–Eagle St (스트리트뷰 확인)
 
-ROAD_W = {"trunk": 48, "primary": 48, "secondary": 40, "tertiary": 36, "residential": 30, "unclassified": 26,
-          "service": 20, "living_street": 24, "footway": 8, "cycleway": 8, "path": 6, "pedestrian": 12, "steps": 6}
+ROAD_W = {"trunk": 48, "primary": 44, "secondary": 40, "tertiary": 34, "residential": 30, "unclassified": 26,
+          "service": 18, "living_street": 24, "footway": 7, "cycleway": 8, "path": 6, "pedestrian": 14, "steps": 6}
 PATH_KINDS = ("footway", "cycleway", "path", "steps", "pedestrian")
 
 
@@ -46,6 +48,8 @@ def classify_wall(row):
         return "limestone"
     if "precast" in n or row.get("building") in ("parking", "garage"):
         return "precast"
+    if "tan brick" in n or "buff brick" in n:
+        return "brick_tan"
     if "brick" in n:
         return "brick_red"
     if row.get("building") in ("industrial", "warehouse", "service", "shed", "roof"):
@@ -78,6 +82,27 @@ def ring_to_local(ring):
     return [[round(x, 2), round(z, 2)] for x, z in pts]
 
 
+def inside(p, rect=CLIP):
+    return rect[0] <= p[0] <= rect[2] and rect[1] <= p[1] <= rect[3]
+
+
+def centroid(poly):
+    return [sum(p[0] for p in poly) / len(poly), sum(p[1] for p in poly) / len(poly)]
+
+
+def clip_line(pts, rect=CLIP):
+    """폴리라인을 사각형 안쪽 구간들로 분할 (바깥 점만 제거)"""
+    runs, cur = [], []
+    for p in pts:
+        if inside(p, rect):
+            cur.append(p)
+        elif cur:
+            runs.append(cur); cur = []
+    if cur:
+        runs.append(cur)
+    return [r for r in runs if len(r) >= 2]
+
+
 def roof_colour(mosaic, img, ring_ll):
     """footprint 안쪽(침식)의 중앙값 RGB"""
     pts = [mosaic.px_of(p[1], p[0]) for p in ring_ll]
@@ -95,57 +120,24 @@ def roof_colour(mosaic, img, ring_ll):
     return [int(v) for v in np.median(arr[m], axis=0)]
 
 
-def ground_tiles(png, bounds_json, out_dir, extent=EXTENT, tiles=TILES, tile_px=TILE_PX):
-    """Web-Mercator 모자이크를 로컬 평면(피트) 격자로 재투영해 tiles×tiles JPEG 타일 저장 (행 청크 처리로 메모리 절약)"""
+def ground_tiles(png, bounds_json, out_dir, rect=CLIP, tiles=TILES, tile_px=TILE_PX):
+    """Web-Mercator 모자이크를 로컬 평면(피트) 격자로 재투영해 tiles×tiles JPEG 타일 저장 (위성 오버레이용)"""
     m = geo.MosaicBounds(bounds_json)
     img = np.asarray(Image.open(png).convert("RGB"))
-    px_per_ft = tile_px * tiles / extent
+    tw, th = (rect[2] - rect[0]) / tiles, (rect[3] - rect[1]) / tiles
     n = 2 ** m.zoom * 256
-    chunk = 512
     for r in range(tiles):
         for c in range(tiles):
-            out = np.empty((tile_px, tile_px, 3), np.uint8)
-            xs = -extent / 2 + (c * tile_px + np.arange(tile_px, dtype=np.float64) + 0.5) / px_per_ft
+            xs = rect[0] + c * tw + (np.arange(tile_px, dtype=np.float64) + 0.5) * tw / tile_px
+            zs = rect[1] + r * th + (np.arange(tile_px, dtype=np.float64) + 0.5) * th / tile_px
             lon = geo.ORIGIN[1] + xs / geo.FT_PER_M / geo.M_PER_DEG_LON
+            lat = geo.ORIGIN[0] - zs / geo.FT_PER_M / geo.M_PER_DEG_LAT
             px = (lon + 180) / 360 * n
+            py = (1 - np.log(np.tan(np.radians(lat)) + 1 / np.cos(np.radians(lat))) / np.pi) / 2 * n
             col = np.clip(((px - m.x0) / (m.x1 - m.x0) * m.w).astype(np.int32), 0, m.w - 1)
-            for y0 in range(0, tile_px, chunk):
-                zs = -extent / 2 + (r * tile_px + np.arange(y0, y0 + chunk, dtype=np.float64) + 0.5) / px_per_ft
-                lat = geo.ORIGIN[0] - zs / geo.FT_PER_M / geo.M_PER_DEG_LAT
-                py = (1 - np.log(np.tan(np.radians(lat)) + 1 / np.cos(np.radians(lat))) / np.pi) / 2 * n
-                row = np.clip(((py - m.y0) / (m.y1 - m.y0) * m.h).astype(np.int32), 0, m.h - 1)
-                out[y0:y0 + chunk] = img[row[:, None], col[None, :]]
-            Image.fromarray(out).save(out_dir / f"ground_{r}_{c}.jpg", quality=85)
-    return px_per_ft
-
-
-def imagery_trees(png, bounds_json, building_rings_ll, spacing_ft=25, extent=EXTENT):
-    """위성영상 녹색 분류로 수목 위치 추출 (건물 내부 제외, 격자 간격 spacing_ft)"""
-    m = geo.MosaicBounds(bounds_json)
-    im = Image.open(png).convert("RGB")
-    scale = 4
-    small = im.resize((im.width // scale, im.height // scale), Image.BILINEAR)
-    a = np.asarray(small).astype(np.float32); R, G, B = a[..., 0], a[..., 1], a[..., 2]
-    veg = (G > R + 8) & (G > B + 12) & (G < 150) & (G > 40)       # 짙은 녹색 = 수관
-    veg = np.asarray(Image.fromarray((veg * 255).astype(np.uint8)).filter(ImageFilter.MinFilter(3)).filter(ImageFilter.MaxFilter(5))) > 0
-    mask = Image.new("L", small.size, 255)
-    d = ImageDraw.Draw(mask)
-    for ring in building_rings_ll:
-        d.polygon([(x / scale, y / scale) for x, y in (m.px_of(p[1], p[0]) for p in ring)], fill=0)
-    veg &= np.asarray(mask) > 0
-    out = []; rng = np.random.default_rng(3)
-    ft_per_px = (m.east - m.west) * geo.M_PER_DEG_LON * geo.FT_PER_M / m.w * scale
-    step = max(1, int(spacing_ft / ft_per_px))
-    for y in range(0, veg.shape[0] - step, step):
-        for x in range(0, veg.shape[1] - step, step):
-            blk = veg[y:y + step, x:x + step]
-            if blk.mean() > 0.45:
-                lat, lon = m.ll_of((x + step / 2) * scale, (y + step / 2) * scale)
-                xl, zl = geo.ll_to_xz(lat, lon)
-                if abs(xl) < extent / 2 and abs(zl) < extent / 2:
-                    out.append([round(xl + rng.uniform(-6, 6), 1), round(zl + rng.uniform(-6, 6), 1),
-                                int(rng.uniform(22, 42)), int(rng.integers(0, 3)), 1])
-    return out
+            row = np.clip(((py - m.y0) / (m.y1 - m.y0) * m.h).astype(np.int32), 0, m.h - 1)
+            Image.fromarray(img[row[:, None], col[None, :]]).save(out_dir / f"ground_{r}_{c}.jpg", quality=85)
+    return {"tiles": tiles, "tile_px": tile_px, "tile_w": round(tw, 2), "tile_h": round(th, 2)}
 
 
 def main():
@@ -153,22 +145,18 @@ def main():
     B = json.load(open(DATA / "osm_buildings.geojson", encoding="utf-8"))
     R = json.load(open(DATA / "osm_roads_etc.geojson", encoding="utf-8"))
     rows = {r["osm_id"]: r for r in csv.DictReader(open(DATA / "buildings.csv", encoding="utf-8"))}
-    # 기본은 z19(여름 촬영, 녹색). z20 은 더 선명하지만 겨울 촬영분이라 --z20 옵션으로만 사용
-    z20 = DATA / "imagery" / "esri_z20.png"
-    if "--z20" in sys.argv and z20.exists():
-        png, bj = z20, DATA / "imagery" / "esri_z20.json"
-    else:
-        png, bj = DATA / "imagery" / "esri_z19.png", DATA / "imagery" / "esri_z19.json"
+    png, bj = DATA / "imagery" / "esri_z19.png", DATA / "imagery" / "esri_z19.json"
     mosaic = geo.MosaicBounds(bj); img = Image.open(png).convert("RGB")
+
     buildings, rings = [], []
     for f in B["features"]:
         if f["geometry"]["type"] != "Polygon":
             continue
         ring = f["geometry"]["coordinates"][0]; row = rows.get(f["id"], {})
-        rings.append(ring)
         poly = ring_to_local(ring)
-        if len(poly) < 3:
+        if len(poly) < 3 or not inside(centroid(poly)):
             continue
+        rings.append(ring)
         tags = f["properties"]
         buildings.append({
             "id": f["id"], "name": row.get("name", "") or tags.get("name", ""), "poly": poly,
@@ -176,46 +164,61 @@ def main():
             "h": round(float(row.get("height_m", 7) or 7) * geo.FT_PER_M, 1), "levels": int(row.get("levels", 2) or 2),
             "roof": roof_colour(mosaic, img, ring),
             "wall": classify_wall({**row, "building": tags.get("building", "yes")}),
-            "detail": row.get("detail_level", "mass"), "roof_shape": tags.get("roof:shape", "flat")})
+            "detail": row.get("detail_level", "mass"), "roof_shape": tags.get("roof:shape", "flat"),
+            "map_no": row.get("map_no", "")})
+
     roads, areas, trees = [], [], []
     for f in R["features"]:
         g, t = f["geometry"], f["properties"]
         if g["type"] == "LineString" and road_width(t):
-            roads.append({"pts": [[round(v, 2) for v in geo.ll_to_xz(p[1], p[0])] for p in g["coordinates"]],
-                          "w": road_width(t), "kind": "path" if t["highway"] in PATH_KINDS else "road"})
+            pts = [[round(v, 2) for v in geo.ll_to_xz(p[1], p[0])] for p in g["coordinates"]]
+            for run in clip_line(pts):
+                kind = "path" if t["highway"] in PATH_KINDS else "road"
+                mid = run[len(run) // 2]
+                surface = t.get("surface", "")
+                if kind == "path":
+                    surface = "pavers" if inside(mid, CORE) and surface in ("", "paving_stones", "paved") else "concrete"
+                roads.append({"pts": run, "w": road_width(t), "kind": kind, "hw": t["highway"], "surface": surface,
+                              "oneway": t.get("oneway") == "yes", "lanes": int(t["lanes"]) if str(t.get("lanes", "")).isdigit() else 0,
+                              "name": t.get("name", "")})
         elif g["type"] == "Polygon":
+            poly = ring_to_local(g["coordinates"][0])
+            if len(poly) < 3 or not inside(centroid(poly)):
+                continue
             kind = ("parking" if t.get("amenity") == "parking" else
                     "grass" if t.get("landuse") == "grass" or t.get("leisure") in ("park", "garden") else
                     "pitch" if t.get("leisure") in ("pitch", "track") else
                     "water" if t.get("natural") == "water" else
                     "wood" if t.get("natural") == "wood" else None)
             if kind == "wood":
-                # OSM 에는 개별 수관이 natural=wood 폴리곤으로 그려져 있음 → 작은 것은 나무 1그루로 변환
-                poly = ring_to_local(g["coordinates"][0]); a = abs(signed_area(poly))
-                if a < 3000 and len(poly) >= 3:
-                    cx = sum(q[0] for q in poly) / len(poly); cz = sum(q[1] for q in poly) / len(poly)
-                    trees.append([round(cx, 1), round(cz, 1), int(min(50, max(18, 1.4 * math.sqrt(a)))), len(trees) % 3, 2])
-                continue
+                continue                              # 수관 폴리곤은 영상 분류로 대체
             if kind:
-                areas.append({"poly": ring_to_local(g["coordinates"][0]), "kind": kind})
+                areas.append({"poly": poly, "kind": kind, "parking": t.get("parking", "surface")})
         elif g["type"] == "Point" and t.get("natural") == "tree":
             x, z = geo.ll_to_xz(g["coordinates"][1], g["coordinates"][0])
-            trees.append([round(x, 1), round(z, 1), 32, len(trees) % 3, 0])
-    img_trees = imagery_trees(DATA / "imagery" / "esri_z19.png", DATA / "imagery" / "esri_z19.json", rings)
-    # OSM 나무와 15 ft 이내로 겹치는 영상 추출 나무는 제거
-    cells = {(int(t[0] // 15), int(t[1] // 15)) for t in trees}
-    for t in img_trees:
-        cx, cz = int(t[0] // 15), int(t[1] // 15)
-        if not any((cx + i, cz + j) in cells for i in (-1, 0, 1) for j in (-1, 0, 1)):
+            if inside((x, z)):
+                trees.append([round(x, 1), round(z, 1), 34, len(trees) % 3, 0, 14])
+
+    print("classifying vegetation ...")
+    veg = vegetation.classify(png, bj, rings, CLIP)
+    cells = {(int(t[0] // 12), int(t[1] // 12)) for t in trees}
+    for t in veg["trees"]:
+        k = (int(t[0] // 12), int(t[1] // 12))
+        if not any((k[0] + i, k[1] + j) in cells for i in (-1, 0, 1) for j in (-1, 0, 1)):
             trees.append(t)
+    veg["grass_mask"] = vegetation.grass_mask_from_site(veg, buildings, roads, areas, CLIP)
+    tufts = vegetation.grass_tufts(veg["grass_mask"], veg["cell_ft"], veg["origin"])
+    Image.fromarray(veg["grass_mask"] * 255).save(OUT / "grass_mask.png")
+    Image.fromarray(veg["canopy_mask"] * 255).save(OUT / "canopy_mask.png")
     print("ground tiles from", png.name)
-    px_per_ft = ground_tiles(png, bj, OUT)
-    site = {"origin": list(geo.ORIGIN),
-            "ground": {"extent_ft": EXTENT, "tiles": TILES, "tile_px": TILE_PX, "px_per_ft": round(px_per_ft, 4)},
+    gt = ground_tiles(png, bj, OUT)
+    site = {"origin": list(geo.ORIGIN), "clip": list(CLIP), "core": list(CORE),
+            "ground": {**gt, "grass_mask": {"file": "grass_mask.png", "cell_ft": veg["cell_ft"], "w": int(veg["grass_mask"].shape[1]), "h": int(veg["grass_mask"].shape[0])}},
             "buildings": buildings, "roads": roads, "areas": areas, "trees": trees}
     json.dump(site, open(OUT / "site.json", "w"), separators=(",", ":"))
     json.dump(trees, open(OUT / "trees.json", "w"), separators=(",", ":"))
-    print(f"buildings {len(buildings)} roads {len(roads)} areas {len(areas)} trees {len(trees)} ground px/ft {px_per_ft:.3f}")
+    json.dump(tufts, open(OUT / "tufts.json", "w"), separators=(",", ":"))
+    print(f"buildings {len(buildings)} roads {len(roads)} areas {len(areas)} trees {len(trees)} tufts {len(tufts)}")
 
 
 if __name__ == "__main__":

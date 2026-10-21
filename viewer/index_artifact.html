@@ -54,13 +54,14 @@
     <label><input type="checkbox" id="tgTrees" checked> Trees</label>
     <label><input type="checkbox" id="tgMass" checked> Mass buildings</label>
     <label><input type="checkbox" id="tgLabels"> Labels</label>
-    <label><input type="checkbox" id="tgGround" checked> Ground imagery</label>
+    <label><input type="checkbox" id="tgGrass" checked> Grass</label>
+    <label><input type="checkbox" id="tgGround"> Satellite overlay</label>
     <label><input type="checkbox" id="tgShadow" checked> Shadows</label>
   </div>
   <div style="font-size:11px;color:var(--muted);margin-top:6px">Drag: orbit · Wheel: zoom · Right-drag: pan</div>
 </div>
 <div id="legend">
-  <b>How this model was made</b> — Buildings with construction drawings (Hulman Center, Student Recreation Center, Reeve Hall, Fine Arts, Technology Building, Welcome Center, former Nursing Building, Myers Technology Center) are modelled from the drawings. All other buildings are OpenStreetMap footprints extruded by storey count (published or estimated). Ground: Esri World Imagery; roads and lots: OSM; trees: OSM nodes + imagery classification. Units feet, X east, Z south, origin 39.4710 N 87.4100 W.
+  <b>How this model was made</b> — Buildings with construction drawings (Hulman Center, Student Recreation Center, Reeve Hall, Fine Arts, Technology Building, Welcome Center, former Nursing Building, Myers Technology Center) are modelled from the drawings. All other buildings are OpenStreetMap footprints extruded by storey count (published or estimated). Ground surfaces (brick-paved walks, concrete walks, asphalt streets with curbs and markings, striped parking lots, lamp posts) follow OSM geometry and Google Street View photos; trees are placed on tree crowns detected in Esri World Imagery; lawns fill the rest. Units feet, X east, Z south, origin 39.4710 N 87.4100 W.
 </div>
 <script>window.ASSET_BASE = 'assets/';</script>
 <script type="module" src="app.js"></script>

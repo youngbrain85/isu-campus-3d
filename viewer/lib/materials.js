@@ -28,6 +28,10 @@ export function makeMaterials(tex) {
   M.dark = new THREE.MeshStandardMaterial({ color: 0x3a3d42, roughness: 0.6, metalness: 0.4 });
   M.white = new THREE.MeshStandardMaterial({ color: 0xf2f1ec, roughness: 0.7 });
   M.ground_flat = new THREE.MeshStandardMaterial({ color: 0x8c9a74, roughness: 1.0 });
+  M.curb = std('curb', { roughness: 0.9 });
+  M.paintYellow = new THREE.MeshStandardMaterial({ color: 0xe8c23a, roughness: 0.7 });
+  M.paintWhite = new THREE.MeshStandardMaterial({ color: 0xf0f0ea, roughness: 0.7 });
+  M.bark = std('bark', { roughness: 0.95 });
   M._cache = new Map();
   return M;
 }

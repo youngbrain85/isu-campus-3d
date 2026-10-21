@@ -7,9 +7,9 @@ import { GLTFExporter } from 'three/addons/exporters/GLTFExporter.js';
 import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
 import * as G from './lib/geom.js';
 import { makeMaterials } from './lib/materials.js';
-import { buildGround, buildSchematic } from './lib/ground.js';
+import { buildGrassBase, buildImagery, buildPaving } from './lib/ground.js';
 import { buildMasses } from './lib/mass.js';
-import { buildTrees } from './lib/trees.js';
+import { buildTrees, buildGrassTufts } from './lib/trees.js';
 import { buildLabels } from './lib/labels.js';
 import { MODULES } from './buildings/index.js';
 
@@ -74,7 +74,7 @@ function setupSkyAndLights() {
 
 // ------------------------------------------------------------------ view presets (world ft)
 const PRESETS = {
-  campus: { pos: [-700, 2000, 2600], tgt: [0, 0, -150] },
+  campus: { pos: [-500, 1700, 2400], tgt: [220, 0, -150] },
 };
 // 건물 OSM id 로 프리셋 생성: 중심에서 방위 azDeg(0=남쪽에서 바라봄, 시계방향) 방향으로 dist 만큼 떨어져 높이 elev 에서 바라봄
 function lookAtBuilding(site, id, { dist = 420, elev = 180, azDeg = 0, tgtY = 20 } = {}) {
@@ -120,8 +120,9 @@ async function main() {
   PRESETS.towers = lookAtBuilding(site, 'way/283611919', { dist: 700, elev: 320, azDeg: -40, tgtY: 60 }); // Sycamore Towers
   const M = makeMaterials(tex);
   say('Building ground…');
-  const groundImg = buildGround(site, M, tex); scene.add(groundImg);
-  const schematic = buildSchematic(site, M); schematic.visible = false; scene.add(schematic);
+  const ground = buildGrassBase(site, M, tex); scene.add(ground);
+  const imagery = buildImagery(site, tex); imagery.visible = false; scene.add(imagery);
+  const paving = buildPaving(site, M, tex); scene.add(paving);
   say('Building masses…');
   // ?mod=buildings/foo.js : 레지스트리에 없는 모듈을 임시로 추가 로드 (모델링 중 미리보기용)
   const extraMod = params.get('mod');
@@ -133,7 +134,7 @@ async function main() {
   }
   const detailedIds = new Set();
   for (const [id, mod] of loaded) { detailedIds.add(id); for (const x of mod.meta.extraIds || []) detailedIds.add(x); }
-  const masses = buildMasses(site, M, detailedIds); scene.add(masses.group);
+  const masses = buildMasses(site, M, detailedIds, null); scene.add(masses.group);   // 지붕: 절차적 재질 (위성 텍스처는 흐릿해서 사용 안 함)
   const detailHeights = new Map();
   for (const [id, mod] of loaded) {
     say('Building detailed model: ' + mod.meta.name);
@@ -148,7 +149,9 @@ async function main() {
   }
   say('Placing trees…');
   const treeList = LOW ? site.trees.filter((_, i) => i % 2 === 0) : site.trees;
-  const trees = buildTrees(treeList, tex); scene.add(trees);
+  const trees = buildTrees(treeList, tex, M); scene.add(trees);
+  const tuftList = await (await fetch(ASSET + 'tufts.json')).json();
+  const tufts = buildGrassTufts(LOW ? tuftList.filter((_, i) => i % 2 === 0) : tuftList, tex); scene.add(tufts);
   const labels = buildLabels(site, detailHeights); labels.visible = false; scene.add(labels);
   const sun = setupSkyAndLights();
 
@@ -158,7 +161,8 @@ async function main() {
   tg('tgTrees', v => { trees.visible = v; });
   tg('tgMass', v => { masses.group.visible = v; });
   tg('tgLabels', v => { labels.visible = v; });
-  tg('tgGround', v => { groundImg.visible = v; schematic.visible = !v; });
+  tg('tgGround', v => { imagery.visible = v; });
+  tg('tgGrass', v => { tufts.visible = v; });
   tg('tgShadow', v => { sun.castShadow = v; renderer.shadowMap.needsUpdate = true; });
   const exBtn = document.getElementById('btnExport');
   if (exBtn) exBtn.addEventListener('click', async () => { exBtn.textContent = 'Exporting…'; const n = await exportGLB(); exBtn.textContent = 'GLB exported (' + (n / 1e6).toFixed(1) + ' MB)'; });
