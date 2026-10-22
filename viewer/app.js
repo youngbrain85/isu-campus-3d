@@ -342,6 +342,7 @@ async function main() {
   const tg = (id, fn) => { const el = document.getElementById(id); if (el) { el.addEventListener('change', () => { fn(el.checked); requestRender(); }); fn(el.checked); } };
   tg('tgTrees', v => { trees.visible = v; });
   let windOn = false; const wind = trees.userData.wind;
+  const windBox = document.getElementById('tgWind'); if (windBox && SHOT) windBox.checked = false;   // 기본 켜짐 (렌더 이미지는 재현성 위해 끔)
   tg('tgWind', v => { windOn = v; wind.uWind.value = v ? 1 : 0; });   // 바람: 켜면 매 프레임 렌더
   tg('tgMass', v => { masses.group.visible = v; });
   tg('tgLabels', v => { labels.visible = v; });
@@ -355,7 +356,12 @@ async function main() {
   const exBtn = document.getElementById('btnExport');
   if (exBtn) exBtn.addEventListener('click', async () => { exBtn.textContent = 'Exporting…'; const n = await exportGLB(); exBtn.textContent = 'GLB exported (' + (n / 1e6).toFixed(1) + ' MB)'; });
   const hud = document.getElementById('hud'), hudBtn = document.getElementById('hudToggle');
-  if (hud && hudBtn) hudBtn.addEventListener('click', () => { hud.classList.toggle('collapsed'); hudBtn.textContent = hud.classList.contains('collapsed') ? '▸' : '▾'; });
+  // 메뉴는 기본으로 접혀 있다. 제목 줄(또는 버튼)을 누르면 열리고, 버튼을 다시 누르면 접힌다
+  const setHud = (open) => { hud.classList.toggle('collapsed', !open); hudBtn.textContent = open ? '▾' : '▸ Menu'; hudBtn.title = open ? 'Collapse menu' : 'Open menu'; hudBtn.setAttribute('aria-expanded', String(open)); };
+  if (hud && hudBtn) {
+    hudBtn.addEventListener('click', (e) => { e.stopPropagation(); setHud(hud.classList.contains('collapsed')); });
+    hud.querySelector('h1').addEventListener('click', () => { if (hud.classList.contains('collapsed')) setHud(true); });
+  }
 
   console.log('site:', site.buildings.length, 'buildings,', masses.byId.size, 'masses,', detailedIds.size, 'detailed,', treeList.length, 'trees, mass tris', masses.tris);
   applyPreset(SHOT || 'campus');
