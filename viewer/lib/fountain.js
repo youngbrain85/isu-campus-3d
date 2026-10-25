@@ -66,6 +66,19 @@ function paverTexture() {
   const tex = new THREE.CanvasTexture(cv); tex.wrapS = tex.wrapT = THREE.RepeatWrapping; tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 8;
   return tex;
 }
+function streakTexture() {
+  // 가로(u) = 물줄기 진행 방향. 물방울 덩어리가 듬성듬성 이어지는 알파 무늬 (흰색 = 보임)
+  const W = 256, H = 16, cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+  const x = cv.getContext('2d'); x.fillStyle = '#262626'; x.fillRect(0, 0, W, H);   // 바탕도 옅게 보여 물줄기가 끊겨 보이지 않게
+  let s = 11; const r = () => (s = (s * 16807) % 2147483647) / 2147483647;
+  for (let i = 0; i < 14; i++) {
+    const cx = (i + r() * 0.5) / 14 * W, w = 4 + r() * 7, g = x.createLinearGradient(cx - w, 0, cx + w, 0);
+    g.addColorStop(0, 'rgba(255,255,255,0)'); g.addColorStop(0.5, `rgba(255,255,255,${0.55 + r() * 0.45})`); g.addColorStop(1, 'rgba(255,255,255,0)');
+    x.fillStyle = g; x.fillRect(cx - w, 0, 2 * w, H); x.fillRect(cx - w - W, 0, 2 * w, H); x.fillRect(cx - w + W, 0, 2 * w, H);
+  }
+  const t = new THREE.CanvasTexture(cv); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(2, 1);
+  return t;
+}
 function latticeTexture() {
   const N = 128, cv = document.createElement('canvas'); cv.width = cv.height = N;
   const x = cv.getContext('2d'); x.strokeStyle = '#f1efe9'; x.lineWidth = 9;
@@ -98,6 +111,11 @@ export function buildFountain(M, tex) {
   const floor = new THREE.MeshStandardMaterial({ map: starTexture(), roughness: 0.7, name: 'fountain_floor' });
   const water = new THREE.MeshPhysicalMaterial({ color: 0x31505c, roughness: 0.04, metalness: 0.0, transmission: 0, transparent: true, opacity: 0.82, envMapIntensity: 1.4, name: 'fountain_water' });
   const spray = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0x9aaab4, emissiveIntensity: 0.5, transparent: true, opacity: 0.85, roughness: 0.2, depthWrite: false, name: 'fountain_spray' });
+  // 물줄기 애니메이션: 관(Tube)의 UV.x 는 물줄기 진행 방향 → 물방울 무늬 alphaMap 을 흘려 보낸다
+  const streak = streakTexture();
+  const jet = spray.clone(); jet.name = 'fountain_jets'; jet.alphaMap = streak; jet.alphaTest = 0.02; jet.opacity = 0.9;
+  const column = spray.clone(); column.name = 'fountain_column'; column.alphaMap = streak.clone(); column.alphaMap.repeat.set(1, 3); column.alphaMap.needsUpdate = true; column.alphaTest = 0.02;
+  water.normalMap = tex('asphalt_n.jpg', { srgb: false }); water.normalMap = water.normalMap.clone(); water.normalMap.repeat.set(6, 6); water.normalMap.needsUpdate = true; water.normalScale = new THREE.Vector2(0.25, 0.25);
   const lattice = new THREE.MeshStandardMaterial({ map: latticeTexture(), alphaTest: 0.5, transparent: false, side: THREE.DoubleSide, roughness: 0.6, name: 'fountain_lattice' });
   lattice.map.repeat.set(1, 1);
   const metal = M.dark;
@@ -142,13 +160,12 @@ export function buildFountain(M, tex) {
     for (const r of [P0, P1]) add(limestone, ringWall(r, a, b, PH + 0.5, PH + 1.3));
   }
   // ---- 물줄기: 중앙 수직 + 아치 24 개
-  { const g = new THREE.CylinderGeometry(0.25, 0.7, 9, 10, 1, true); g.translate(C[0], 0.95 + 4.5, C[1]); add(spray, g);
-    const t = new THREE.SphereGeometry(1.4, 12, 8); t.scale(1, 0.7, 1); t.translate(C[0], 10, C[1]); add(spray, t); }
+  // 중앙 물줄기는 높이를 맥동시키므로 별도 메시 (아래 colMesh)
   for (let i = 0; i < 24; i++) {
     const a = i / 24 * Math.PI * 2, s = [Math.cos(a), Math.sin(a)];
     const p0 = new THREE.Vector3(C[0] + s[0] * 25.5, 1.0, C[1] + s[1] * 25.5), p2 = new THREE.Vector3(C[0] + s[0] * 13, 1.0, C[1] + s[1] * 13);
     const p1 = new THREE.Vector3(C[0] + s[0] * 19, 7.5, C[1] + s[1] * 19);
-    add(spray, new THREE.TubeGeometry(new THREE.QuadraticBezierCurve3(p0, p1, p2), 14, 0.32, 6, false));
+    add(jet, new THREE.TubeGeometry(new THREE.QuadraticBezierCurve3(p0, p1, p2), 14, 0.32, 6, false));
   }
   // ---- 벤치 6, 가로등 4 (포장 원판 바깥 띠 위)
   for (let i = 0; i < 6; i++) {
@@ -165,9 +182,24 @@ export function buildFountain(M, tex) {
   const G = new THREE.Group(); G.name = 'fountain';
   for (const [mat, gs] of parts) {
     const m = new THREE.Mesh(BufferGeometryUtils.mergeGeometries(gs), mat);
-    m.receiveShadow = true; m.castShadow = ![water, spray, grass, mulch, pavers, charcoal, floor].includes(mat); m.name = mat.name || 'fountain';
+    m.receiveShadow = true; m.castShadow = ![water, spray, jet, grass, mulch, pavers, charcoal, floor].includes(mat); m.name = mat.name || 'fountain';
     G.add(m);
   }
+  // 중앙 수직 물줄기 + 물보라 (원점 = 수면, 높이 1 단위로 만들고 scale.y 로 맥동)
+  const colG = new THREE.CylinderGeometry(0.25, 0.7, 1, 10, 1, true); colG.translate(0, 0.5, 0);
+  const colMesh = new THREE.Mesh(colG, column); colMesh.position.set(C[0], 0.95, C[1]); colMesh.scale.set(1, 9, 1); colMesh.name = 'fountain_column';
+  const crown = new THREE.Mesh(new THREE.SphereGeometry(1.4, 12, 8), spray); crown.scale.set(1, 0.7, 1); crown.name = 'fountain_crown';
+  G.add(colMesh, crown);
+  /** t = 초. 물방울 무늬를 흘리고, 중앙 물줄기 높이(8.2~10 ft)를 맥동, 수면 잔물결 이동 */
+  G.userData.update = (t) => {
+    streak.offset.x = -t * 1.6;                       // 아치 물줄기: 테두리 → 중심 방향으로 흐름
+    column.alphaMap.offset.y = -t * 2.2;              // 중앙 물줄기: 위로 솟음
+    const h = 9 + 0.8 * Math.sin(t * 2.3) + 0.3 * Math.sin(t * 5.1);
+    colMesh.scale.y = h; crown.position.set(C[0], 0.95 + h + 0.2, C[1]);
+    const s = 1 + 0.12 * Math.sin(t * 4.7); crown.scale.set(s, 0.7 * s, s);
+    water.normalMap.offset.set(t * 0.03, t * 0.021);
+  };
+  G.userData.update(0);
   return G;
 }
 

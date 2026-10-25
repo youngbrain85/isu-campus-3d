@@ -350,7 +350,9 @@ async function main() {
   tg('tgTrees', v => { trees.visible = v; });
   let windOn = false; const wind = trees.userData.wind;
   const windBox = document.getElementById('tgWind'); if (windBox && SHOT) windBox.checked = false;   // 기본 켜짐 (렌더 이미지는 재현성 위해 끔)
-  tg('tgWind', v => { windOn = v; wind.uWind.value = v ? 1 : 0; });   // 바람: 켜면 매 프레임 렌더
+  tg('tgWind', v => { windOn = v; wind.uWind.value = v ? 1 : 0; });
+  let fountainOn = false; const fBox = document.getElementById('tgFountain'); if (fBox && SHOT) fBox.checked = false;
+  tg('tgFountain', v => { fountainOn = v; if (!v) fountain.userData.update(0); });   // 바람: 켜면 매 프레임 렌더
   tg('tgMass', v => { masses.group.visible = v; });
   tg('tgLabels', v => { labels.visible = v; });
   tg('tgGround', v => { imagery.visible = v; });
@@ -383,6 +385,7 @@ async function main() {
   function animate() {
     controls.update();                                   // 감쇠 중이면 change 이벤트 → requestRender
     if (windOn) { wind.uTime.value = performance.now() / 1000; requestRender(1); }
+    if (fountainOn) { fountain.userData.update(performance.now() / 1000); requestRender(1); }   // 분수 물줄기 애니메이션
     if (dirty > 0) {
       dirty--;
       if (camera.position.y < 6) camera.position.y = 6;
