@@ -1,1 +1,814 @@
-{"note":"손 판독 포장면. tools 없이 직접 편집. 좌표 ft (x 동, z 남). surface: concrete | brick | charcoal","items":[]}
+{
+"note": "손 판독 포장면. scratch/entrances/items.py 로 생성. 좌표 ft (x 동, z 남). surface: concrete | brick | charcoal",
+"items": [
+{
+"id": "normal_nw_landing",
+"building": "way/545265790",
+"type": "apron",
+"poly": [
+[
+386,
+357
+],
+[
+399,
+357
+],
+[
+399,
+377
+],
+[
+386,
+377
+]
+],
+"surface": "concrete",
+"src": "z20: light landing where OSM diagonal ends, beside the NW re-entrant corner (dark areaway/stair at x399-411)"
+},
+{
+"id": "normal_south_steps",
+"building": "way/545265790",
+"type": "apron",
+"poly": [
+[
+424,
+488
+],
+[
+458,
+488
+],
+[
+458,
+496
+],
+[
+448,
+496
+],
+[
+448,
+505
+],
+[
+434,
+505
+],
+[
+434,
+496
+],
+[
+424,
+496
+]
+],
+"surface": "concrete",
+"src": "z20+z19: light stair landing between planters, centred on south face (x441)"
+},
+{
+"id": "stalker_south_landing",
+"building": "way/461428312",
+"type": "apron",
+"poly": [
+[
+297,
+314
+],
+[
+327,
+314
+],
+[
+327,
+322
+],
+[
+297,
+322
+]
+],
+"surface": "concrete",
+"src": "z20/z19: white steps + landing at south door (hip-roof pavilion)"
+},
+{
+"id": "stalker_south_walk",
+"building": "way/461428312",
+"type": "walk",
+"pts": [
+[
+311,
+322
+],
+[
+311,
+348
+]
+],
+"w": 12,
+"surface": "concrete",
+"src": "z19 summer: 12ft walk between curved planters to quad walk z~348"
+},
+{
+"id": "stalker_south_east_walk",
+"building": "way/461428312",
+"type": "walk",
+"pts": [
+[
+361,
+314
+],
+[
+361,
+346
+]
+],
+"w": 6,
+"surface": "concrete",
+"src": "z20+z19: 6ft N-S walk off SE door to quad walk"
+},
+{
+"id": "stalker_north_plaza",
+"building": "way/461428312",
+"type": "apron",
+"poly": [
+[
+278,
+205
+],
+[
+348,
+205
+],
+[
+348,
+232
+],
+[
+278,
+232
+]
+],
+"surface": "concrete",
+"src": "holm drone ortho (cam 277,48,132,29): concrete plaza in north notch with sculpture"
+},
+{
+"id": "stalker_north_nw_diag",
+"building": "way/461428312",
+"type": "walk",
+"pts": [
+[
+290,
+207
+],
+[
+257,
+172
+]
+],
+"w": 10,
+"surface": "concrete",
+"src": "holm drone ortho: 45deg walk NW from plaza to E-W walk"
+},
+{
+"id": "stalker_north_ne_diag",
+"building": "way/461428312",
+"type": "walk",
+"pts": [
+[
+336,
+207
+],
+[
+359,
+174
+],
+[
+359,
+163
+]
+],
+"w": 10,
+"surface": "concrete",
+"src": "holm drone ortho: diagonal NE from plaza then N to E-W walk"
+},
+{
+"id": "root_court_diag",
+"building": "way/461428309",
+"type": "walk",
+"pts": [
+[
+632,
+-232
+],
+[
+707,
+-307
+]
+],
+"w": 8,
+"surface": "concrete",
+"src": "z20+z19: 45deg courtyard walk from south quad walk to NE inner corner"
+},
+{
+"id": "root_court_ne_landing",
+"building": "way/461428309",
+"type": "apron",
+"poly": [
+[
+703,
+-323
+],
+[
+725,
+-323
+],
+[
+725,
+-306
+],
+[
+703,
+-306
+]
+],
+"surface": "concrete",
+"src": "z20 light landing at courtyard inner-corner door; z19 walk stub"
+},
+{
+"id": "root_se_door",
+"building": "way/461428309",
+"type": "apron",
+"poly": [
+[
+748,
+-246
+],
+[
+766,
+-246
+],
+[
+766,
+-232
+],
+[
+748,
+-232
+]
+],
+"surface": "concrete",
+"src": "z20: paving from SE wing porch (notch x745-769) to E-W walk"
+},
+{
+"id": "holm_nw_landing",
+"building": "way/461428308",
+"type": "apron",
+"poly": [
+[
+284,
+-234
+],
+[
+300,
+-234
+],
+[
+300,
+-221
+],
+[
+284,
+-221
+]
+],
+"surface": "concrete",
+"src": "z20+z19: paved NW re-entrant corner at west door"
+},
+{
+"id": "holm_nw_link",
+"building": "way/461428308",
+"type": "walk",
+"pts": [
+[
+266,
+-210
+],
+[
+286,
+-228
+]
+],
+"w": 10,
+"surface": "concrete",
+"src": "z20+z19: paved fillet from west OSM walk to NW door"
+},
+{
+"id": "holm_sw_apron",
+"building": "way/461428308",
+"type": "apron",
+"poly": [
+[
+281,
+-67
+],
+[
+301,
+-67
+],
+[
+301,
+-52
+],
+[
+281,
+-52
+]
+],
+"surface": "concrete",
+"src": "z20+z19: light paving in SW recess from OSM walk to door"
+},
+{
+"id": "library_south_walk",
+"building": "way/349907334",
+"type": "walk",
+"pts": [
+[
+312.5,
+-517
+],
+[
+312.5,
+-466
+]
+],
+"w": 8,
+"surface": "concrete",
+"src": "z20+z19: walk from south face (beside light-well) to E-W walk z-466"
+},
+{
+"id": "tirey_plaza_upper",
+"building": "way/545265796",
+"type": "apron",
+"poly": [
+[
+500,
+801
+],
+[
+555,
+801
+],
+[
+555,
+786
+],
+[
+668,
+786
+],
+[
+668,
+845
+],
+[
+500,
+845
+]
+],
+"surface": "concrete",
+"src": "z20 + tirey drone ortho (cam 598.6,20,878,0): grey-paver plaza along Tirey south face, picnic tables at west end; lawn strip x500-555 z786-801 left out"
+},
+{
+"id": "tirey_plaza_main",
+"building": "way/545265796",
+"type": "apron",
+"poly": [
+[
+560,
+845
+],
+[
+636,
+845
+],
+[
+636,
+905
+],
+[
+560,
+905
+]
+],
+"surface": "concrete",
+"src": "z20 + tirey drone ortho: central square with planter + umbrellas, down to planters at z~905"
+},
+{
+"id": "ring_lawn_circle",
+"building": "way/545265791",
+"type": "walk",
+"pts": [
+[
+665.0,
+456.0
+],
+[
+664.1,
+466.2
+],
+[
+661.4,
+476.2
+],
+[
+657.1,
+485.5
+],
+[
+651.2,
+493.9
+],
+[
+643.9,
+501.2
+],
+[
+635.5,
+507.1
+],
+[
+626.2,
+511.4
+],
+[
+616.2,
+514.1
+],
+[
+606.0,
+515.0
+],
+[
+595.8,
+514.1
+],
+[
+585.8,
+511.4
+],
+[
+576.5,
+507.1
+],
+[
+568.1,
+501.2
+],
+[
+560.8,
+493.9
+],
+[
+554.9,
+485.5
+],
+[
+550.6,
+476.2
+],
+[
+547.9,
+466.2
+],
+[
+547.0,
+456.0
+],
+[
+547.9,
+445.8
+],
+[
+550.6,
+435.8
+],
+[
+554.9,
+426.5
+],
+[
+560.8,
+418.1
+],
+[
+568.1,
+410.8
+],
+[
+576.5,
+404.9
+],
+[
+585.8,
+400.6
+],
+[
+595.8,
+397.9
+],
+[
+606.0,
+397.0
+],
+[
+616.2,
+397.9
+],
+[
+626.2,
+400.6
+],
+[
+635.5,
+404.9
+],
+[
+643.9,
+410.8
+],
+[
+651.2,
+418.1
+],
+[
+657.1,
+426.5
+],
+[
+661.4,
+435.8
+],
+[
+664.1,
+445.8
+],
+[
+665.0,
+456.0
+]
+],
+"w": 12,
+"surface": "concrete",
+"src": "z20+z19: circular 12ft ring walk (outer r65, inner r53) around lawn E of Normal Hall; joins OSM walks at NW/N/SW/SE"
+},
+{
+"id": "ring_lawn_ne_plaza",
+"building": "way/545265791",
+"type": "apron",
+"poly": [
+[
+600,
+440
+],
+[
+600,
+397.3
+],
+[
+606.0,
+397.0
+],
+[
+614.2,
+397.6
+],
+[
+622.3,
+399.3
+],
+[
+630.0,
+402.1
+],
+[
+637.3,
+406.0
+],
+[
+643.9,
+410.8
+],
+[
+649.8,
+416.5
+],
+[
+654.9,
+423.0
+],
+[
+659.0,
+430.1
+],
+[
+662.1,
+437.8
+],
+[
+662.8,
+440
+]
+],
+"surface": "concrete",
+"src": "z20+z19: NE quadrant of ring paved solid down to z440 (small round feature at 612,432)"
+},
+{
+"id": "ring_lawn_diag",
+"building": "way/545265791",
+"type": "walk",
+"pts": [
+[
+550,
+498
+],
+[
+605,
+436
+]
+],
+"w": 10,
+"surface": "concrete",
+"src": "z20+z19: diagonal walk across ring lawn SW->NE plaza"
+},
+{
+"id": "career_west_plaza",
+"building": "way/461428311",
+"type": "apron",
+"poly": [
+[
+12,
+291
+],
+[
+52,
+291
+],
+[
+52,
+333
+]
+],
+"surface": "concrete",
+"src": "z20+z19: light paved right-triangle between diagonal walk and SW face; zig-zag steps along north edge"
+},
+{
+"id": "reeve_w_court_terrace",
+"building": "way/1348752763",
+"type": "apron",
+"poly": [
+[
+-155,
+-815
+],
+[
+-83,
+-815
+],
+[
+-83,
+-797
+],
+[
+-155,
+-797
+]
+],
+"surface": "concrete",
+"src": "z20+z19: paved terrace in west courtyard along north-wing south face, down to OSM walk"
+},
+{
+"id": "reeve_e_court_terrace",
+"building": "way/544686556",
+"type": "apron",
+"poly": [
+[
+88,
+-815
+],
+[
+158,
+-815
+],
+[
+158,
+-797
+],
+[
+88,
+-797
+]
+],
+"surface": "concrete",
+"src": "z20+z19: paved terrace in east courtyard along north-wing south face, down to OSM walk"
+},
+{
+"id": "scott_south_sidewalk",
+"building": "way/640437205",
+"type": "walk",
+"pts": [
+[
+566,
+1430
+],
+[
+800,
+1430
+]
+],
+"w": 10,
+"surface": "concrete",
+"src": "z20+z19: light sidewalk band between south facade (z~1425) and south drive/parking; no OSM line"
+},
+{
+"id": "gillum_mall_walk",
+"building": "way/461428314",
+"type": "walk",
+"pts": [
+[
+6.5,
+728
+],
+[
+6.5,
+925
+]
+],
+"w": 8,
+"surface": "concrete",
+"src": "z20 winter: long N-S walk in the mall west of Gillum (hidden by canopy in z19); no OSM line"
+},
+{
+"id": "gillum_west_upper",
+"building": "way/461428314",
+"type": "walk",
+"pts": [
+[
+29,
+733
+],
+[
+35,
+795
+]
+],
+"w": 8,
+"surface": "concrete",
+"src": "z20: walk hugging west face from E-W walk to the round bay (slightly off-grid, as measured)"
+},
+{
+"id": "gillum_west_lower",
+"building": "way/461428314",
+"type": "walk",
+"pts": [
+[
+44,
+834
+],
+[
+21,
+926
+]
+],
+"w": 8,
+"surface": "concrete",
+"src": "z20: walk leaving south of the round bay diagonally SW to E-W walk z~925"
+},
+{
+"id": "dreiser_sw_plaza",
+"building": "way/461428313",
+"type": "apron",
+"poly": [
+[
+4,
+688
+],
+[
+46,
+688
+],
+[
+46,
+706
+],
+[
+4,
+706
+]
+],
+"surface": "concrete",
+"src": "z20 winter (light paving with curved bench) + z19: paved corner plaza between SW door and walks at z708/x17"
+}
+]
+}
