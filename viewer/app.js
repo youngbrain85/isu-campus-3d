@@ -6,9 +6,10 @@ import { GLTFExporter } from 'three/addons/exporters/GLTFExporter.js';
 import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
 import * as G from './lib/geom.js';
 import { makeMaterials } from './lib/materials.js';
-import { buildGrassBase, buildImagery, buildPaving } from './lib/ground.js';
+import { buildGrassBase, buildImagery, buildPaving, buildHardscape, hardscapeCover } from './lib/ground.js';
 import { buildStreet } from './lib/street.js';
 import { buildSports, sportsCover } from './lib/sports.js';
+import { buildFountain, fountainCover } from './lib/fountain.js';
 import { buildMasses } from './lib/mass.js';
 import { buildTrees, buildGrassTufts } from './lib/trees.js';
 import { buildLabels } from './lib/labels.js';
@@ -286,6 +287,11 @@ async function main() {
     site.areas = site.areas.filter(a => a.kind !== 'pitch');
   } catch (e) { console.error('sports layer failed', e); }
   const paving = buildPaving(site, M, tex); scene.add(paving);
+  const fountain = buildFountain(M, tex); scene.add(fountain);
+  // 손 판독 포장면 (건물 입구 앞마당·광장·OSM 에 없는 보도) — assets/hardscape.json
+  let inHard = null;
+  try { const hj = await (await fetch(ASSET + 'hardscape.json')).json(); scene.add(buildHardscape(hj, M, tex)); inHard = hardscapeCover(hj); }
+  catch (e) { console.warn('hardscape layer not loaded', e); }   // Dede Plaza 분수 광장 (드론 파노라마 기준)
   // 가로 레이어: 영상 검출 주차 차량, 횡단보도·정지선·화살표·황색 연석, 신호·표지·소화전·벤치 등 (tools/street_data.py → street.json)
   let street = null;
   try {
@@ -326,6 +332,7 @@ async function main() {
   const trees = buildTrees(treeList, tex, M); scene.add(trees);
   let tuftList = await (await fetch(ASSET + 'tufts.json')).json();
   if (inSports) tuftList = tuftList.filter(t => !inSports(t[0], t[1]));   // 코트·내야 위 풀 포기 제거
+  tuftList = tuftList.filter(t => !fountainCover(t[0], t[1], 1) && !(inHard && inHard(t[0], t[1])));          // 분수 광장 포장·화단 위 풀 포기 제거
   const tufts = buildGrassTufts(LOW ? tuftList.filter((_, i) => i % 2 === 0) : tuftList, tex); scene.add(tufts);
   const labels = buildLabels(site, detailHeights); labels.visible = false; scene.add(labels);
   const sun = makeSun(renderer, scene, camera, { low: LOW });

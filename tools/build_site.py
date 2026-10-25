@@ -184,7 +184,8 @@ def main():
                 mid = run[len(run) // 2]
                 surface = t.get("surface", "")
                 if kind == "path":
-                    surface = "pavers" if inside(mid, CORE) and surface in ("", "paving_stones", "paved") else "concrete"
+                    # 드론 파노라마(2024): 캠퍼스 보도는 대부분 콘크리트, 벽돌은 일부 구간뿐 → OSM 이 벽돌로 표시한 것만 벽돌
+                    surface = "brick" if surface in ("paving_stones", "brick", "sett") else "concrete"
                 roads.append({"pts": run, "w": road_width(t), "kind": kind, "hw": t["highway"], "surface": surface,
                               "oneway": t.get("oneway") == "yes", "lanes": int(t["lanes"]) if str(t.get("lanes", "")).isdigit() else 0,
                               "name": t.get("name", "")})

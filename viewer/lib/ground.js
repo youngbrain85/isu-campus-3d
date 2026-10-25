@@ -1,5 +1,5 @@
 // 지면: 잔디 기본면 + 차도(아스팔트·경계석·차선) + 보도(벽돌 포장/콘크리트) + 주차장(아스팔트·주차선) + 가로등. (차량·가로 시설은 street.js)
-// 위성영상 타일은 선택적 오버레이(기본 꺼짐). 스트리트뷰(2020–2023) 확인: 핵심부 보도 벽돌 포장, 외곽 콘크리트, 경계석, 검은 가로등.
+// 위성영상 타일은 선택적 오버레이(기본 꺼짐). 보도: 드론 파노라마(2024) 확인 — 대부분 콘크리트, OSM 이 벽돌로 표시한 구간만 벽돌.
 import * as THREE from 'three';
 import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
 import { capGeometry, mergeByMaterial, box } from './geom.js';
@@ -72,7 +72,7 @@ export function buildPaving(site, M, tex) {
         if (r.hw === 'primary' || r.hw === 'trunk' || r.hw === 'secondary') for (const side of [-1, 1]) white.push(dashed(r.pts, side * (r.w / 2 - 1.2), 0.4, 1e6, 0, Y_ROAD + Y_LINE));
       }
     } else {
-      (r.surface === 'pavers' ? paths.pavers : paths.concrete).push(ribbon(r.pts, r.w, Y_PATH));
+      (r.surface === 'brick' || r.surface === 'pavers' ? paths.pavers : paths.concrete).push(ribbon(r.pts, r.w, Y_PATH));
     }
   }
   for (const a of site.areas) {
@@ -230,3 +230,39 @@ function pointInPoly(p, poly) {
 }
 function scaleUV(g, k) { const uv = g.attributes.uv; for (let i = 0; i < uv.count; i++) uv.setXY(i, uv.getX(i) * k, uv.getY(i) * k); return g; }
 function norm2(x, z) { const l = Math.hypot(x, z) || 1; return [x / l, z / l]; }
+
+/** 손으로 판독한 포장면 (data → assets/hardscape.json): 건물 입구 앞마당·광장·OSM 에 없는 보도.
+ *  items: {type:'walk', pts, w, surface} | {type:'apron', poly, surface} | {type:'circle', c, r, surface}
+ *  surface: 'concrete'(기본) | 'brick' | 'charcoal'. 좌표 ft. 근거는 각 항목의 src (위성 z20·스트리트뷰·드론). */
+export function buildHardscape(data, M, tex) {
+  const Y = 0.37, by = { concrete: [], brick: [], charcoal: [] };
+  for (const it of (data && data.items) || []) {
+    let g = null;
+    try {
+      if (it.type === 'walk' && it.pts && it.pts.length > 1) g = scaleUV(ribbon(it.pts, it.w || 6, Y), 24 / 5);
+      else if (it.type === 'apron' && it.poly && it.poly.length > 2) g = capGeometry(it.poly, [], Y, 1 / 5);
+      else if (it.type === 'circle') { const p = []; for (let i = 0; i < 40; i++) { const a = -i / 40 * Math.PI * 2; p.push([it.c[0] + Math.cos(a) * it.r, it.c[1] + Math.sin(a) * it.r]); } g = capGeometry(p, [], Y, 1 / 5); }
+    } catch (e) { console.warn('hardscape item failed', it.id, e); }
+    if (g) (by[it.surface] || by.concrete).push(g);
+  }
+  const walk = M.walk.clone(); walk.color = new THREE.Color(0.86, 0.86, 0.86);
+  const brick = new THREE.MeshStandardMaterial({ map: tex('pavers.jpg'), roughness: 0.9, color: 0xd9c4b0 });
+  const charcoal = new THREE.MeshStandardMaterial({ map: tex('asphalt.jpg'), color: 0x8a8c90, roughness: 0.9 });
+  const parts = [];
+  if (by.concrete.length) parts.push({ geom: BufferGeometryUtils.mergeGeometries(by.concrete), mat: walk, cast: false, name: 'hardscape_concrete' });
+  if (by.brick.length) parts.push({ geom: BufferGeometryUtils.mergeGeometries(by.brick), mat: brick, cast: false, name: 'hardscape_brick' });
+  if (by.charcoal.length) parts.push({ geom: BufferGeometryUtils.mergeGeometries(by.charcoal), mat: charcoal, cast: false, name: 'hardscape_charcoal' });
+  const grp = new THREE.Group(); grp.name = 'hardscape';
+  for (const m of mergeByMaterial(parts)) grp.add(m);
+  return grp;
+}
+
+/** 손 판독 포장면 위인지 (풀 포기 제거용) */
+export function hardscapeCover(data) {
+  const items = (data && data.items) || [];
+  const pip = (p, x, z) => { let c = false; for (let i = 0, j = p.length - 1; i < p.length; j = i++) { const a = p[i], b = p[j]; if ((a[1] > z) !== (b[1] > z) && x < (b[0] - a[0]) * (z - a[1]) / (b[1] - a[1]) + a[0]) c = !c; } return c; };
+  const segd = (x, z, a, b) => { const dx = b[0] - a[0], dz = b[1] - a[1], L = dx * dx + dz * dz || 1e-9; const t = Math.max(0, Math.min(1, ((x - a[0]) * dx + (z - a[1]) * dz) / L)); return Math.hypot(x - a[0] - t * dx, z - a[1] - t * dz); };
+  return (x, z) => items.some(it => it.type === 'apron' ? pip(it.poly, x, z)
+    : it.type === 'circle' ? Math.hypot(x - it.c[0], z - it.c[1]) < it.r
+    : it.type === 'walk' ? it.pts.some((p, i) => i > 0 && segd(x, z, it.pts[i - 1], p) < (it.w || 6) / 2 + 1) : false);
+}
