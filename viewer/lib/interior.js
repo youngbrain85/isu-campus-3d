@@ -4,6 +4,7 @@
 // 단면 보기: setFloor(name) → 외부 껍데기·위층을 숨기고 해당 층 천장을 숨김. setFloor(null) → 원래대로.
 import * as THREE from 'three';
 import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
+import { buildContents, contentsByRoom } from './interior_contents.js';
 
 const NL = String.fromCharCode(10);
 const toShape = (poly, holes = []) => {
@@ -258,7 +259,8 @@ export function buildInterior(data, M, tex) {
     const C = new THREE.Group(); C.name = 'ceiling';
     for (const [m, gs] of ceil) { const mesh = new THREE.Mesh(BufferGeometryUtils.mergeGeometries(gs), m); mesh.receiveShadow = true; mesh.name = m.name; C.add(mesh); }
     G.add(C);
-    floors[fl.name] = { group: G, y, H, ceiling: C };
+    G.add(buildContents(fl, cut));        // 2 단계: 장비·캐비닛·위생기구·가구 (A-701/702/704, A-501, 추정 배치)
+    floors[fl.name] = { group: G, y, H, ceiling: C, contents: contentsByRoom(fl) };
     root.add(G);
   }
   // 실내는 하늘 환경광(PMREM)을 그대로 받으면 하얗게 날아가므로 줄인다 (실내는 천장 조명·창으로 밝다는 가정)

@@ -423,11 +423,17 @@ async function main() {
     if (!o) return false;
     const panel = document.getElementById('info'), body = document.getElementById('infoBody'), r = o.r, mt = (c) => (c && interior.userData.materials && interior.userData.materials[c]) ? interior.userData.materials[c].desc : c;
     const row = (k, v) => v ? `<dt>${k}</dt><dd>${String(v).replace(/[&<>]/g, '')}</dd>` : '';
+    const cs = (interior.userData.floors[interiorFloor].contents || {})[r.no];
+    // 가구: 도면(A-701/702)에 그려진 것 vs 용도별 추정 배치
+    const contentsRows = (c) => !c ? (r.furniture_estimated ? row('Furniture', 'estimated layout') : '') :
+      row('Furniture', c.furniture ? (r.furniture_estimated || c.estimated ? 'estimated layout' : c.furniture + ' items (drawn on A-701/702)') : (r.furniture_estimated ? 'estimated layout' : '')) +
+      row('Equipment', c.equipment ? c.equipment + ' items' + (c.tags.length ? ': ' + c.tags.slice(0, 4).join(', ') + (c.equipment > 4 ? ', …' : '') : '') : '') +
+      row('Casework', c.casework ? c.casework + ' items (A-501 / plan)' : '') + row('Fixtures', c.fixtures ? c.fixtures + ' items' : '');
     body.innerHTML = `<h2>${(r.name || 'Room').replace(/[&<>]/g, '')}</h2><span class="tag">Technology Building · ${interiorFloor.toLowerCase()} floor</span><dl>` +
       row('Room no.', r.no) + row('Area', r.area ? Math.round(r.area) + ' sf' + (r.area_label ? ' (drawing: ' + r.area_label + ' sf)' : '') : '') +
       row('Ceiling height', r._ch ? r._ch.toFixed(1) + ' ft' + (r._ch > 20 ? ' (double height)' : r.ch_source === 'default' || !r.ch ? ' (estimated)' : '') : '') +
-      row('Floor', mt(r.floor)) + row('Wall', mt(r.wall)) + row('Ceiling', mt(r.ceiling)) +
-      `</dl><div class="src"><b>From:</b> RATIO cTED construction set 2025 (A-100…A-102 plans, A-131/132 ceilings, A-151/152 + A-650 finishes)</div>`;
+      row('Floor', mt(r.floor)) + row('Wall', mt(r.wall)) + row('Ceiling', mt(r.ceiling)) + contentsRows(cs) +
+      `</dl><div class="src"><b>From:</b> RATIO cTED construction set 2025 (A-100…A-102 plans, A-131/132 ceilings, A-151/152 + A-650 finishes, A-701/702 + A-704 equipment, A-501 elevations)</div>`;
     panel.classList.add('open'); requestRender(); return true;
   };
 
@@ -485,6 +491,8 @@ async function main() {
     if (!SHOT || frames < 6) requestAnimationFrame(animate);
   }
   if (SHOT) await new Promise(r => setTimeout(r, 3000));   // 텍스처 로딩 대기
+  window.__renderNow = () => { controls.update(); sun.update(); post.render(); };   // 렌더 스크립트용: 프레임 루프가 멈춘 뒤 한 장 그리기
+  window.__renderer = renderer;
   animate();
 }
 addEventListener('resize', () => { camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });

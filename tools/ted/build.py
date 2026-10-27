@@ -1,4 +1,4 @@
-"""cTED 실내 데이터 빌드: 층마다 벽·문·방·마감·천장·조명 → viewer/assets/ted_interior.json + scratch/ted/overlay_<층>.png
+"""cTED 실내 데이터 빌드: 층마다 벽·문·방·마감·천장·조명 (+ 2 단계 내용물, contents.py) → viewer/assets/ted_interior.json + scratch/ted/overlay_<층>.png
 
 실행:  python -I tools/ted/build.py   (저장소 루트에서; scipy DLL 오류 시 anaconda Library/bin 을 PATH 에)
 좌표 = technology_bldg.js 로컬 프레임 (ft, x = 그리드 E1 에서 동쪽, z = 그리드 EM 에서 남쪽), y = 층 바닥 높이 (FIRST = 0).
@@ -251,6 +251,8 @@ def main():
             'unmodelled': [{'sheet': a, 'xz': [b, c], 'why': d} for a, b, c, d in ST.UNMODELLED],
             'generated_by': 'tools/ted/build.py',
             'materials': mats, 'floors': floors}
+    from ted.contents import add_contents                # 2 단계: 장비·캐비닛·위생기구·가구
+    add_contents(data)
     OUT.write_text(json.dumps(data, separators=(',', ':')), encoding='utf-8')
     print('wrote', OUT, round(OUT.stat().st_size / 1024), 'KB')
 

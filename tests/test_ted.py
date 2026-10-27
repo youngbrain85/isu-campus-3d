@@ -384,3 +384,95 @@ def test_sub_levels(ted_json):
     ys = {round(p['y'], 2) for p in R['101']['parts']}
     assert -5.0 in ys and 0.0 in ys
     assert {round(p['y'], 2) for p in R['148']['parts']} >= {-2.0}
+
+
+# ── 2 단계: 장비·캐비닛·위생기구·가구 ──
+import re as _re
+from shapely.geometry import Point as _Pt, Polygon as _Pg
+from shapely.ops import unary_union as _union
+from ted.equipment import equipment_schedule, rect_poly, TAG_RE as _TAG_RE
+
+_EQ_SHEETS = {'FIRST': 'A-701', 'SECOND': 'A-702'}
+
+
+def test_equipment_schedule_parse():
+    s = equipment_schedule()
+    assert s['E082X']['desc'] == '4 POST LIFT' and s['E082X']['mount'] == 'FLOOR'
+    assert s['E087']['cls'] == 'ROBOTICS'
+    assert 'REFRIGERATION' in s['E008']['desc']
+    assert len(s) > 120
+
+
+@pytest.mark.parametrize('floor', ['FIRST', 'SECOND'])
+def test_equipment_count_matches_sheet_tags(ted_json, floor):
+    """A-701/702 의 장비 태그 글자 수와 태그 달린 장비 항목 수가 ±5 % 안"""
+    s = Sheet(sheet_path(_EQ_SHEETS[floor]))
+    tags = [t for t, x, y, h, r in s.words if _TAG_RE.match(t) and abs(h - 9.6) < 0.5]
+    f = next(f for f in ted_json['floors'] if f['name'] == floor)
+    n = sum(1 for e in f['equipment'] if e.get('tag'))
+    assert len(tags) > 40
+    assert abs(n - len(tags)) <= 0.05 * len(tags), (n, len(tags))
+
+
+def _items(f):
+    for k in ('equipment', 'casework', 'fixtures', 'furniture'):
+        for it in f.get(k, []):
+            yield k, it
+
+
+def test_contents_inside_rooms(ted_json):
+    bad = []
+    for f in ted_json['floors']:
+        rooms = {r['no']: _Pg(r['poly']).buffer(0.05) for r in f['rooms'] if r['no']}
+        for k, it in _items(f):
+            p = _Pt(it['x'], it['z'])
+            if it.get('room') not in rooms or not rooms[it['room']].contains(p):
+                bad.append((f['name'], k, it['type'], it.get('room'), it['x'], it['z']))
+    assert not bad, bad[:10]
+
+
+def test_contents_clear_of_walls(ted_json):
+    """항목 발자국이 벽 다각형에 0.3 ft 넘게 파고들지 않는다 (발자국을 0.3 ft 줄이면 벽과 안 겹침)"""
+    bad = []
+    for f in ted_json['floors']:
+        W = _union([_Pg(w['poly'], w.get('holes') or []).buffer(0) for w in f['walls']])
+        for k, it in _items(f):
+            g = rect_poly(it).buffer(-0.3, join_style=2)
+            if not g.is_empty and g.intersects(W):
+                bad.append((f['name'], k, it['type'], it.get('room'), round(it['x'], 1), round(it['z'], 1)))
+    assert not bad, bad[:10]
+
+
+def test_estimated_flag_on_non_drawing_furniture(ted_json):
+    est, drawn = 0, 0
+    for f in ted_json['floors']:
+        est_rooms = {r['no'] for r in f['rooms'] if r.get('furniture_estimated')}
+        for it in f.get('furniture', []):
+            if it.get('src') == 'estimated layout':
+                assert it.get('estimated') is True
+                assert it['room'] in est_rooms
+                est += 1
+            else:
+                assert not it.get('estimated') and _re.match(r'A-70[12]$', it.get('src', '')), it
+                drawn += 1
+        for k in ('equipment', 'casework', 'fixtures'):
+            assert not any(it.get('estimated') for it in f.get(k, []))
+    assert est > 0 and drawn > 1000
+
+
+def test_casework_and_wall_items(ted_json):
+    f1 = next(f for f in ted_json['floors'] if f['name'] == 'FIRST')
+    cw = f1['casework']
+    for room in ('106', '107', '108'):                  # 기계·토목 실험실 아일랜드 (A-501 G/E/D 입면)
+        assert any(c['type'] == 'base_cabinet' and c['room'] == room and c['w'] > 12 for c in cw), room
+    assert sum(1 for c in cw if c['type'] == 'marker_board') == 4          # A-501 F1 + C5 VDS-01
+    assert sum(1 for c in cw if c['type'] == 'wall_monitor' and c['room'] == '145') == 4   # A-501 B1 + B3
+    assert all(abs(c['h'] - 2.93) < 0.01 for c in cw if c['type'] == 'base_cabinet')
+
+
+def test_restroom_fixtures(ted_json):
+    fx = {f['name']: f['fixtures'] for f in ted_json['floors']}
+    cnt = lambda fl, room, t: sum(1 for x in fx[fl] if x['room'] == room and x['type'] == t)
+    assert cnt('FIRST', '120', 'toilet') == 2 and cnt('FIRST', '120', 'urinal') == 2 and cnt('FIRST', '120', 'lavatory') == 3
+    assert cnt('FIRST', '121', 'toilet') == 4 and cnt('FIRST', '121', 'lavatory') == 3
+    assert cnt('SECOND', '240', 'toilet') == 3 and cnt('SECOND', '241', 'urinal') == 2
