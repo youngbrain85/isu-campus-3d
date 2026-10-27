@@ -231,6 +231,54 @@ async function exportGLB() {
 }
 window.exportGLB = exportGLB;
 
+// ------------------------------------------------------------------ VR 용 단일 건물 GLB (Unreal / Omni One)
+// 단위 m, Y-up(glTF 표준, Unreal 가져오기 시 Z-up 으로 변환됨). 건물 + 반경 r ft 지면 원판.
+// 노드 구분: WALKABLE (바닥·계단·지면 — 이동 가능), COLLISION (벽·유리·외관·장비·가구·난간 — 충돌), VISUAL (천장·조명 — 충돌 없음).
+// 원점 = 건물 대표점 바닥(FIRST 100'-0" 의 지반 쪽, 서측 보도 95'-0" 가 y = 0).
+async function exportBuildingGLB(groupName = 'bldg_tech', r = 220) {
+  const src = scene.getObjectByName(groupName); if (!src) throw new Error('no ' + groupName);
+  if (src.userData && src.children) { const it = src.getObjectByName('interior'); if (it && it.userData.setFloor) it.userData.setFloor(null); }
+  src.updateMatrixWorld(true);
+  const box = new THREE.Box3().setFromObject(src), c = box.getCenter(new THREE.Vector3());
+  const FT = 0.3048, root = new THREE.Group(); root.name = 'ISU_' + groupName.replace('bldg_', '');
+  const cats = { WALKABLE: new THREE.Group(), COLLISION: new THREE.Group(), VISUAL: new THREE.Group() };
+  for (const [k, g] of Object.entries(cats)) { g.name = k; root.add(g); }
+  const classify = (o) => {
+    const n = ((o.material && o.material.name) || '') + ' ' + o.name;
+    for (let p = o; p; p = p.parent) if (p.name === 'ceiling') return 'VISUAL';
+    if (/int_light/.test(n)) return 'VISUAL';
+    if (/int_slab|int_stair_(terrazzo|concrete|wood|grating)|int_landing/.test(n)) return 'WALKABLE';
+    if (/^int_/.test(o.material && o.material.name || '') && !/int_(wall|glass|mullion|frame|door|base|rail|stair_steel|elev|c_)/.test(n)) return 'WALKABLE';   // 실 바닥 마감 (재질 이름 = 마감 코드)
+    return 'COLLISION';
+  };
+  const M4 = new THREE.Matrix4().makeTranslation(-c.x, 0, -c.z).premultiply(new THREE.Matrix4().makeScale(FT, FT, FT));
+  let n = 0;
+  src.traverse(o => {
+    if (!o.isMesh || o.isSprite || !o.geometry) return;
+    for (let p = o; p; p = p.parent) if (!p.visible) return;
+    const geos = [];
+    if (o.isInstancedMesh) { const m = new THREE.Matrix4(); for (let i = 0; i < o.count; i++) { o.getMatrixAt(i, m); const g = o.geometry.clone(); g.applyMatrix4(new THREE.Matrix4().multiplyMatrices(o.matrixWorld, m)); geos.push(g); } }
+    else { const g = o.geometry.clone(); g.applyMatrix4(o.matrixWorld); geos.push(g); }
+    for (const g of geos) { for (const k of Object.keys(g.attributes)) if (!['position', 'normal', 'uv'].includes(k)) g.deleteAttribute(k); }
+    const g = geos.length > 1 ? BufferGeometryUtils.mergeGeometries(geos.map(x => x.index ? x.toNonIndexed() : x)) : geos[0];
+    if (!g) return;
+    g.applyMatrix4(M4);
+    const mat = o.material.clone(); mat.clippingPlanes = null;
+    const mesh = new THREE.Mesh(g, mat); mesh.name = (o.name || mat.name || 'mesh') + '_' + (n++);
+    cats[classify(o)].add(mesh);
+  });
+  // 지면 원판 (건물 주변 이동용)
+  const disc = new THREE.Mesh(new THREE.CircleGeometry(r * FT, 64).rotateX(-Math.PI / 2), new THREE.MeshStandardMaterial({ color: 0x7f9a5a, roughness: 1, name: 'ground' }));
+  disc.name = 'ground'; disc.position.y = -0.01; cats.WALKABLE.add(disc);
+  root.userData = { units: 'metres', note: 'WALKABLE = floors/stairs/ground, COLLISION = walls/glass/exterior/equipment, VISUAL = ceilings/lights' };
+  const exp = new GLTFExporter();
+  const result = await new Promise((res, rej) => exp.parse(root, res, rej, { binary: true, maxTextureSize: 2048 }));
+  const blob = new Blob([result], { type: 'model/gltf-binary' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = root.name + '_vr.glb'; a.click();
+  return { size: blob.size, counts: Object.fromEntries(Object.entries(cats).map(([k, g]) => [k, g.children.length])) };
+}
+window.exportBuildingGLB = exportBuildingGLB;
+
 // ------------------------------------------------------------------ 태양 위치 (날짜·시각 → 실제 태양 고도·방위)
 // 기준점 = 좌표 원점 (39.471 N, 87.410 W). ?sun=YYYY-MM-DDTHH:MM 로 지정, 렌더(?shot)는 재현성을 위해 하지 오후 3 시가 기본.
 const LAT = 39.471, LON = -87.410, TZ = 'America/Indiana/Indianapolis';

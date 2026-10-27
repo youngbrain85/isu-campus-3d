@@ -41,6 +41,19 @@ the evidence it was modelled from.
 * **Leaf-card trees** with a dark inner core, and an optional *Wind* toggle that sways the crowns in the shader.
 * The viewer renders only when something changes, so it idles when the view is still.
 
+## Technology Building interior and VR export
+
+The Technology Building (Bailey College / cTED, 2025 renovation) has a full interior extracted from the RATIO
+construction set: rooms with names, areas and finishes, walls, glass partitions, doors, ceilings and lights, stairs,
+ramp and elevator, lab equipment, casework, restroom fixtures and furniture (from A-701/A-702; the few rooms without
+drawn furniture get an estimated layout, flagged in the room panel). In the viewer use *Technology Building interior*
+in the menu for a floor cutaway and click a room for its details. `?solo=way/461428305` opens the building on its own.
+
+`model/ted_vr.glb` is the building for VR (Unreal / Omni One): metres, Y-up, with three node groups —
+`WALKABLE` (floors, stairs, ground disc), `COLLISION` (walls, glass, exterior, equipment, furniture, rails) and
+`VISUAL` (ceilings, lights). Regenerate with `node tools/export_building.mjs`. Interior data: `python tools/ted/build.py`
+(reads the drawings folder) → `viewer/assets/ted_interior.json`.
+
 ## What is in the repository
 
 | Path | Contents |
