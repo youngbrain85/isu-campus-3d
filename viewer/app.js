@@ -16,6 +16,7 @@ import { buildLabels } from './lib/labels.js';
 import { MODULES } from './buildings/index.js';
 import { makePost } from './lib/post.js';
 import { makeSun } from './lib/sun.js';
+import { buildInterior } from './lib/interior.js';
 import { sunPosition, localToDate } from './lib/solar.js';
 
 const ASSET = (window.ASSET_BASE || 'assets/');
@@ -34,6 +35,7 @@ renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 0.95;
 renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.localClippingEnabled = true;   // 실내 단면 보기 (재질별 절단면)
 
 const scene = new THREE.Scene();
 window.__scene = scene;   // 진단용
@@ -177,7 +179,9 @@ function setupPicking(site, info, roots) {
     ndc.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
     ray.setFromCamera(ndc, camera);
     const hits = ray.intersectObjects(roots.filter(o => o.visible), true);
-    const h = hits.find(x => x.object.visible && !x.object.isSprite);
+    const shown = (o) => { for (; o; o = o.parent) if (!o.visible) return false; return true; };   // 부모 그룹까지 보이는 것만
+    const h = hits.find(x => shown(x.object) && !x.object.isSprite);
+    if (window.__interiorPick && window.__interiorPick(h)) return;
     if (!h) { panel.classList.remove('open'); hl.clear(); requestRender(); return; }
     // 벽면을 클릭한 경우 바깥으로 약간 밀린 점이 나올 수 있으므로 법선 반대로 1 ft 들어간 점으로 판정
     const pt = h.point.clone(); if (h.face) { const n = h.face.normal.clone().transformDirection(h.object.matrixWorld); pt.addScaledVector(n, -1); }
@@ -312,12 +316,17 @@ async function main() {
   for (const [id, mod] of loaded) { detailedIds.add(id); for (const x of mod.meta.extraIds || []) detailedIds.add(x); }
   const masses = buildMasses(site, M, detailedIds, null); scene.add(masses.group);   // 지붕: 절차적 재질 (위성 텍스처는 흐릿해서 사용 안 함)
   const detailHeights = new Map();
+  let interior = null, techGrp = null;
   for (const [id, mod] of loaded) {
     say('Building detailed model: ' + mod.meta.name);
     try {
       const grp = mod.build(M, G);
       G.toWorld(grp, mod.meta.anchor, mod.meta.rotation);
       grp.name = 'bldg_' + mod.meta.id; scene.add(grp);
+      if (mod.meta.id === 'tech') {   // Technology Building (cTED) 실내 — 시공 도면에서 추출 (tools/ted)
+        try { interior = buildInterior(await (await fetch(ASSET + 'ted_interior.json')).json(), M, tex); grp.add(interior); techGrp = grp; }
+        catch (e) { console.error('interior failed', e); }
+      }
       if (mod.meta.preset) PRESETS[mod.meta.id] = mod.meta.preset;
       if (mod.meta.height) detailHeights.set(id, mod.meta.height);
       for (const extra of mod.meta.extraIds || []) detailHeights.set(extra, mod.meta.height || 40);
@@ -343,6 +352,37 @@ async function main() {
   // 여러 건물을 한 모듈로 병합한 경우(교회, 타워, 소형 건물)도 구분되도록, 맞은 지점을 지면에 투영해 OSM 외곽선으로 판정한다
   const info = await (await fetch(ASSET + 'info.json')).json();
   setupPicking(site, info, buildingRoots);
+
+  // 실내 단면 보기: 외부 껍데기 숨김 + 선택 층까지만 + 해당 층 천장 숨김
+  let interiorFloor = null;
+  const setInterior = (name) => {
+    if (!interior) return;
+    interiorFloor = name;
+    for (const c of techGrp.children) if (c !== interior) c.visible = !name;
+    interior.userData.setFloor(name);
+    document.querySelectorAll('[data-interior]').forEach(b => b.classList.toggle('on', (b.dataset.interior || null) === (name || '')));
+    if (name) {
+      const f = interior.userData.floors[name], c = new THREE.Vector3(115, f.y, 30).applyMatrix4(techGrp.matrixWorld);
+      camera.position.set(c.x - 150, c.y + 210, c.z + 230); controls.target.copy(c); controls.update();
+    }
+    requestRender();
+  };
+  document.querySelectorAll('[data-interior]').forEach(b => b.addEventListener('click', () => setInterior(b.dataset.interior || null)));
+  window.__setInterior = setInterior;
+  window.__interiorPick = (hit) => {     // 실내 단면 보기 중 클릭: 실 정보 표시 (true = 처리함)
+    if (!interiorFloor || !hit) return false;
+    const p = interior.worldToLocal(hit.point.clone());
+    const o = interior.userData.roomAt(interiorFloor, p.x, p.z);
+    if (!o) return false;
+    const panel = document.getElementById('info'), body = document.getElementById('infoBody'), r = o.r, mt = (c) => (c && interior.userData.materials && interior.userData.materials[c]) ? interior.userData.materials[c].desc : c;
+    const row = (k, v) => v ? `<dt>${k}</dt><dd>${String(v).replace(/[&<>]/g, '')}</dd>` : '';
+    body.innerHTML = `<h2>${(r.name || 'Room').replace(/[&<>]/g, '')}</h2><span class="tag">Technology Building · ${interiorFloor.toLowerCase()} floor</span><dl>` +
+      row('Room no.', r.no) + row('Area', r.area ? Math.round(r.area) + ' sf' + (r.area_label ? ' (drawing: ' + r.area_label + ' sf)' : '') : '') +
+      row('Ceiling height', r._ch ? r._ch.toFixed(1) + ' ft' + (r._ch > 20 ? ' (double height)' : r.ch_source === 'default' || !r.ch ? ' (estimated)' : '') : '') +
+      row('Floor', mt(r.floor)) + row('Wall', mt(r.wall)) + row('Ceiling', mt(r.ceiling)) +
+      `</dl><div class="src"><b>From:</b> RATIO cTED construction set 2025 (A-100…A-102 plans, A-131/132 ceilings, A-151/152 + A-650 finishes)</div>`;
+    panel.classList.add('open'); requestRender(); return true;
+  };
 
   // UI
   document.querySelectorAll('[data-view]').forEach(b => b.addEventListener('click', () => applyPreset(b.dataset.view)));
