@@ -44,6 +44,7 @@ scene.fog = new THREE.FogExp2(0xdde6ee, 0.00007);
 
 const camera = new THREE.PerspectiveCamera(50, innerWidth / innerHeight, 1, 30000);
 const controls = new OrbitControls(camera, canvas);
+window.__view = { camera, controls };   // 진단·렌더 스크립트용 (scratch/ted 의 실내 시점 렌더)
 controls.enableDamping = true; controls.dampingFactor = 0.08;
 controls.maxPolarAngle = Math.PI * 0.495;
 controls.minDistance = 15; controls.maxDistance = 9000;

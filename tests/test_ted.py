@@ -219,3 +219,168 @@ def test_json_first_floor_room_numbers(ted_json):
     nums = {r['no'] for r in ted_json['floors'][1]['rooms']}
     for n in ('100', '101', '102', '104A', '109A', '124C', '127', '136', '145', '146', '147', '148'):
         assert n in nums
+
+
+# ── Task 7: 계단·엘리베이터 ──
+import math as _math
+
+LEVEL_Y = {'LOWER': -14.67, 'FIRST SW': -5.0, 'FIRST SW 97': -3.0, 'FIRST N': -2.0, 'FIRST': 0.0, 'SECOND': 14.67}
+
+
+def _all_stairs(d):
+    return [(f, s) for f in d['floors'] for s in f.get('stairs', [])]
+
+
+def test_stairs_inventory(ted_json):
+    # A-421/A-422 상세 제목 + 평면 실명(STAIR 002 / STAIRS 126) + 메자닌 계단 → 모두 모델에 있고, 시작 층에 속한다
+    ids = {s['id']: f['name'] for f, s in _all_stairs(ted_json)}
+    want = {'lobby1': 'FIRST', 'lobby1_seat': 'FIRST', 'lobby2': 'FIRST', 'lobby3': 'FIRST', 'n_stair': 'FIRST',
+            'corr_stair': 'FIRST', 'corr_ramp': 'FIRST', 'stair126': 'LOWER', 'mezz_stair': 'FIRST'}
+    for k, fl in want.items():
+        assert ids.get(k) == fl, (k, ids.get(k))
+
+
+def test_stair_titles_on_sheets_are_modelled(ted_json):
+    from ted.stairs import sheet_titles
+    names = ' '.join(s['name'].upper() for _, s in _all_stairs(ted_json))
+    T = sheet_titles()                   # 'LOBBY STAIR 1', 'N STAIR', 'CORRIDOR STAIR', ...
+    assert len(T) >= 5
+    for t in T:
+        assert t in names, t
+
+
+def test_every_plan_up_dn_is_a_modelled_stair(ted_json):
+    # 평면 A-100/101/102 의 UP/DN 글자는 (제외 목록 말고는) 모델 계단·경사로 발자국에서 4 ft 안
+    from ted.stairs import plan_arrows, UNMODELLED
+    from shapely.geometry import Point, box
+    from shapely.ops import unary_union
+    foot = []
+    for f, s in _all_stairs(ted_json):
+        for fl in s['flights']:
+            (ax, az), (bx, bz), w = fl['a'], fl['b'], fl['w']
+            foot.append(box(min(ax, bx), min(az, bz), max(ax, bx), max(az, bz)).buffer(w / 2))
+    F = unary_union(foot)
+    arrows = plan_arrows()
+    assert len(arrows) >= 15
+    miss = []
+    for sheet, t, x, z in arrows:
+        if any(sheet == us and abs(x - ux) < 3 and abs(z - uz) < 3 for us, ux, uz, _ in UNMODELLED):
+            continue
+        if F.distance(Point(x, z)) > 4:
+            miss.append((sheet, t, round(x, 1), round(z, 1)))
+    assert not miss, miss
+
+
+def test_riser_heights(ted_json):
+    for f, s in _all_stairs(ted_json):
+        for fl in s['flights']:
+            if not fl['risers']:
+                continue                                    # 경사로
+            r = (fl['y1'] - fl['y0']) / fl['risers'] * 12
+            if s.get('kind') == 'egress':
+                assert 6.5 <= r <= 7.75, (s['id'], r)      # 피난 계단: 6.5"~7.75"
+            elif s.get('kind') == 'service':
+                assert 10.5 <= r <= 11.5, (s['id'], r)      # 메자닌 철재 계단 11"
+            elif s.get('kind') == 'seating':
+                assert 14 <= r <= 16, (s['id'], r)          # 목재 좌석 단
+            else:
+                assert 5.5 <= r <= 7.75, (s['id'], r)       # 로비 기념 계단: 도면 5.87"·6"
+
+
+def test_known_riser_counts(ted_json):
+    S = {s['id']: s for _, s in _all_stairs(ted_json)}
+    cnt = lambda k: [fl['risers'] for fl in S[k]['flights']]
+    assert cnt('lobby3') == [9, 10, 11]                 # A-421 A1: 9/10/11 EQ R
+    assert cnt('n_stair') == [10, 10, 10]               # A-422 E1: 10 EQUAL RISERS ×3
+    assert cnt('lobby1') == [5, 5]                      # A-421 G4: 5 EQ R ×2
+    assert cnt('lobby2') == [4] and cnt('corr_stair') == [4]
+    assert abs(S['lobby3']['flights'][0]['y1'] * 12 / 9 - 5.867) < 0.01
+
+
+def test_flights_connect_levels(ted_json):
+    for f, s in _all_stairs(ted_json):
+        fls = s['flights']
+        assert abs(fls[0]['y0'] - LEVEL_Y[s['from']]) < 0.1, s['id']
+        assert abs(fls[-1]['y1'] - LEVEL_Y[s['to']]) < 0.1, s['id']
+        if s['from'] == f['name']:
+            assert abs(fls[0]['y0'] - f['y']) < 0.1
+        for p, q in zip(fls, fls[1:]):
+            assert abs(p['y1'] - q['y0']) < 0.01, s['id']
+            assert any(abs(L['y'] - p['y1']) < 0.01 for L in s['landings']), s['id']   # 계단참이 잇는다
+        for fl in fls:
+            if fl['risers'] > 1:
+                L = _math.dist(fl['a'], fl['b']) / (fl['risers'] - 1)
+                assert 0.8 <= L <= 2.6, (s['id'], L)                                  # 디딤판 깊이
+
+
+def test_flights_match_plan_riser_lines():
+    # 사양의 챌판 위치가 평면(A-100/101/102) 선과 일치 (평면에 보이는 만큼)
+    from ted.stairs import STAIRS, plan_riser_hits
+    n = 0
+    for st in STAIRS:
+        for i, fl in enumerate(st['flights']):
+            for sheet, need in fl.get('check', []):
+                hit = plan_riser_hits(sheet, st, i)
+                assert hit >= need, (st['id'], i, sheet, hit, need)
+                n += 1
+    assert n >= 10
+
+
+def test_stair_dimension_text_on_sheets():
+    from ted.stairs import STAIRS, sheet_has_text
+    n = 0
+    for st in STAIRS:
+        for sheet, txt in st.get('text', []):
+            assert sheet_has_text(sheet, txt), (st['id'], sheet, txt)
+            n += 1
+    assert n >= 8
+
+
+def test_rails_and_landings(ted_json):
+    for f, s in _all_stairs(ted_json):
+        assert s['rails'], s['id']
+        for r in s['rails']:
+            assert len(r['pts']) >= 2 and all(len(p) == 3 for p in r['pts'])
+            assert 2.5 <= r['h'] <= 3.6 and r['kind'] in ('glass', 'metal', 'handrail')
+        for L in s['landings']:
+            assert len(L['poly']) >= 3
+
+
+def test_elevator(ted_json):
+    E = {f['name']: f.get('elevators', []) for f in ted_json['floors']}
+    assert len(E['FIRST']) == 1 and len(E['SECOND']) == 1
+    e = E['FIRST'][0]
+    xs = [p[0] for p in e['poly']]; zs = [p[1] for p in e['poly']]
+    assert 47 < min(xs) < 50 and 57 < max(xs) < 60 and 29 < min(zs) < 32 and 37 < max(zs) < 40
+    (ax, az), (bx, bz) = e['door']
+    assert abs(ax - bx) < 0.5 and 3 < abs(az - bz) < 4.5        # 동쪽 벽 3'-6" 문
+
+
+def test_floor_cut_over_stairs(ted_json):
+    # 위층 바닥 마감이 계단 구멍을 덮지 않는다
+    from shapely.geometry import Point, Polygon
+    def covered(fl, x, z):
+        for r in fl['rooms']:
+            if r.get('open'):
+                continue
+            for p in r.get('parts') or [{'poly': r['poly'], 'holes': []}]:
+                g = Polygon(p['poly'], p.get('holes', []))
+                if g.is_valid and g.contains(Point(x, z)):
+                    return True
+        return False
+    F = {f['name']: f for f in ted_json['floors']}
+    assert not covered(F['SECOND'], 85, -20.9)       # N 계단 중간 계단참 위
+    assert not covered(F['FIRST'], 158, 61.2)        # 126 계단 위
+    assert not covered(F['FIRST'], 40, 52)           # 로비 계단 1
+    assert covered(F['SECOND'], 85, -30)              # 옆 브레이크아웃 바닥은 그대로
+
+
+def test_sub_levels(ted_json):
+    # 로비(95'), 남측 단(97'), 북측 증축(98') 바닥은 실제 높이에
+    F = {f['name']: f for f in ted_json['floors']}
+    lv = {L['name']: L['y'] for L in F['FIRST']['levels']}
+    assert lv == {'FIRST SW': -5.0, 'FIRST SW 97': -3.0, 'FIRST N': -2.0}
+    R = {r['no']: r for r in F['FIRST']['rooms']}
+    ys = {round(p['y'], 2) for p in R['101']['parts']}
+    assert -5.0 in ys and 0.0 in ys
+    assert {round(p['y'], 2) for p in R['148']['parts']} >= {-2.0}

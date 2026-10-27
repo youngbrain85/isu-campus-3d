@@ -17,6 +17,7 @@ from ted.sheet import Sheet, sheet_path, building_outline          # noqa: E402
 from ted.walls import wall_layers, wall_polys, find_doors, door_schedule, floor_of_mark   # noqa: E402
 from ted.rooms import find_rooms                                     # noqa: E402
 from ted.finishes import finish_schedule, room_finishes, room_ceilings, ceiling_lights, material   # noqa: E402
+from ted import stairs as ST                                         # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / 'viewer' / 'assets' / 'ted_interior.json'
@@ -109,16 +110,49 @@ def build_floor(name, y, height, plan, fin, rcp_name, dsched, fsched):
             continue                     # 외벽 커튼월·창은 외부 모듈 몫
         near = [jr['ch'] for jr, r in zip(jrooms, rooms) if r['poly'].distance(g) < 0.6 and jr['ch_source'] == 'rcp']
         jwalls.append({'poly': poly_coords(g), 'holes': [], 'h': min(max(near), height) if near else DEFAULT_GLASS_H, 'glass': True})
+    # 계단 난간·측판 선이 벽으로 잡힌 것 제거 (절반 넘게 계단 발자국 안)
+    zone = ST.stair_zone(y, height)
+    if ST.cuts_for(name) is not None:          # 바닥 구멍 둘레 가드도 (2 층 N 계단·로비 계단 3)
+        zone = ST.cuts_for(name).buffer(0.8, join_style=2).union(zone) if zone is not None else ST.cuts_for(name).buffer(0.8, join_style=2)
+    if zone is not None:
+        from shapely.geometry import Polygon as _P
+        def _in(w):
+            g = _P(w['poly']).buffer(0)
+            return g.area > 0 and g.intersection(zone).area > 0.5 * g.area
+        n0 = len(jwalls)
+        jwalls = [w for w in jwalls if not _in(w)]
+        print(name, 'walls dropped inside stair footprints:', n0 - len(jwalls))
+    # 엘리베이터 승강로 문: 평면 벽 추출이 문틀까지 막아 버리므로 개구부를 벽에서 빼고 문(인방)으로 추가
+    from shapely.geometry import box as _box, Polygon as _Pe
+    elev_doors = []
+    for e in ST.elevators_for(name):
+        (ax_, az_), (bx_, bz_) = e['door']
+        if abs(ax_ - bx_) < abs(az_ - bz_):
+            op = _box(ax_ - 0.8, min(az_, bz_), ax_ + 0.8, max(az_, bz_))
+        else:
+            op = _box(min(ax_, bx_), az_ - 0.8, max(ax_, bx_), az_ + 0.8)
+        nw = []
+        for w in jwalls:
+            g = _Pe(w['poly'], w.get('holes') or []).buffer(0)
+            if not g.intersects(op):
+                nw.append(w); continue
+            for part in ST._polys(g.difference(op)):
+                nw.append({**w, 'poly': poly_coords(part), 'holes': [[r2(q) for q in list(h.coords)[:-1]] for h in part.interiors]})
+        jwalls = nw
+        elev_doors.append({'a': r2(e['door'][0]), 'b': r2(e['door'][1]), 'kind': 'elevator', 'tag': None,
+                           'w': round(((ax_ - bx_) ** 2 + (az_ - bz_) ** 2) ** 0.5, 2), 'h': 7.4, 'hinges': [], 'swing': []})
     jdoors = []
     for d in doors:
         sc = dsched.get(d.get('tag'), {})
         jdoors.append({'a': r2(d['a']), 'b': r2(d['b']), 'kind': d['kind'], 'tag': d.get('tag'), 'w': d['w'],
                        'h': round(sc['h'], 2) if sc.get('h') else 7.0, 'hinges': [r2(p) for p in d['hinges']],
                        'swing': [r2(p) for p in d['swing']], **({'approx': True} if d.get('approx') else {})})
+    jdoors += elev_doors
     marks = [k for k in dsched if floor_of_mark(k) == name]
     floor = {'name': name, 'y': y, 'height': height, 'sheets': [x for x in (plan, fin, rcp_name) if x],
              'walls': jwalls, 'partition_tags': partition_tags(s, building_outline(name, 2)),
-             'doors': jdoors, 'rooms': jrooms, 'lights': lights, 'stairs': [],
+             'doors': jdoors, 'rooms': jrooms, 'lights': lights, 'stairs': ST.stairs_for(name),
+             'elevators': ST.elevators_for(name),
              'stats': {'rooms': len(jrooms), 'rooms_labeled': sum(1 for r in jrooms if r['no']),
                        'wall_area_ft2': round(float(solid.sum() + glass.sum()) * FT * FT),
                        'glass_area_ft2': round(float(glass.sum()) * FT * FT),
@@ -127,8 +161,49 @@ def build_floor(name, y, height, plan, fin, rcp_name, dsched, fsched):
                        'rooms_with_finish': sum(1 for r in jrooms if r['floor']),
                        'rooms_with_rcp_height': sum(1 for r in jrooms if r['ch_source'] == 'rcp'),
                        'grid_residual_ft': round(s.grid_residual_ft, 3), 'seconds': round(time.time() - t0, 1)}}
+    apply_levels_and_cuts(floor, rooms)
     overlay(s, name, solid, glass, origin, jdoors, rooms, lights)
     return floor, used
+
+
+def apply_levels_and_cuts(floor, rooms):
+    """계단 구멍(바닥 마감·슬래브 제외)과 낮은 바닥 영역(로비 95', 97', 북측 증축 98')을 반영.
+    rooms[].parts = [{poly, holes, y, base?}] (base = 단차 옆면 블록 바닥), rooms[].cparts = 위층 계단 구멍을 뺀 천장,
+    walls/doors[].y0 = 낮은 영역에 닿으면 그 높이부터. levels = [{name, y, polys}]."""
+    from shapely.geometry import Polygon
+    from shapely.ops import unary_union
+    name, y = floor['name'], floor['y']
+    cut = ST.cuts_for(name)
+    order = [f[0] for f in FLOORS]
+    up = order[order.index(name) + 1] if order.index(name) + 1 < len(order) else None
+    ucut = ST.cuts_for(up) if up else None
+    areas = ST.level_areas(name, [{'no': r['number'], 'poly': r['poly']} for r in rooms])
+    floor['levels'] = [{'name': n, 'y': yy, 'polys': [poly_coords(p) for p in ST._polys(A)]} for n, yy, A in areas]
+    pc = lambda g: {'poly': poly_coords(g), 'holes': [[r2(p) for p in list(h.coords)[:-1]] for h in g.interiors]}
+    for jr, r in zip(floor['rooms'], rooms):
+        g = r['poly']
+        touched = (cut is not None and g.intersects(cut)) or any(g.intersects(A) for _, _, A in areas)
+        if touched and not jr.get('open'):
+            jr['parts'] = [{**pc(p), 'y': yy, **({'base': b} if b is not None else {})}
+                           for p, yy, b in ST.room_parts(g, y, cut, areas)]
+        if ucut is not None and g.intersects(ucut) and not jr.get('open'):
+            jr['cparts'] = [pc(p) for p in ST._polys(g.difference(ucut))]
+    if areas:
+        A = unary_union([a for _, _, a in areas])
+        for w in floor['walls']:
+            try:
+                wg = Polygon(w['poly'])
+            except Exception:
+                continue
+            hit = [yy for _, yy, a in areas if wg.distance(a) < 0.8]
+            if hit:
+                w['y0'] = min(hit)
+        from shapely.geometry import Point
+        for d in floor['doors']:
+            m = Point((d['a'][0] + d['b'][0]) / 2, (d['a'][1] + d['b'][1]) / 2)
+            hit = [yy for _, yy, a in areas if a.distance(m) < 1.0]
+            if hit:
+                d['y0'] = min(hit)
 
 
 def overlay(s, name, solid, glass, origin, doors, rooms, lights):
@@ -172,7 +247,8 @@ def main():
         print(name, json.dumps(f['stats']))
     mats = {c: material(c, fsched) for c in sorted(used)}
     data = {'frame': 'technology_bldg local ft (x east from grid E1, z south from grid EM, y up from FIRST 100\'-0")',
-            'source': 'RATIO cTED construction set 2025: A-100/101/102 plans, A-151/152 finish plans, A-131/132 RCP, A-601 door schedule, A-650 finish schedule',
+            'source': 'RATIO cTED construction set 2025: A-100/101/102 plans, A-151/152 finish plans, A-131/132 RCP, A-601 door schedule, A-650 finish schedule, A-421/422/424/425 stairs, A-301 sections',
+            'unmodelled': [{'sheet': a, 'xz': [b, c], 'why': d} for a, b, c, d in ST.UNMODELLED],
             'generated_by': 'tools/ted/build.py',
             'materials': mats, 'floors': floors}
     OUT.write_text(json.dumps(data, separators=(',', ':')), encoding='utf-8')
