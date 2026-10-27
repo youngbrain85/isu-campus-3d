@@ -22,6 +22,7 @@ import { sunPosition, localToDate } from './lib/solar.js';
 const ASSET = (window.ASSET_BASE || 'assets/');
 const params = new URLSearchParams(location.search);
 const SHOT = params.get('shot');           // 헤드리스 스크린샷 모드 (프리셋 이름)
+const SOLO = params.get('solo');           // ?solo=<OSM id> : 그 건물만 따로 보는 페이지 (주변 250 ft 만 잘라 보여줌)
 const LOW = params.get('low') === '1';
 const AO = params.get('ao') !== '0';         // ?ao=0 : 주변광 차폐 끄기 (전후 비교용)
 
@@ -164,7 +165,7 @@ function setupPicking(site, info, roots) {
     body.innerHTML = `<h2>${esc(d.name)}</h2><span class="tag">${esc(d.model)}</span><dl>` +
       row('Campus map no.', esc(d.map_no)) + row('Built', esc(d.year)) + row('Storeys', esc(d.storeys)) +
       row('Height', d.height_ft ? Math.round(d.height_ft) + ' ft (' + Math.round(d.height_ft * 0.3048) + ' m)' : '') +
-      row('Notes', esc(d.notes)) + row('OSM', `<a href="https://www.openstreetmap.org/${id}" target="_blank" rel="noopener" style="color:var(--accent)">${id}</a>`) +
+      row('Notes', esc(d.notes)) + (SOLO ? '' : row('View', `<a href="?solo=${encodeURIComponent(id)}" target="_blank" rel="noopener" style="color:var(--accent)">Open this building on its own ↗</a>`)) + row('OSM', `<a href="https://www.openstreetmap.org/${id}" target="_blank" rel="noopener" style="color:var(--accent)">${id}</a>`) +
       `</dl><div class="src"><b>Modelled from:</b> ${esc(d.sources)}</div>`;
     panel.classList.add('open'); requestRender();
   };
@@ -270,6 +271,35 @@ function setupSunUI(sun) {
   apply();
 }
 
+// ------------------------------------------------------------------ 단독 건물 보기 (?solo=<OSM id>)
+// 건물 외곽 + 여유 250 ft 상자 밖은 모든 재질에 절단면을 걸어 잘라낸다 (하늘 제외). 카메라는 건물 프리셋, 제목은 건물 이름.
+function setupSolo(site, mod) {
+  const ids = new Set([SOLO, ...(mod ? [mod.meta.osm, ...(mod.meta.extraIds || [])] : [])]);
+  const polys = site.buildings.filter(b => ids.has(b.id)).map(b => b.poly);
+  if (!polys.length) { console.warn('solo: building not found', SOLO); return; }
+  let x0 = 1e9, x1 = -1e9, z0 = 1e9, z1 = -1e9;
+  for (const p of polys) for (const [x, z] of p) { x0 = Math.min(x0, x); x1 = Math.max(x1, x); z0 = Math.min(z0, z); z1 = Math.max(z1, z); }
+  const m = 250;
+  const planes = [new THREE.Plane(new THREE.Vector3(1, 0, 0), -(x0 - m)), new THREE.Plane(new THREE.Vector3(-1, 0, 0), x1 + m),
+    new THREE.Plane(new THREE.Vector3(0, 0, 1), -(z0 - m)), new THREE.Plane(new THREE.Vector3(0, 0, -1), z1 + m)];
+  renderer.localClippingEnabled = true;
+  scene.traverse(o => {
+    if (!o.material || o.name === 'sky') return;
+    for (const mt of Array.isArray(o.material) ? o.material : [o.material]) mt.clippingPlanes = [...(mt.clippingPlanes || []).filter(p => !planes.includes(p)), ...planes];
+  });
+  scene.fog = null;
+  const cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, r = Math.max(x1 - x0, z1 - z0);
+  if (mod && mod.meta.preset) { camera.position.set(...mod.meta.preset.pos); controls.target.set(...mod.meta.preset.tgt); }
+  else { camera.position.set(cx - r, r * 0.8, cz + r * 1.2); controls.target.set(cx, 10, cz); }
+  controls.maxDistance = r * 4 + 600; controls.update();
+  const name = (mod && mod.meta.name) || SOLO;
+  const t = document.querySelector('#hud h1 span'); if (t) t.innerHTML = '<a href="./" style="color:var(--accent);text-decoration:none">← Campus</a> · ' + name.replace(/[&<>]/g, '');
+  document.title = name + ' – ISU 3D';
+  // 실내 버튼은 실내 모델이 있는 건물에서만
+  const ib = document.querySelector('[data-interior]'); if (ib && !(mod && mod.meta.id === 'tech')) { ib.parentElement.style.display = 'none'; ib.parentElement.previousElementSibling.style.display = 'none'; }
+  requestRender(10);
+}
+
 // ------------------------------------------------------------------ main
 async function main() {
   const status = document.getElementById('status');
@@ -314,10 +344,14 @@ async function main() {
   }
   const detailedIds = new Set();
   for (const [id, mod] of loaded) { detailedIds.add(id); for (const x of mod.meta.extraIds || []) detailedIds.add(x); }
-  const masses = buildMasses(site, M, detailedIds, null); scene.add(masses.group);   // 지붕: 절차적 재질 (위성 텍스처는 흐릿해서 사용 안 함)
+  const masses = buildMasses(site, M, detailedIds, null); scene.add(masses.group);
+  // 단독 보기: 대상 모듈(osm 또는 extraIds 가 SOLO)만 짓고, 매스 건물은 숨김
+  const soloMod = SOLO ? (loaded.find(([id, m]) => id === SOLO || (m.meta.extraIds || []).includes(SOLO)) || [])[1] : null;
+  if (SOLO) masses.group.visible = false;   // 지붕: 절차적 재질 (위성 텍스처는 흐릿해서 사용 안 함)
   const detailHeights = new Map();
   let interior = null, techGrp = null;
   for (const [id, mod] of loaded) {
+    if (SOLO && mod !== soloMod) continue;
     say('Building detailed model: ' + mod.meta.name);
     try {
       const grp = mod.build(M, G);
@@ -414,6 +448,7 @@ async function main() {
 
   console.log('site:', site.buildings.length, 'buildings,', masses.byId.size, 'masses,', detailedIds.size, 'detailed,', treeList.length, 'trees, mass tris', masses.tris);
   applyPreset(SHOT || 'campus');
+  if (SOLO) setupSolo(site, soloMod);
   const camQ = params.get('cam');      // ?cam=px,py,pz,tx,ty,tz (거리 눈높이 렌더 등 임의 시점)
   if (camQ) { const v = camQ.split(',').map(Number); camera.position.set(v[0], v[1], v[2]); controls.target.set(v[3], v[4], v[5]); if (v[6]) { camera.fov = v[6]; camera.updateProjectionMatrix(); } controls.update(); }
   if (street) street.userData.updateCars(camera);
