@@ -61,3 +61,53 @@ def test_door_count_matches_schedule(sheet, floor):
     assert abs(len(doors) - len(marks)) <= 0.1 * len(marks), (len(doors), len(marks))
     tagged = {d.get('tag') for d in doors}
     assert len(set(marks) & tagged) >= 0.95 * len(marks)
+
+
+# ── Task 2: 방 ──
+from ted.rooms import find_rooms, room_labels
+from shapely.geometry import Point
+
+
+def _rooms(sheet, floor):
+    key = ('rooms', sheet, floor)
+    if key not in _cache:
+        s, m, o = _floor(sheet, floor)
+        doors = find_doors(s, door_schedule(), floor, m, o)
+        _cache[key] = find_rooms(s, m, o, doors=doors, outline=building_outline(floor, 2))
+    return _cache[key]
+
+
+@pytest.mark.parametrize("sheet,floor,lo,hi", [("A-101", "FIRST", 40, 80), ("A-102", "SECOND", 38, 90)])
+def test_room_counts(sheet, floor, lo, hi):
+    R = _rooms(sheet, floor)
+    labeled = [r for r in R if r['number']]
+    assert len(labeled) >= lo and len(R) <= hi, (len(labeled), len(R))
+    # 평면의 방 번호 라벨은 모두 방이 된다
+    s = _floor(sheet, floor)[0]
+    L = room_labels(s, building_outline(floor, 2))
+    assert len(labeled) == len(L)
+
+
+@pytest.mark.parametrize("sheet,floor", [("A-101", "FIRST"), ("A-102", "SECOND")])
+def test_room_polygons_closed_inside_outline(sheet, floor):
+    out = building_outline(floor, 2.01)
+    for r in _rooms(sheet, floor):
+        g = r['poly']
+        assert g.is_valid and g.geom_type == 'Polygon'
+        assert g.exterior.is_closed
+        assert g.area > 8
+        assert out.contains(g), r['number']
+
+
+def test_lobby_contains_label():
+    R = {r['number']: r for r in _rooms('A-101', 'FIRST')}
+    assert R['101']['name'] == 'LOBBY'
+    assert R['101']['poly'].contains(Point(R['101']['label_xy']))
+    assert 'AUTOMOTIVE' in R['127']['name']
+
+
+def test_room_areas_match_labels_second_floor():
+    # A-102 는 방마다 '1234 SF' 면적 글자가 있다 → 열린 평면(복도·브레이크아웃) 말고는 ±20 % 안이어야
+    R = [r for r in _rooms('A-102', 'SECOND') if r['area_label']]
+    ok = [r for r in R if abs(r['area_ft2'] / r['area_label'] - 1) <= 0.2]
+    assert len(ok) >= 0.6 * len(R), (len(ok), len(R))
