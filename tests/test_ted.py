@@ -111,3 +111,24 @@ def test_room_areas_match_labels_second_floor():
     R = [r for r in _rooms('A-102', 'SECOND') if r['area_label']]
     ok = [r for r in R if abs(r['area_ft2'] / r['area_label'] - 1) <= 0.2]
     assert len(ok) >= 0.6 * len(R), (len(ok), len(R))
+
+
+def test_enclosure_124c_is_a_room():
+    R = {r['number']: r for r in _rooms('A-101', 'FIRST')}
+    assert '124C' in R and 250 < R['124C']['area_ft2'] < 400
+
+
+@pytest.mark.parametrize("sheet,floor", [("A-101", "FIRST"), ("A-102", "SECOND")])
+def test_room_boundaries_axis_aligned(sheet, floor):
+    # 열린 평면 분할은 축에 나란한 직선만 — 4 ft 넘는 비스듬한 변은 실제 사선 벽(스카이브리지)뿐
+    import math
+    bad = []
+    for r in _rooms(sheet, floor):
+        if r['number'] == '250':
+            continue
+        c = list(r['poly'].exterior.coords)
+        for a, b in zip(c, c[1:]):
+            ang = math.degrees(math.atan2(b[1] - a[1], b[0] - a[0])) % 90
+            if math.dist(a, b) > 4 and 3 < ang < 87:
+                bad.append((r['number'], a, b))
+    assert len(bad) <= 2, bad

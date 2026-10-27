@@ -462,6 +462,13 @@ def find_doors(sheet, schedule=None, floor=None, mask=None, origin=None, ft_per_
             doors.append({'a': a, 'b': b, 'kind': kind, 'hinges': [], 'swing': [], 'w': round(w, 2), 'tag': t, 'approx': True})
             have.add(t)
     for d in doors:
+        # 거의 축에 나란한 현(호 맞춤 오차 ≤ 6°)은 축에 맞춘다 — 방 경계가 비스듬해지지 않게
+        (ax, az), (bx, bz) = d['a'], d['b']
+        ang = math.degrees(math.atan2(bz - az, bx - ax)) % 180
+        if min(ang, 180 - ang) < 6:
+            m = (az + bz) / 2; d['a'], d['b'] = (ax, m), (bx, m)
+        elif abs(ang - 90) < 6:
+            m = (ax + bx) / 2; d['a'], d['b'] = (m, az), (m, bz)
         d['a'] = tuple(round(v, 3) for v in d['a']); d['b'] = tuple(round(v, 3) for v in d['b'])
     return doors
 
@@ -486,3 +493,32 @@ def _snap_tag_door(a, b, vert, mask, origin, ft_per_px, reach=2.5):
     if vert:
         return (a[0] + bo, a[1]), (b[0] + bo, b[1])
     return (a[0], a[1] + bo), (b[0], b[1] + bo)
+
+
+def thin_enclosures(sheet, min_side=8.0, max_side=60.0, tol=0.7):
+    """가는 선(0.36 pt)으로만 그린 닫힌(문 하나 정도 비어도 되는) 직사각형 울타리 → [(x0, z0, x1, z1)].
+    예: A-101 의 CM LAB ENCLOSURE 124C (건물 밖 펜스). 긴 가로선 둘 + 그 양 끝을 잇는 세로선 하나 이상."""
+    H, V = [], []
+    for d in drawings(sheet):
+        if d['type'] == 'f' or _style(d) != (0.36, 'k'):
+            continue
+        for it in d['items']:
+            if it[0] != 'l':
+                continue
+            (ax, az), (bx, bz) = _item_segments(sheet, it)[0]
+            if abs(az - bz) < 0.05 and abs(ax - bx) >= min_side:
+                H.append((min(ax, bx), max(ax, bx), (az + bz) / 2))
+            elif abs(ax - bx) < 0.05 and abs(az - bz) >= min_side:
+                V.append((min(az, bz), max(az, bz), (ax + bx) / 2))
+    out = []
+    for i, (a0, a1, za) in enumerate(H):
+        for b0, b1, zb in H[i + 1:]:
+            if not (min_side <= abs(zb - za) <= max_side and abs(a0 - b0) < tol and abs(a1 - b1) < tol):
+                continue
+            z0, z1 = sorted((za, zb))
+            sides = [x for c0, c1, x in V if abs(c0 - z0) < tol and abs(c1 - z1) < tol and (abs(x - min(a0, b0)) < tol or abs(x - max(a1, b1)) < tol)]
+            if sides:
+                r = (round(min(a0, b0), 2), round(z0, 2), round(max(a1, b1), 2), round(z1, 2))
+                if r not in out:
+                    out.append(r)
+    return out

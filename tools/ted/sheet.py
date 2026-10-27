@@ -67,6 +67,35 @@ class Sheet:
         self.grid_used = (nx, tx, nz, tz)
         return self
 
+    def _poche_rects(self):
+        out = []
+        for d in self.page.get_drawings():
+            if d['type'] == 'f' and d.get('fill') and abs(d['fill'][0] - 0.898) < 0.01:
+                for it in d['items']:
+                    if it[0] == 're':
+                        r = it[1] * self.M
+                        if r.width * r.height > 20:
+                            out.append((r.x0, r.y0, r.width, r.height))
+        return out
+
+    def align_to(self, ref):
+        """그리드 기호가 없는 시트(A-151/152 마감 평면): 같은 크기의 포셰 사각형(벽·기둥)을 ref 평면과 짝지어
+        평행이동 (dX, dY) 의 최빈값을 구하고, ref 의 그리드 변환을 그대로 쓴다. 잔차(ft) 를 grid_residual_ft 에."""
+        a, b = ref._poche_rects(), self._poche_rects()
+        d = [(x0 - X0, y0 - Y0) for x0, y0, w, h in a for X0, Y0, W, H in b if abs(w - W) < 0.05 and abs(h - H) < 0.05]
+        if not d:
+            raise ValueError(f"{self.path.name}: no matching poche to align with {ref.path.name}")
+        d = np.array(d)
+        from collections import Counter
+        mode = np.array(Counter((round(x), round(y)) for x, y in d).most_common(1)[0][0], float)
+        near = d[np.hypot(*(d - mode).T) < 1.5]
+        dx, dy = np.median(near, axis=0)
+        self.ax, self.az = ref.ax, ref.az
+        self.bx, self.bz = ref.bx + ref.ax * dx, ref.bz + ref.az * dy
+        self.grid_residual_ft = float(np.abs(near - (dx, dy)).max() * abs(ref.ax))
+        self.grid_used = (len(near), len(d))
+        return self
+
     def to_local(self, X, Y):
         return self.ax * X + self.bx, self.az * Y + self.bz
 
@@ -96,6 +125,7 @@ class Sheet:
 # 건물 외곽 (로컬 ft): technology_bldg.js 의 기존동 outline + 북측 증축(상부 볼륨 5.45..121.45 × -76.5..0) + 서측 증축(-9.85..35 × 34..136.1).
 # 동측 브리지(228..270.5)는 2층에만 있다.
 EXISTING = [(0, 0), (0, 68), (35, 68), (35, 136), (228, 136), (228, 68), (228, 58), (173, 58), (173, 0)]
+YARD_124C = (174.98, 22.69, 194.32, 42.02)
 BRIDGE = [(228, 68), (270.5, 41.5), (270.5, 31), (228, 57)]
 
 
@@ -104,6 +134,8 @@ def building_outline(floor='FIRST', buffer=0.0):
     from shapely.geometry import Polygon, box
     from shapely.ops import unary_union
     parts = [Polygon(EXISTING), box(5.45, -76.5, 121.45, 0), box(-9.85, 34, 35, 136.1)]
+    if floor == 'FIRST':
+        parts.append(box(*YARD_124C))           # CM LAB ENCLOSURE 124C: CM 랩 동쪽 바깥의 울타리 친 마당 (A-101)
     if floor == 'SECOND':
         parts.append(Polygon(BRIDGE).buffer(0.5))
     g = unary_union(parts)
