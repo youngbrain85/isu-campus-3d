@@ -330,6 +330,18 @@ async function main() {
   let street = null;
   try {
     const sj = await (await fetch(ASSET + 'street.json')).json();
+    // 가로 시설·차량이 건물 외곽 안에 놓인 것 제거 (예: Technology Building 로비 안 자전거 거치대 — 건물 증축 후 OSM·영상 기준 위치가 실내가 됨)
+    const bboxes = site.buildings.map(b => { let x0 = 1e9, x1 = -1e9, z0 = 1e9, z1 = -1e9; for (const [x, z] of b.poly) { x0 = Math.min(x0, x); x1 = Math.max(x1, x); z0 = Math.min(z0, z); z1 = Math.max(z1, z); } return [x0, x1, z0, z1, b.poly]; });
+    const pipB = (p, x, z) => { let c = false; for (let i = 0, j = p.length - 1; i < p.length; j = i++) { const a = p[i], b = p[j]; if ((a[1] > z) !== (b[1] > z) && x < (b[0] - a[0]) * (z - a[1]) / (b[1] - a[1]) + a[0]) c = !c; } return c; };
+    const indoors = (x, z) => bboxes.some(([x0, x1, z0, z1, p]) => x > x0 && x < x1 && z > z0 && z < z1 && pipB(p, x, z));
+    let dropped = 0;
+    for (const k of Object.keys(sj)) {
+      const v = sj[k];
+      if (Array.isArray(v) && v.length && Array.isArray(v[0]) && typeof v[0][0] === 'number' && typeof v[0][1] === 'number') {
+        const n = v.length; sj[k] = v.filter(q => !indoors(q[0], q[1])); dropped += n - sj[k].length;
+      }
+    }
+    if (dropped) console.log('street items inside buildings removed:', dropped);
     street = buildStreet(site, sj, M); scene.add(street);
     console.log('street:', JSON.stringify(street.userData.stats));
   } catch (e) { console.error('street layer failed', e); }

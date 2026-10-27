@@ -68,8 +68,10 @@ export function buildInterior(data, M, tex) {
     mm.name = 'int_' + (code || fallback);
     mats.set(key, mm); return mm;
   };
-  const wallMat = new THREE.MeshStandardMaterial({ color: 0xe9e6df, roughness: 0.9, name: 'int_wall' });
-  const glassMat = new THREE.MeshPhysicalMaterial({ color: 0xcfe3ec, roughness: 0.05, metalness: 0, transparent: true, opacity: 0.28, depthWrite: false, side: THREE.DoubleSide, name: 'int_glass' });
+  const wallMat = new THREE.MeshStandardMaterial({ color: 0xd6d1c7, roughness: 0.92, name: 'int_wall' });   // 도장 벽 (마감표 PT 계열 웜그레이)
+  const glassMat = new THREE.MeshPhysicalMaterial({ color: 0x9fb8bf, roughness: 0.04, metalness: 0.1, transparent: true, opacity: 0.12, depthWrite: false, side: THREE.DoubleSide, envMapIntensity: 1.2, name: 'int_glass' });   // 유리 칸막이: 여러 장 겹쳐도 뿌옇지 않게 투명도 낮춤
+  const mullionMat = new THREE.MeshStandardMaterial({ color: 0x2f3236, roughness: 0.4, metalness: 0.6, name: 'int_mullion' });
+  const baseMat = new THREE.MeshStandardMaterial({ color: 0x3a3a3c, roughness: 0.8, name: 'int_base', polygonOffset: true, polygonOffsetFactor: -1 });
   const doorMat = new THREE.MeshStandardMaterial({ color: 0x9c7a55, roughness: 0.6, name: 'int_door' });
   const frameMat = new THREE.MeshStandardMaterial({ color: 0x3b3f45, roughness: 0.5, metalness: 0.5, name: 'int_frame' });
   const lightMat = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xfff6e0, emissiveIntensity: 0.9, name: 'int_light' });
@@ -92,6 +94,8 @@ export function buildInterior(data, M, tex) {
       try {
         const top = y + Math.min(w.h || H, H);
         add(w.glass ? glassMat : wallMat, extrude(w.poly, w.holes || [], y, top));
+        if (w.glass) { add(mullionMat, extrude(w.poly, [], y, y + 0.35)); add(mullionMat, extrude(w.poly, [], top - 0.25, top)); }   // 유리 하부 프레임·상부 헤드
+        else { try { add(baseMat, extrude(w.poly, w.holes || [], y + 0.4, y + 0.75)); } catch (e) { } }   // 걸레받이 (고무 4")
       } catch (e) { /* 자기교차 다각형은 건너뜀 */ }
     }
     // 문: 개구부 위 인방(문 높이 ~ 층고), 문짝(열린 상태: 경첩 → 열린 끝), 문틀
@@ -135,7 +139,7 @@ export function buildInterior(data, M, tex) {
     root.add(G);
   }
   // 실내는 하늘 환경광(PMREM)을 그대로 받으면 하얗게 날아가므로 줄인다 (실내는 천장 조명·창으로 밝다는 가정)
-  root.traverse(o => { if (o.isMesh && o.material && o.material.envMapIntensity !== undefined && o.material !== lightMat) o.material.envMapIntensity = 0.35; });
+  root.traverse(o => { if (o.isMesh && o.material && o.material.envMapIntensity !== undefined && o.material !== lightMat) o.material.envMapIntensity = o.material === glassMat ? 1.2 : 0.3; });
   root.userData = { floors, rooms, order: data.floors.map(f => f.name), materials: data.materials };
   /** 층 선택: null = 원래대로(모두 보임, 천장 보임, 이름표 숨김) */
   root.userData.setFloor = (name) => {
