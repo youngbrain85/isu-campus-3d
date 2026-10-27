@@ -134,6 +134,8 @@ def building_outline(floor='FIRST', buffer=0.0):
     from shapely.geometry import Polygon, box
     from shapely.ops import unary_union
     parts = [Polygon(EXISTING), box(5.45, -76.5, 121.45, 0), box(-9.85, 34, 35, 136.1)]
+    if floor == 'LOWER':
+        parts.append(box(170, 50, 199, 58.5))     # ELECTRICAL ROOM 005: 기존동 외곽(x 173) 동쪽, 변압기 볼트 옆 지하 (A-100)
     if floor == 'FIRST':
         parts.append(box(*YARD_124C))           # CM LAB ENCLOSURE 124C: CM 랩 동쪽 바깥의 울타리 친 마당 (A-101)
     if floor == 'SECOND':

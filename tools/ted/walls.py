@@ -372,9 +372,10 @@ def door_schedule(path=None):
             return int(m.group(1)) + int(m.group(2)) / 12 if m else None
         w = ft(dims[0]) if dims else None
         w2 = ft(dims[1]) if pair and len(dims) > 2 else None
+        hh = ft(dims[2]) if pair and len(dims) > 2 else (ft(dims[1]) if len(dims) > 1 else None)
         panel = next((t for t in toks if t in ('F', 'FG', 'HG', 'N2', 'OH', '5')), None)
         txt = ' '.join(toks)
-        out[ws[0][4]] = {'pair': pair, 'w': w, 'w2': w2, 'panel': panel,
+        out[ws[0][4]] = {'pair': pair, 'w': w, 'w2': w2, 'h': hh, 'panel': panel,
                          'sliding': 'SLIDING' in txt, 'overhead': panel == 'OH' or ('MTL' in toks and (w or 0) >= 8),
                          'existing': 'EXISTING TO REMAIN' in txt}
     return out

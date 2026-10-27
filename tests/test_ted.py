@@ -169,3 +169,53 @@ def test_ceiling_heights_and_lights(plan, rcp, floor):
     s, m, o = _floor(plan, floor)
     L = ceiling_lights(r, m, o, outline=building_outline(floor))
     assert len(L) > 50
+
+
+# ── Task 5: JSON ──
+import json
+from shapely.geometry import Polygon
+
+JSON_PATH = pathlib.Path(__file__).resolve().parents[1] / 'viewer' / 'assets' / 'ted_interior.json'
+
+
+@pytest.fixture(scope='module')
+def ted_json():
+    if not JSON_PATH.exists():
+        pytest.skip('run tools/ted/build.py first')
+    return json.loads(JSON_PATH.read_text(encoding='utf-8'))
+
+
+def test_json_schema(ted_json):
+    d = ted_json
+    assert {'frame', 'materials', 'floors'} <= d.keys()
+    assert [f['name'] for f in d['floors']] == ['LOWER', 'FIRST', 'SECOND']
+    for f in d['floors']:
+        assert {'name', 'y', 'height', 'walls', 'doors', 'rooms', 'lights', 'stairs', 'partition_tags'} <= f.keys()
+        for w in f['walls']:
+            assert {'poly', 'h', 'glass'} <= w.keys() and len(w['poly']) >= 3 and 6 < w['h'] <= 15
+        for dr in f['doors']:
+            assert {'a', 'b', 'kind', 'w', 'h'} <= dr.keys()
+        for r in f['rooms']:
+            assert {'no', 'name', 'poly', 'area', 'floor', 'base', 'wall', 'ceiling', 'ch'} <= r.keys()
+            assert 6.5 <= r['ch'] <= 30
+            for c in [r['floor'], r['base'], r['ceiling'], *r['wall']]:
+                assert c is None or c in d['materials']
+        for l in f['lights']:
+            assert len(l) == 4
+    assert all(len(m['color']) == 3 for m in d['materials'].values())
+
+
+@pytest.mark.parametrize("i,floor", [(1, 'FIRST'), (2, 'SECOND')])
+def test_json_rooms_inside_outline_and_doors(ted_json, i, floor):
+    f = ted_json['floors'][i]
+    out = building_outline(floor, 2.01)
+    for r in f['rooms']:
+        assert out.contains(Polygon(r['poly'])), r['no']
+    st = f['stats']
+    assert abs(st['doors'] - st['door_marks_in_schedule']) <= 0.1 * st['door_marks_in_schedule']
+
+
+def test_json_first_floor_room_numbers(ted_json):
+    nums = {r['no'] for r in ted_json['floors'][1]['rooms']}
+    for n in ('100', '101', '102', '104A', '109A', '124C', '127', '136', '145', '146', '147', '148'):
+        assert n in nums

@@ -27,7 +27,7 @@ TYPE_RGB = {
     'RF': ('rubber flooring', (95, 95, 98)), 'SDT': ('static dissipative tile', (130, 130, 128)), 'TZ': ('terrazzo', (215, 212, 204)),
     'WO': ('wood flooring', (176, 138, 90)), 'RB': ('rubber base', (60, 60, 62)), 'EPB': ('epoxy base', (150, 150, 146)),
     'TZB': ('terrazzo base', (215, 212, 204)), 'QTB': ('quarry tile base', (150, 80, 60)), 'CTB': ('ceramic tile base', (196, 182, 160)),
-    'WDB': ('wood base', (176, 138, 90)), 'ACT': ('acoustic ceiling tile', (242, 242, 238)), 'MTL': ('metal ceiling', (200, 202, 204)),
+    'WDB': ('wood base', (176, 138, 90)), 'EXPOSED': ('exposed structure (painted)', (214, 214, 210)), 'OPEN': ('open to above', (214, 214, 210)), 'ACT': ('acoustic ceiling tile', (242, 242, 238)), 'MTL': ('metal ceiling', (200, 202, 204)),
     'MT': ('metal ceiling', (200, 202, 204)), 'WD': ('wood ceiling', (181, 137, 90)), 'GWB': ('gypsum board ceiling', (240, 240, 236)),
     'WT': ('window treatment', (200, 200, 195)), 'PL': ('plastic laminate', (200, 200, 195)), 'QTZ': ('quartz', (225, 222, 215)),
     'SSM': ('solid surface', (225, 222, 215)), 'TEX': ('textile', (120, 120, 125)), 'ETR': ('existing to remain', (168, 166, 160)),
