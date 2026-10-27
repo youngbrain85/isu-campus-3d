@@ -140,7 +140,8 @@ export function buildInterior(data, M, tex) {
   /** 층 선택: null = 원래대로(모두 보임, 천장 보임, 이름표 숨김) */
   root.userData.setFloor = (name) => {
     const ord = root.userData.order, k = name ? ord.indexOf(name) : -1;
-    cut.constant = name ? floors[name].y + 8.5 : 1e6;   // 선택 층 바닥 + 8.5 ft 에서 벽을 자름
+    const wy = new THREE.Vector3(); root.getWorldPosition(wy);   // 건물 그룹이 지반에 맞춰 올라가 있음 (technology_bldg.js meta.elevation)
+    cut.constant = name ? wy.y + floors[name].y + 8.5 : 1e6;   // 선택 층 바닥 + 8.5 ft 에서 벽을 자름 (월드 y)
     ord.forEach((n, i) => {
       const f = floors[n];
       f.group.visible = !name || i <= k;
