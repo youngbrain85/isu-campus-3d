@@ -93,10 +93,20 @@ def build_floor(name, y, height, plan, fin, rcp_name, dsched, fsched):
     # 벽: 실벽 = 층고(데크까지, A-002 일반주기 B), 유리 = 접한 방 천장 높이(최댓값)
     from shapely.geometry import Point
     jwalls = []
-    for g in wall_polys(solid, origin, FT):
+    # 외벽은 외부 모듈(technology_bldg.js)이 그린다 → 실내 벽은 외곽선 0.7 ft 안쪽까지만 (안쪽 마감면만 남김).
+    # 그대로 두면 실내 벽(흰색, 층고 전체)이 외부 벽돌·유리면과 겹쳐 밖으로 비쳐 보였다.
+    inner = building_outline(name, -0.7)
+    shell_band = building_outline(name).boundary.buffer(1.0)
+    def _parts(g):
+        g = g.intersection(inner)
+        return [x for x in getattr(g, 'geoms', [g]) if x.geom_type == 'Polygon' and x.area > 0.2]
+    for g0 in wall_polys(solid, origin, FT):
+      for g in _parts(g0):
         jwalls.append({'poly': poly_coords(g), 'holes': [[r2(p) for p in list(h.coords)[:-1]] for h in g.interiors],
                        'h': height, 'glass': False})
     for g in wall_polys(glass, origin, FT, min_area=0.3):
+        if g.intersection(shell_band).area > 0.5 * g.area:
+            continue                     # 외벽 커튼월·창은 외부 모듈 몫
         near = [jr['ch'] for jr, r in zip(jrooms, rooms) if r['poly'].distance(g) < 0.6 and jr['ch_source'] == 'rcp']
         jwalls.append({'poly': poly_coords(g), 'holes': [], 'h': min(max(near), height) if near else DEFAULT_GLASS_H, 'glass': True})
     jdoors = []
