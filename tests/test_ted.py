@@ -132,3 +132,40 @@ def test_room_boundaries_axis_aligned(sheet, floor):
             if math.dist(a, b) > 4 and 3 < ang < 87:
                 bad.append((r['number'], a, b))
     assert len(bad) <= 2, bad
+
+
+# ── Task 4: 마감·천장 ──
+from ted.finishes import finish_schedule, room_finishes, room_ceilings, ceiling_lights
+
+
+def test_finish_schedule_decoded():
+    sch = finish_schedule()
+    assert len(sch) > 60
+    assert sch['PT-02']['color'] == [88, 87, 85]           # SW7674 Peppercorn
+    assert 'TECHZONE' in sch['ACT-02']['desc']
+    assert sch['CPT-01']['type'] == 'carpet tile'
+
+
+@pytest.mark.parametrize("plan,fin,floor", [("A-101", "A-151", "FIRST"), ("A-102", "A-152", "SECOND")])
+def test_room_floor_finishes_in_schedule(plan, fin, floor):
+    sch = finish_schedule()
+    s = _floor(plan, floor)[0]
+    R = _rooms(plan, floor)
+    F = room_finishes(Sheet(sheet_path(fin)), s, R)
+    labeled = [r['number'] for r in R if r['number']]
+    assert len([n for n in labeled if n in F]) >= 0.7 * len(labeled)
+    for n, f in F.items():
+        assert f['floor'] in sch or f['floor'] == 'ETR', (n, f)
+
+
+@pytest.mark.parametrize("plan,rcp,floor", [("A-101", "A-131", "FIRST"), ("A-102", "A-132", "SECOND")])
+def test_ceiling_heights_and_lights(plan, rcp, floor):
+    R = _rooms(plan, floor)
+    r = Sheet(sheet_path(rcp)).fit_grid()
+    C = room_ceilings(r, R)
+    hs = [c['h'] for c in C.values() if c['h']]
+    assert len(C) >= 0.7 * len([x for x in R if x['number']])
+    assert hs and all(6.5 <= h <= 30 for h in hs)
+    s, m, o = _floor(plan, floor)
+    L = ceiling_lights(r, m, o, outline=building_outline(floor))
+    assert len(L) > 50
