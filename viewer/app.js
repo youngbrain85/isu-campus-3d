@@ -321,30 +321,78 @@ function setupSunUI(sun) {
 }
 
 // ------------------------------------------------------------------ 단독 건물 보기 (?solo=<OSM id>)
-// 건물 외곽 + 여유 250 ft 상자 밖은 모든 재질에 절단면을 걸어 잘라낸다 (하늘 제외). 카메라는 건물 프리셋, 제목은 건물 이름.
 function setupSolo(site, mod) {
-  const ids = new Set([SOLO, ...(mod ? [mod.meta.osm, ...(mod.meta.extraIds || [])] : [])]);
-  const polys = site.buildings.filter(b => ids.has(b.id)).map(b => b.poly);
-  if (!polys.length) { console.warn('solo: building not found', SOLO); return; }
-  let x0 = 1e9, x1 = -1e9, z0 = 1e9, z1 = -1e9;
-  for (const p of polys) for (const [x, z] of p) { x0 = Math.min(x0, x); x1 = Math.max(x1, x); z0 = Math.min(z0, z); z1 = Math.max(z1, z); }
-  const m = 250;
-  const planes = [new THREE.Plane(new THREE.Vector3(1, 0, 0), -(x0 - m)), new THREE.Plane(new THREE.Vector3(-1, 0, 0), x1 + m),
-    new THREE.Plane(new THREE.Vector3(0, 0, 1), -(z0 - m)), new THREE.Plane(new THREE.Vector3(0, 0, -1), z1 + m)];
-  renderer.localClippingEnabled = true;
-  scene.traverse(o => {
-    if (!o.material || o.name === 'sky') return;
-    for (const mt of Array.isArray(o.material) ? o.material : [o.material]) mt.clippingPlanes = [...(mt.clippingPlanes || []).filter(p => !planes.includes(p)), ...planes];
-  });
+  // 단독 보기 = Revit 3D 뷰처럼 건물만: 배경(지면·도로·나무·다른 건물·하늘) 없이 밝은 단색 배경 + 그림자 받는 바닥판.
+  // 오른쪽 세로 크롭 바(위·아래 두 손잡이)로 높이(Z, 월드 y) 구간만 잘라 본다 = Revit 단면 상자의 위/아래 면.
+  const grp = mod ? scene.getObjectByName('bldg_' + mod.meta.id) : null;
+  if (!grp) { console.warn('solo: building not found', SOLO); return; }
+  for (const o of [...scene.children]) {
+    if (o === grp || o.isLight || (o.parent === scene && o.type === 'Object3D' && scene.children.some(l => l.isDirectionalLight && l.target === o))) continue;
+    o.visible = false;
+  }
   scene.fog = null;
-  const cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, r = Math.max(x1 - x0, z1 - z0);
-  if (mod && mod.meta.preset) { camera.position.set(...mod.meta.preset.pos); controls.target.set(...mod.meta.preset.tgt); }
-  else { camera.position.set(cx - r, r * 0.8, cz + r * 1.2); controls.target.set(cx, 10, cz); }
-  controls.maxDistance = r * 4 + 600; controls.update();
+  scene.background = new THREE.Color(0xe9ecef);
+  grp.updateMatrixWorld(true);
+  const box = new THREE.Box3().setFromObject(grp), c = box.getCenter(new THREE.Vector3()), sz = box.getSize(new THREE.Vector3());
+  // 그림자 받는 바닥판 (그림자만 보임) + 옅은 격자 (10 ft)
+  const R = Math.max(sz.x, sz.z) * 0.75;
+  const shadowPlane = new THREE.Mesh(new THREE.PlaneGeometry(R * 3, R * 3).rotateX(-Math.PI / 2), new THREE.ShadowMaterial({ opacity: 0.22 }));
+  shadowPlane.position.set(c.x, box.min.y + 0.02, c.z); shadowPlane.receiveShadow = true; shadowPlane.name = 'solo_floor'; scene.add(shadowPlane);
+  const grid = new THREE.GridHelper(Math.ceil(R * 2.4 / 10) * 10, Math.ceil(R * 2.4 / 10), 0xb9bec4, 0xd5d9dd);
+  grid.position.set(c.x, box.min.y + 0.03, c.z); grid.material.transparent = true; grid.material.opacity = 0.6; scene.add(grid);
+  // 높이 크롭: 위 면(아래쪽만 남김) + 아래 면(위쪽만 남김). 모든 재질에 추가 (실내 단면 절단면과 함께 동작)
+  renderer.localClippingEnabled = true;
+  const top = new THREE.Plane(new THREE.Vector3(0, -1, 0), box.max.y + 1), bot = new THREE.Plane(new THREE.Vector3(0, 1, 0), -(box.min.y - 1));
+  grp.traverse(o => {
+    if (!o.material) return;
+    for (const mt of Array.isArray(o.material) ? o.material : [o.material]) { mt.clippingPlanes = [...(mt.clippingPlanes || []).filter(p => p !== top && p !== bot), top, bot]; mt.clipShadows = true; mt.needsUpdate = true; }
+  });
+  // 크롭 바 UI
+  const y0 = box.min.y, y1 = box.max.y, fmt = (v) => Math.max(0, v - y0).toFixed(1) + ' ft';
+  const ui = document.createElement('div'); ui.id = 'cropbar';
+  ui.innerHTML = `<style>
+    #cropbar{position:fixed;right:16px;top:50%;transform:translateY(-50%);background:var(--panel);backdrop-filter:blur(8px);border:1px solid var(--border);border-radius:12px;padding:10px 8px;color:var(--fg);font-size:11px;display:flex;flex-direction:column;align-items:center;gap:6px;z-index:5}
+    #cropbar .bar{position:relative;height:56vh;width:96px}
+    #cropbar input[type=range]{position:absolute;left:70%;top:50%;width:56vh;transform:translate(-50%,-50%) rotate(-90deg);margin:0;background:transparent;pointer-events:none;-webkit-appearance:none;appearance:none;accent-color:var(--accent)}
+    #cropbar input[type=range]::-webkit-slider-thumb{pointer-events:auto}
+    #cropbar input[type=range]::-moz-range-thumb{pointer-events:auto}
+    #cropbar .lv{position:absolute;left:0;font-size:10px;color:var(--muted);white-space:nowrap;transform:translateY(50%);pointer-events:none}
+    #cropbar button{background:rgba(255,255,255,0.08);color:var(--fg);border:1px solid var(--border);border-radius:6px;font-size:11px;padding:2px 6px;cursor:pointer}
+  </style>
+  <b>Height crop</b><span id="cropTopV"></span>
+  <div class="bar"><input type="range" id="cropTop" min="${y0}" max="${y1}" step="0.25" value="${y1}" aria-label="Crop top">
+  <input type="range" id="cropBot" min="${y0}" max="${y1}" step="0.25" value="${y0}" aria-label="Crop bottom"></div>
+  <span id="cropBotV"></span><button id="cropReset">Reset</button>`;
+  document.body.appendChild(ui);
+  // 층 레벨 눈금 (실내 모델이 있으면 층 바닥 높이)
+  const bar = ui.querySelector('.bar'), it = grp.getObjectByName('interior');
+  if (it && it.userData.floors) {
+    const wy = new THREE.Vector3(); it.getWorldPosition(wy);
+    for (const [n, f] of Object.entries(it.userData.floors)) {
+      const v = wy.y + f.y; if (v < y0 || v > y1) continue;
+      const l = document.createElement('div'); l.className = 'lv'; l.style.bottom = ((v - y0) / (y1 - y0) * 100) + '%'; l.textContent = n.toLowerCase() + ' —'; bar.appendChild(l);
+    }
+  }
+  const tI = ui.querySelector('#cropTop'), bI = ui.querySelector('#cropBot');
+  const apply = () => {
+    let t = +tI.value, b = +bI.value; if (b > t - 1) { if (document.activeElement === bI) b = t - 1; else t = b + 1; tI.value = t; bI.value = b; }
+    top.constant = t; bot.constant = -b;
+    ui.querySelector('#cropTopV').textContent = '▲ ' + fmt(t); ui.querySelector('#cropBotV').textContent = '▼ ' + fmt(b);
+    requestRender(2);
+  };
+  tI.addEventListener('input', apply); bI.addEventListener('input', apply);
+  ui.querySelector('#cropReset').addEventListener('click', () => { tI.value = y1; bI.value = y0; apply(); });
+  window.__soloCrop = (t, b) => { if (t != null) tI.value = y0 + t; if (b != null) bI.value = y0 + b; apply(); };   // 테스트용 (건물 바닥 기준 ft)
+  apply();
+  // 카메라: 건물 전체가 보이는 남서쪽 위 3/4 시점
+  const r = Math.max(sz.x, sz.z);
+  const dist = (r * 0.62) / Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));   // 건물 폭이 화면에 들어오는 거리
+  const dir = new THREE.Vector3(-0.62, 0.48, 0.62).normalize(); camera.position.copy(c).addScaledVector(dir, dist); controls.target.copy(c);
+  controls.maxDistance = r * 4; controls.update();
   const name = (mod && mod.meta.name) || SOLO;
-  const t = document.querySelector('#hud h1 span'); if (t) t.innerHTML = '<a href="./" style="color:var(--accent);text-decoration:none">← Campus</a> · ' + name.replace(/[&<>]/g, '');
+  const tt = document.querySelector('#hud h1 span'); if (tt) tt.innerHTML = '<a href="./" style="color:var(--accent);text-decoration:none">← Campus</a> · ' + name.replace(/[&<>]/g, '');
   document.title = name + ' – ISU 3D';
-  // 실내 버튼은 실내 모델이 있는 건물에서만
+  // 단독 보기에서 의미 없는 캠퍼스용 메뉴 숨김 (프리셋·토글·햇빛은 유지)
   const ib = document.querySelector('[data-interior]'); if (ib && !(mod && mod.meta.id === 'tech')) { ib.parentElement.style.display = 'none'; ib.parentElement.previousElementSibling.style.display = 'none'; }
   requestRender(10);
 }
