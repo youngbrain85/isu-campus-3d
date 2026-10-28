@@ -519,3 +519,35 @@ def test_ceiling_leaders_found():
     for sh, n in (('A-131', 20), ('A-132', 15)):
         s = Sheet(sheet_path(sh)).fit_grid()
         assert sum(len(v) for v in ceiling_leaders(s, ceiling_tags(s)).values()) >= n
+
+
+# ── 마무리 3: 위생기구 방향 ──
+# 평면 확대(A-101 120/121, A-102 240/241/209/210)에서 읽은 물탱크(뒤) 방향: 다인 화장실은 가운데 배관벽, 1 인 화장실은 남쪽 벽
+_TANK = {('FIRST', '120'): (1, 0), ('FIRST', '121'): (-1, 0), ('SECOND', '241'): (1, 0), ('SECOND', '240'): (-1, 0),
+         ('SECOND', '209'): (0, 1), ('SECOND', '210'): (0, 1)}
+
+
+def test_toilet_tank_against_wall(ted_json):
+    """변기 물탱크 방향 = 도면, 그리고 뒤쪽 끝이 벽에 닿고 앞은 21\" 이상 비어 있다"""
+    n = 0
+    for f in ted_json['floors']:
+        W = _union([_Pg(w['poly'], w.get('holes') or []).buffer(0) for w in f['walls']])
+        for x in f['fixtures']:
+            if x['type'] not in ('toilet', 'urinal', 'lavatory'):
+                continue
+            bx, bz = _math.sin(x['rot']), _math.cos(x['rot'])
+            back = _Pt(x['x'] + bx * x['d'] / 2, x['z'] + bz * x['d'] / 2)
+            assert W.distance(back) < 0.5, (f['name'], x['room'], x['type'], x['x'], x['z'])
+            if x['type'] == 'toilet':
+                assert (round(bx), round(bz)) == _TANK[(f['name'], x['room'])], (f['name'], x['room'], x['x'], x['z'], x['rot'])
+                front = _Pt(x['x'] - bx * (x['d'] / 2 + 1.75), x['z'] - bz * (x['d'] / 2 + 1.75))
+                assert W.distance(front) > 0.05, (f['name'], x['room'], 'front clearance')
+                n += 1
+    assert n == 12                       # 120: 2, 121: 4, 240: 3, 241: 1, 209: 1, 210: 1
+
+
+def test_fixture_counts_match_plan(ted_json):
+    fx = {f['name']: f['fixtures'] for f in ted_json['floors']}
+    cnt = lambda fl, room, t: sum(1 for x in fx[fl] if x['room'] == room and x['type'] == t)
+    assert cnt('SECOND', '240', 'lavatory') == 2 and cnt('SECOND', '241', 'lavatory') == 2   # 라벨 상자 오검출 없음
+    assert cnt('SECOND', '209', 'toilet') == 1 and cnt('SECOND', '210', 'toilet') == 1

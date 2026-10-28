@@ -49,7 +49,11 @@ def find_fixtures(plan, rooms, walls):
     """plan = 'A-101' 등, rooms = [{no,name,poly}], walls = shapely 다각형 목록 → [{type,x,z,w,d,rot,h,room,src}]"""
     s = Sheet(sheet_path(plan)).fit_grid()
     W = unary_union(walls) if walls else None
-    words = [s.to_local(X, Y) for t, X, Y, h, r in s.words]
+    # 글자 상자 (로컬 ft): 라벨 상자를 세로선이 가르면 글자 중심이 옆 칸에 있을 수 있어 중심이 아니라 상자로 판단
+    words = []
+    for t, X, Y, h, r in s.words:
+        (ax, az), (bx, bz) = s.to_local(r.x0, r.y0), s.to_local(r.x1, r.y1)
+        words.append((min(ax, bx), min(az, bz), max(ax, bx), max(az, bz)))
     out = []
     for r in rooms:
         name = r['name'] or ''
@@ -74,7 +78,7 @@ def find_fixtures(plan, rooms, walls):
                     continue
                 b0, b1, b2, b3 = p.bbox
                 bx0, bz0, bx1, bz1 = x0 + b1 * sx, z0 + b0 * sz, x0 + b3 * sx, z0 + b2 * sz
-                if any(bx0 <= wx <= bx1 and bz0 <= wz <= bz1 for wx, wz in words):
+                if any(wx0 < bx1 and bx0 < wx1 and wz0 < bz1 and bz0 < wz1 for wx0, wz0, wx1, wz1 in words):
                     continue                   # 글자 든 칸 (방 번호 상자 등)
                 maj, mn = p.major_axis_length * sx, p.minor_axis_length * sx
                 regs.append((x, z, A, maj, mn, p.solidity, p.orientation, p))
@@ -92,6 +96,14 @@ def find_fixtures(plan, rooms, walls):
             # 뒤(벽) 방향
             if typ == 'toilet':
                 ax_ = (math.sin(ori), math.cos(ori))            # (dx, dz) 장축
+                if A < 0.55:
+                    # 1 인 화장실(209/210)의 작은 변기 기호는 거의 둥글어 장축이 믿을 수 없다 → 볼·시트 안쪽 조각들
+                    # (0.9 ft 안의 작은 흰 영역)이 늘어선 방향을 축으로 (A-102 확대: 볼·시트가 물탱크 쪽으로 세로로 쌓임)
+                    near = [(qx, qz) for qx, qz, qA, *_ in regs if 0.1 < qA < 1.0 and math.dist((qx, qz), (x, z)) < 0.9]
+                    if len(near) >= 2:
+                        sx_ = max(q[0] for q in near) - min(q[0] for q in near)
+                        sz_ = max(q[1] for q in near) - min(q[1] for q in near)
+                        ax_ = (1.0, 0.0) if sx_ > sz_ else (0.0, 1.0)
                 c1, c2 = Point(x + ax_[0], z + ax_[1]), Point(x - ax_[0], z - ax_[1])
                 back = ax_ if (W is None or W.distance(c1) <= W.distance(c2)) else (-ax_[0], -ax_[1])
             else:
