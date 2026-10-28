@@ -677,3 +677,23 @@ def test_ships_ladder_reaches_roof_hatch(ted_json):
     assert abs(f['y0'] - 14.67) < 0.01 and abs(f['y1'] - 29.33) < 0.01
     hatch = _Pg([(98.2, 40.8), (101.4, 40.8), (101.4, 46.0), (98.2, 46.0)])
     assert hatch.contains(_Pt(f['b']))
+
+
+# ── 마무리 5: 계단 126 / 002 치수 ──
+def test_stair126_dimensions(ted_json):
+    """A-101: 위 층계 마지막 챌판에서 동쪽 벽까지 5'-10 1/8" (위 계단참), A-301 85'-4" → 100'-0" 26 챌판,
+    평면 챌판 간격(A-100/A-101) = 디딤판 10.8~11" — A-423 H1 상세가 없어 평면·단면에서 확인할 수 있는 것"""
+    from ted.stairs import STAIRS
+    spec = next(s for s in STAIRS if s['id'] == 'stair126')
+    st = next(s for _, s in _all_stairs(ted_json) if s['id'] == 'stair126')
+    up = st['flights'][1]
+    F1 = next(f for f in ted_json['floors'] if f['name'] == 'FIRST')
+    W = _union([_Pg(w['poly'], w.get('holes') or []).buffer(0) for w in F1['walls']])
+    sheet, clear = spec['top_clear']
+    face = _Pt(up['b'][0] + clear, up['b'][1])
+    assert W.distance(face) < 0.35, W.distance(face)                     # 5'-10 1/8" 끝에 벽면
+    assert W.distance(_Pt(up['b'][0] + clear - 1.0, up['b'][1])) > 0.3  # 그 사이는 비어 있음 (계단참)
+    assert sum(f['risers'] for f in st['flights']) == 26
+    assert abs((st['flights'][-1]['y1'] - st['flights'][0]['y0']) - 14.667) < 0.01
+    for f in st['flights']:
+        assert 0.89 <= f['tread'] <= 0.93, f['tread']
