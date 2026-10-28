@@ -357,6 +357,8 @@ function setupSolo(site, mod) {
     #cropbar input[type=range]::-webkit-slider-thumb{pointer-events:auto}
     #cropbar input[type=range]::-moz-range-thumb{pointer-events:auto}
     #cropbar .lv{position:absolute;left:0;font-size:10px;color:var(--muted);white-space:nowrap;transform:translateY(50%);pointer-events:none}
+    #info.open ~ #cropbar{right:372px}   /* 정보 패널(폭 340)이 열리면 그 왼쪽으로 */
+    @media (max-width:640px){#cropbar{top:auto;bottom:16px;transform:none} #cropbar .bar{height:30vh} #cropbar input[type=range]{width:30vh} #info.open ~ #cropbar{right:16px;bottom:calc(45vh + 24px)}}
     #cropbar button{background:rgba(255,255,255,0.08);color:var(--fg);border:1px solid var(--border);border-radius:6px;font-size:11px;padding:2px 6px;cursor:pointer}
   </style>
   <b>Height crop</b><span id="cropTopV"></span>
@@ -383,18 +385,105 @@ function setupSolo(site, mod) {
   tI.addEventListener('input', apply); bI.addEventListener('input', apply);
   ui.querySelector('#cropReset').addEventListener('click', () => { tI.value = y1; bI.value = y0; apply(); });
   window.__soloCrop = (t, b) => { if (t != null) tI.value = y0 + t; if (b != null) bI.value = y0 + b; apply(); };   // 테스트용 (건물 바닥 기준 ft)
+  const setCrop = (t, b) => { tI.value = t == null ? y1 : t; bI.value = b == null ? y0 : b; apply(); };
   apply();
   // 카메라: 건물 전체가 보이는 남서쪽 위 3/4 시점
   const r = Math.max(sz.x, sz.z);
   const dist = (r * 0.62) / Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));   // 건물 폭이 화면에 들어오는 거리
-  const dir = new THREE.Vector3(-0.62, 0.48, 0.62).normalize(); camera.position.copy(c).addScaledVector(dir, dist); controls.target.copy(c);
+  const dir = new THREE.Vector3(-0.62, 0.48, 0.62).normalize();
+  const resetView = (keepCam) => { setCrop(null, null); if (!keepCam) { camera.position.copy(c).addScaledVector(dir, dist); controls.target.copy(c); controls.update(); } };
+  resetView();
   controls.maxDistance = r * 4; controls.update();
+  setupSoloTree(grp, mod, setCrop, resetView);
   const name = (mod && mod.meta.name) || SOLO;
   const tt = document.querySelector('#hud h1 span'); if (tt) tt.innerHTML = '<a href="./" style="color:var(--accent);text-decoration:none">← Campus</a> · ' + name.replace(/[&<>]/g, '');
   document.title = name + ' – ISU 3D';
   // 단독 보기에서 의미 없는 캠퍼스용 메뉴 숨김 (프리셋·토글·햇빛은 유지)
   const ib = document.querySelector('[data-interior]'); if (ib && !(mod && mod.meta.id === 'tech')) { ib.parentElement.style.display = 'none'; ib.parentElement.previousElementSibling.style.display = 'none'; }
   requestRender(10);
+}
+
+// ------------------------------------------------------------------ 단독 보기 계층 메뉴 (Revit 프로젝트 브라우저 같은 구조)
+// Views (3D 전체 / 외관) · Levels (층별 단면) · Categories (분류별 표시 켜기·끄기) · Rooms (층별 실 목록 → 클릭하면 그 실로 이동 + 정보)
+function setupSoloTree(grp, mod, setCrop, resetView) {
+  const hud = document.getElementById('hud'); if (!hud) return;
+  for (const el of [...hud.children]) if (el.tagName !== 'H1') el.style.display = 'none';
+  const it = grp.getObjectByName('interior');
+  // 메시 → 분류
+  const FIX = /toilet|urinal|lavatory|sink|fountain|shower|partition_stall/i, CASE = /cabinet|counter|island|casework|shelf_wall|markerboard|tackboard|whiteboard|display|monitor_wall|wall_tv|reception/i,
+    FURN = /chair|table|desk|stool|sofa|lounge|bench|seat|ottoman|bookcase|shelving|storage_shelf|monitor|workstation|cart|locker/i;
+  const catOf = (o) => {
+    let inInt = false, inCeil = false;
+    for (let p = o; p && p !== grp; p = p.parent) { if (p === it) inInt = true; if (p.name === 'ceiling') inCeil = true; }
+    if (!inInt) return 'exterior';
+    if (inCeil) return 'ceilings';
+    const n = o.name + ' ' + ((o.material && o.material.name) || '');
+    if (/^c_/.test(o.name)) { const t = o.name.slice(2); return FIX.test(t) ? 'fixtures' : CASE.test(t) ? 'casework' : FURN.test(t) ? 'furniture' : 'equipment'; }
+    if (/int_(stair|rail|landing|ramp|ladder|mezz)/.test(n)) return 'stairs';
+    if (/int_(door|frame|elev)/.test(n)) return 'doors';
+    if (/int_(wall|base|glass|mullion)/.test(n)) return 'walls';
+    return 'floors';
+  };
+  const cats = {};
+  grp.traverse(o => { if (o.isMesh && !o.isSprite) (cats[catOf(o)] = cats[catOf(o)] || []).push(o); });
+  const CAT_LABEL = { exterior: 'Exterior', walls: 'Walls & glass', doors: 'Doors & elevator', floors: 'Floors & slabs', ceilings: 'Ceilings & lights',
+    stairs: 'Stairs, ramps & rails', equipment: 'Equipment', casework: 'Casework', fixtures: 'Plumbing fixtures', furniture: 'Furniture' };
+  const floors = it && it.userData.floors ? Object.entries(it.userData.floors) : [];
+  const rooms = it && it.userData.rooms ? it.userData.rooms : [];
+  const wy = new THREE.Vector3(); if (it) it.getWorldPosition(wy);
+  const esc = (t) => String(t ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const box = document.createElement('div'); box.id = 'soloTree';
+  let html = `<style>
+    #soloTree{font-size:12px;margin-top:6px;max-height:calc(100vh - 110px);overflow:auto}
+    #soloTree details{margin:2px 0} #soloTree summary{cursor:pointer;color:var(--muted);text-transform:uppercase;font-size:11px;letter-spacing:.04em;padding:3px 0}
+    #soloTree .it{display:block;width:100%;text-align:left;background:none;border:0;color:var(--fg);padding:3px 6px 3px 14px;border-radius:6px;cursor:pointer;font-size:12px}
+    #soloTree .it:hover{background:rgba(127,193,255,0.18)} #soloTree .it.on{background:rgba(127,193,255,0.3)}
+    #soloTree label{display:flex;gap:6px;align-items:center;padding:2px 6px 2px 14px;cursor:pointer}
+    #soloTree .sub{padding-left:10px} #soloTree .no{color:var(--muted);display:inline-block;min-width:38px}
+  </style>
+  <details open><summary>Views</summary>
+    <button class="it" data-v="3d">3D – whole building</button>
+    ${it ? '<button class="it" data-v="ext">3D – exterior only</button>' : ''}
+  </details>`;
+  if (floors.length) {
+    html += '<details open><summary>Levels</summary>' + floors.slice().reverse().map(([n, f]) =>
+      `<button class="it" data-lv="${n}">${n.charAt(0) + n.slice(1).toLowerCase()} level <span class="no">${(f.y >= 0 ? '+' : '') + f.y.toFixed(2)} ft</span></button>`).join('') + '</details>';
+  }
+  html += '<details open><summary>Categories</summary>' + Object.keys(CAT_LABEL).filter(k => cats[k]).map(k =>
+    `<label><input type="checkbox" data-cat="${k}" checked> ${CAT_LABEL[k]}</label>`).join('') + '</details>';
+  if (rooms.length) {
+    html += '<details><summary>Rooms (' + rooms.length + ')</summary>' + floors.slice().reverse().map(([n]) => {
+      const rs = rooms.filter(o => o.floor === n).sort((a, b) => String(a.r.no).localeCompare(String(b.r.no)));
+      return rs.length ? `<details class="sub"><summary>${n.toLowerCase()} (${rs.length})</summary>` + rs.map(o =>
+        `<button class="it" data-room="${rooms.indexOf(o)}"><span class="no">${esc(o.r.no || '–')}</span>${esc(o.r.name || 'Room')}</button>`).join('') + '</details>' : '';
+    }).join('') + '</details>';
+  }
+  box.innerHTML = html; hud.appendChild(box);
+  const mark = (el) => { box.querySelectorAll('.it').forEach(b => b.classList.toggle('on', b === el)); };
+  const setCat = (k, v) => { for (const o of cats[k] || []) o.visible = v; requestRender(2); };
+  box.querySelectorAll('[data-cat]').forEach(cb => cb.addEventListener('change', () => setCat(cb.dataset.cat, cb.checked)));
+  const restoreCats = () => box.querySelectorAll('[data-cat]').forEach(cb => setCat(cb.dataset.cat, cb.checked));
+  box.querySelectorAll('[data-v]').forEach(b => b.addEventListener('click', () => {
+    mark(b); if (window.__setInterior) window.__setInterior(null);
+    resetView(); restoreCats();
+    if (b.dataset.v === 'ext') for (const k of Object.keys(cats)) if (k !== 'exterior') for (const o of cats[k]) o.visible = false;
+    requestRender(4);
+  }));
+  box.querySelectorAll('[data-lv]').forEach(b => b.addEventListener('click', () => {
+    mark(b); const f = it.userData.floors[b.dataset.lv];
+    window.__setInterior(b.dataset.lv); restoreCats(); setCat('exterior', false); setCrop(null, null);
+    resetView(true); requestRender(4);
+  }));
+  box.querySelectorAll('[data-room]').forEach(b => b.addEventListener('click', () => {
+    mark(b); const o = rooms[+b.dataset.room];
+    window.__setInterior(o.floor); restoreCats(); setCat('exterior', false);
+    let cx = 0, cz = 0; for (const [x, z] of o.r.poly) { cx += x; cz += z; } cx /= o.r.poly.length; cz /= o.r.poly.length;
+    const w = it.localToWorld(new THREE.Vector3(cx, o.y + 0.5, cz));
+    const s = Math.sqrt(o.r.area || 400);
+    controls.target.copy(w); camera.position.set(w.x - s * 0.9, w.y + s * 1.3 + 25, w.z + s * 1.1 + 15); controls.update();
+    if (window.__interiorPick) window.__interiorPick({ point: w });
+    requestRender(4);
+  }));
 }
 
 // ------------------------------------------------------------------ main
