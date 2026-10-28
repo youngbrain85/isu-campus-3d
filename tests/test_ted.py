@@ -476,3 +476,46 @@ def test_restroom_fixtures(ted_json):
     assert cnt('FIRST', '120', 'toilet') == 2 and cnt('FIRST', '120', 'urinal') == 2 and cnt('FIRST', '120', 'lavatory') == 3
     assert cnt('FIRST', '121', 'toilet') == 4 and cnt('FIRST', '121', 'lavatory') == 3
     assert cnt('SECOND', '240', 'toilet') == 3 and cnt('SECOND', '241', 'urinal') == 2
+
+
+# ── 마무리 1: 마감·천장 빈칸 ──
+_FIN_SRC = _re.compile(r'^(tag|hatch|callout|default)(\+(tag|hatch|callout|default))*$')
+
+
+def test_every_labeled_room_has_finishes(ted_json):
+    """모든 번호 있는 방 = 바닥·벽·천장 코드가 있고, 출처(finish_src / ch_source) 가 적혀 있다 (근거 없으면 'default')"""
+    bad = []
+    for f in ted_json['floors']:
+        for r in f['rooms']:
+            if not r['no']:
+                continue
+            ok = r['floor'] and r['wall'] and r['ceiling'] and _FIN_SRC.match(r.get('finish_src') or '') \
+                and r['ch_source'] in ('rcp', 'rcp-leader', 'rcp-continued', 'note', 'default')
+            ok = ok and (r['base'] or 'ENCLOSURE' in r['name'])
+            if not ok:
+                bad.append((f['name'], r['no'], r['name'], r['floor'], r['base'], r['wall'], r['ceiling'], r.get('finish_src')))
+            for c in [r['floor'], r['base'], r['ceiling'], *r['wall']]:
+                assert c is None or c in ted_json['materials'], c
+    assert not bad, bad
+
+
+def test_restroom_and_hoteling_finishes(ted_json):
+    R = {(f['name'], r['no']): r for f in ted_json['floors'] for r in f['rooms']}
+    for k in (('FIRST', '120'), ('FIRST', '121'), ('SECOND', '240'), ('SECOND', '241'), ('SECOND', '209'), ('SECOND', '210')):
+        r = R[k]
+        assert r['floor'] == 'CT-01' and r['base'] == 'CTB-01' and 'hatch' in r['finish_src'], (k, r['floor'], r['finish_src'])
+    for no in ('110', '111', '112', '113'):
+        assert R[('FIRST', no)]['floor'].startswith('CPT') and R[('FIRST', no)]['ch_source'] == 'rcp-leader'
+    for no in ('206', '207', '208'):
+        assert R[('SECOND', no)]['floor'].startswith('CPT') and R[('SECOND', no)]['ceiling'] == 'ACT-04'
+    assert R[('FIRST', '110')]['ch'] == 11.0 and R[('FIRST', '113')]['ceiling'] == 'ACT-02'     # A-131 지시선 태그
+    for k in (('FIRST', '146'), ('FIRST', '147'), ('FIRST', '148'), ('SECOND', '229')):
+        assert R[k]['floor'] == 'TZ-01' and R[k]['base'] == 'TZB-01'                          # 'CJ' 테라조 줄눈
+    assert R[('FIRST', '146')]['ceiling'] == 'AT-03'                                           # 배플 천장 태그
+
+
+def test_ceiling_leaders_found():
+    from ted.finishes import ceiling_leaders, ceiling_tags
+    for sh, n in (('A-131', 20), ('A-132', 15)):
+        s = Sheet(sheet_path(sh)).fit_grid()
+        assert sum(len(v) for v in ceiling_leaders(s, ceiling_tags(s)).values()) >= n

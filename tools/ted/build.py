@@ -16,7 +16,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from ted.sheet import Sheet, sheet_path, building_outline          # noqa: E402
 from ted.walls import wall_layers, wall_polys, find_doors, door_schedule, floor_of_mark   # noqa: E402
 from ted.rooms import find_rooms                                     # noqa: E402
-from ted.finishes import finish_schedule, room_finishes, room_ceilings, ceiling_lights, material   # noqa: E402
+from ted.finishes import (finish_schedule, room_finishes, room_ceilings, ceiling_lights, material,   # noqa: E402
+                          floor_hatch, wall_callouts, fill_finishes)
+from collections import Counter                                      # noqa: E402
 from ted import stairs as ST                                         # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -33,6 +35,83 @@ FLOORS = [
 TAG_RE = re.compile(r'^([SMG]\d+[A-Z]{0,2})((?:\.[A-Z0-9]+)*)$')
 DEFAULT_GLASS_H = 9.0          # 천장 정보가 없을 때 유리 칸막이 높이
 STRUCT_DEPTH = 1.5             # 노출 천장: 층고 - 구조 깊이
+
+
+# 천장 태그가 없는 방 (지시선까지 봐도): A-131/A-132 일반주기 B "INSTALL NEW CEILINGS AT +9'-0" A.F.F. UNLESS NOTED OTHERWISE.
+# ALL CEILINGS TO BE ACT-02 UNLESS NOTED OTHERWISE." → ACT-02 9'-0". 단 천장도에 천장 격자 없이 구조가 보이는 곳
+# (계단실·경사로·스카이브리지·옥외 마당·기계/전기실·기존 지하층)은 노출 구조. 아래 표 = 천장도 확대 렌더로 확인한 결과.
+# 천장도에서 같은 해치(GWB 점묘)가 이웃 방 태그에서 이어지는 방: (층, 방) → (코드, 높이, 근거)
+CEILING_CONTINUES = {('FIRST', '100'): ('GWB-X1', 10.0, 'A-131: stippled GWB field of the GWB-X1 10 ft tag at (16, 51) continues over the vestibule')}
+EXPOSED_ROOMS = re.compile(r'STAIR|RAMP|SKYBRIDGE|ENCLOSURE|OVERLOOK|MECHANICAL|ELEC|IDF|MDF|MACHINE|CLASSROOM')
+
+
+def _no_finish(height):
+    return {'floor': None, 'base': None, 'wall': [], 'finish_src': 'default', 'ceiling': None,
+            'ch': round(height - STRUCT_DEPTH, 2), 'ch_source': 'default'}
+
+
+def finishes_and_ceilings(name, plan_sheet, fin, rcp_name, rooms, height):
+    """방 번호 → {floor, base, wall, finish_src, ceiling, ch, ch_source}
+    마감: A-151/152 태그 → 바닥 해치·강조벽 표기 → 방 종류 기본값 (finishes.fill_finishes).
+    천장: A-131/132 방 안 태그 → 지시선 태그 → 일반주기 B (ACT-02, 9'-0") 또는 노출 구조(층고 - 구조 깊이)."""
+    F, hatch, call = {}, {}, {}
+    if fin:
+        fs = Sheet(sheet_path(fin))
+        F = room_finishes(fs, plan_sheet, rooms)
+        hatch = floor_hatch(fs, rooms)
+        call = wall_callouts(fs, rooms)
+    FF = fill_finishes(rooms, F, name, hatch, call)
+    C = room_ceilings(Sheet(sheet_path(rcp_name)).fit_grid(), rooms) if rcp_name else {}
+    out = {}
+    for r in rooms:
+        no = r['number']
+        f = FF.get(no, {})
+        c = C.get(no, {})
+        code, ch, src = c.get('code'), c.get('h'), ('rcp' if c.get('src') == 'tag' else 'rcp-leader') if c else None
+        if c and code is None and ch is not None:
+            code = 'ACT-02'                                       # 높이만 적힌 태그: 일반주기 B "ALL CEILINGS TO BE ACT-02 UNO"
+        if ch is None and code and (code.startswith('EXPOSED') or code.startswith('AT-')):
+            ch, src = round(height - STRUCT_DEPTH, 2), 'rcp'
+        if code is None and (name, no) in CEILING_CONTINUES:
+            code, ch, _ = CEILING_CONTINUES[(name, no)]
+            src = 'rcp-continued'
+        if code is None and no:
+            if not rcp_name or EXPOSED_ROOMS.search(r['name'] or ''):
+                code, ch, src = 'EXPOSED', round(height - STRUCT_DEPTH, 2), 'default'
+            else:
+                code, ch, src = 'ACT-02', 9.0, 'note'             # 일반주기 B
+        if ch is None:
+            ch, src = round(height - STRUCT_DEPTH, 2), src or 'default'      # 노출 구조 / 정보 없음
+        out[no] = {'floor': f.get('floor'), 'base': f.get('base'), 'wall': f.get('wall', []),
+                   'finish_src': f.get('src', 'default'), 'ceiling': code, 'ch': ch, 'ch_source': src}
+    return out
+
+
+def refresh_finishes(path=OUT):
+    """기존 JSON 의 방 다각형으로 마감·천장만 다시 (빠른 반복용, 30 초). 전체 빌드와 같은 함수를 쓴다."""
+    from shapely.geometry import Polygon
+    data = json.loads(path.read_text(encoding='utf-8'))
+    fsched = finish_schedule()
+    used = set()
+    for (name, y, h, plan, fin, rcp), fl in zip(FLOORS, data['floors']):
+        s = Sheet(sheet_path(plan)).fit_grid()
+        rooms = [{'number': r['no'], 'name': r['name'], 'poly': Polygon(r['poly']).buffer(0)} for r in fl['rooms']]
+        FC = finishes_and_ceilings(name, s, fin, rcp, rooms, h)
+        for jr in fl['rooms']:
+            if jr['no']:
+                jr.update(FC[jr['no']])
+            used |= {x for x in [jr['floor'], jr['base'], jr['ceiling'], *jr['wall']] if x}
+        _finish_stats(fl)
+    data['materials'] = {c: material(c, fsched) for c in sorted(used)}
+    path.write_text(json.dumps(data, separators=(',', ':')), encoding='utf-8')
+
+
+def _finish_stats(fl):
+    R = [r for r in fl['rooms'] if r['no']]
+    fl['stats']['rooms_with_finish'] = sum(1 for r in fl['rooms'] if r['floor'])
+    fl['stats']['rooms_with_rcp_height'] = sum(1 for r in fl['rooms'] if str(r['ch_source']).startswith('rcp'))
+    fl['stats']['finish_src'] = dict(Counter(r.get('finish_src') for r in R))
+    fl['stats']['ceiling_src'] = dict(Counter(r.get('ch_source') for r in R))
 
 
 def partition_tags(sheet, outline):
@@ -69,24 +148,16 @@ def build_floor(name, y, height, plan, fin, rcp_name, dsched, fsched):
     mask = solid | glass
     doors = find_doors(s, dsched, name, mask, origin, FT)
     rooms = find_rooms(s, mask, origin, FT, doors=doors, outline=building_outline(name, 2))
-    F = room_finishes(Sheet(sheet_path(fin)), s, rooms) if fin else {}
-    C, lights = {}, []
+    FC = finishes_and_ceilings(name, s, fin, rcp_name, rooms, height)
+    lights = []
     if rcp_name:
         rcp = Sheet(sheet_path(rcp_name)).fit_grid()
-        C = room_ceilings(rcp, rooms)
         lights = ceiling_lights(rcp, mask, origin, FT, outline=building_outline(name))
     used = set()
     jrooms = []
     for r in rooms:
-        f = F.get(r['number'], {})
-        c = C.get(r['number'], {})
-        ch, src = c.get('h'), 'rcp'
-        if ch is None:
-            ch, src = round(height - STRUCT_DEPTH, 2), 'default'       # 노출 구조 / 정보 없음
         jr = {'no': r['number'], 'name': r['name'], 'poly': poly_coords(r['poly']), 'area': round(r['area_ft2']),
-              'area_label': r['area_label'], 'label': r2(r['label_xy']),
-              'floor': f.get('floor'), 'base': f.get('base'), 'wall': f.get('wall', []),
-              'ceiling': c.get('code'), 'ch': ch, 'ch_source': src}
+              'area_label': r['area_label'], 'label': r2(r['label_xy']), **FC.get(r['number'], _no_finish(height))}
         if r.get('open'):
             jr['open'] = True                       # 라벨 없는 넓은 공간 = 대개 아래층으로 트인 곳(바닥 없음)
         jrooms.append(jr)
@@ -108,7 +179,7 @@ def build_floor(name, y, height, plan, fin, rcp_name, dsched, fsched):
     for g in wall_polys(glass, origin, FT, min_area=0.3):
         if g.intersection(shell_band).area > 0.5 * g.area:
             continue                     # 외벽 커튼월·창은 외부 모듈 몫
-        near = [jr['ch'] for jr, r in zip(jrooms, rooms) if r['poly'].distance(g) < 0.6 and jr['ch_source'] == 'rcp']
+        near = [jr['ch'] for jr, r in zip(jrooms, rooms) if r['poly'].distance(g) < 0.6 and str(jr['ch_source']).startswith('rcp')]
         jwalls.append({'poly': poly_coords(g), 'holes': [], 'h': min(max(near), height) if near else DEFAULT_GLASS_H, 'glass': True})
     # 계단 난간·측판 선이 벽으로 잡힌 것 제거 (절반 넘게 계단 발자국 안)
     zone = ST.stair_zone(y, height)
@@ -158,9 +229,8 @@ def build_floor(name, y, height, plan, fin, rcp_name, dsched, fsched):
                        'glass_area_ft2': round(float(glass.sum()) * FT * FT),
                        'doors': len(jdoors), 'door_marks_in_schedule': len(marks),
                        'doors_tagged': sum(1 for d in jdoors if d['tag'] in dsched), 'lights': len(lights),
-                       'rooms_with_finish': sum(1 for r in jrooms if r['floor']),
-                       'rooms_with_rcp_height': sum(1 for r in jrooms if r['ch_source'] == 'rcp'),
                        'grid_residual_ft': round(s.grid_residual_ft, 3), 'seconds': round(time.time() - t0, 1)}}
+    _finish_stats(floor)
     apply_levels_and_cuts(floor, rooms)
     overlay(s, name, solid, glass, origin, jdoors, rooms, lights)
     return floor, used
@@ -258,4 +328,7 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    if '--finishes' in sys.argv:
+        refresh_finishes()
+    else:
+        main()

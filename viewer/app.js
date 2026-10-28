@@ -616,8 +616,9 @@ async function main() {
       row('Casework', c.casework ? c.casework + ' items (A-501 / plan)' : '') + row('Fixtures', c.fixtures ? c.fixtures + ' items' : '');
     body.innerHTML = `<h2>${(r.name || 'Room').replace(/[&<>]/g, '')}</h2><span class="tag">Technology Building · ${interiorFloor.toLowerCase()} floor</span><dl>` +
       row('Room no.', r.no) + row('Area', r.area ? Math.round(r.area) + ' sf' + (r.area_label ? ' (drawing: ' + r.area_label + ' sf)' : '') : '') +
-      row('Ceiling height', r._ch ? r._ch.toFixed(1) + ' ft' + (r._ch > 20 ? ' (double height)' : r.ch_source === 'default' || !r.ch ? ' (estimated)' : '') : '') +
-      row('Floor', mt(r.floor)) + row('Wall', mt(r.wall)) + row('Ceiling', mt(r.ceiling)) + contentsRows(cs) +
+      row('Ceiling height', r._ch ? r._ch.toFixed(1) + ' ft' + (r._ch > 20 ? ' (double height)' : r.ch_source === 'default' || !r.ch ? ' (estimated)' : r.ch_source === 'note' ? ' (RCP general note)' : '') : '') +
+      row('Floor', mt(r.floor)) + row('Wall', mt(r.wall)) + row('Ceiling', mt(r.ceiling)) +
+      row('Finish source', r.finish_src && r.finish_src !== 'tag' ? r.finish_src.replace(/\+/g, ' + ').replace('default', 'room-type default') : '') + contentsRows(cs) +
       `</dl><div class="src"><b>From:</b> RATIO cTED construction set 2025 (A-100…A-102 plans, A-131/132 ceilings, A-151/152 + A-650 finishes, A-701/702 + A-704 equipment, A-501 elevations)</div>`;
     panel.classList.add('open'); requestRender(); return true;
   };
