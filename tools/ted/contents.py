@@ -161,9 +161,10 @@ def floor_contents(floor, schedule, log):
         casework = CW.counters(eq_sheet, rooms, walls)
         casework = [c for c in casework if stairz is None or not EQ.rect_poly(c).intersects(stairz.buffer(-0.3))]
         casework += CW.wall_items({r['no']: r for r in rooms})
+        casework += CW.upper_cabinets(plan, rooms, walls, casework)      # 평면 점선 상부장 (A-501 C8 높이)
     fixtures = FX.find_fixtures(plan, rooms, walls) + FX.measured(name, plan)
     if casework:
-        casework += FX.counter_sinks(plan, casework)
+        casework += FX.counter_sinks(plan, casework, end_ok={r['no'] for r in rooms if re.search(r'LAB', r['name'] or '')})
     furniture = refine_furniture(furniture, names)
     # 추정 가구: 도면 가구(탁자·책상·의자류)가 하나도 없는 방
     drawn = Counter(f['room'] for f in furniture if f['type'] not in ('monitor',))
@@ -198,7 +199,7 @@ def floor_contents(floor, schedule, log):
                 dropped[key] += 1
                 continue
             it['room'] = r['no']
-            wall_mounted = it['type'] in ('marker_board', 'wall_monitor')
+            wall_mounted = it['type'] in ('marker_board', 'wall_monitor', 'upper_cabinet', 'wall_shelf')
             ok = True
             for _ in range(3):                 # 벽에서 떼기 ↔ 방 안으로 되돌리기를 번갈아
                 if not wall_mounted:
@@ -224,6 +225,8 @@ def floor_contents(floor, schedule, log):
                     break
             res.append(_clean(it))
         out[key] = res
+    # 카운터 사각형 → 모듈 하부장(문·서랍·토킥) + 내민 상판 (벽 정리 뒤에: 모듈이 따로 밀리지 않게)
+    out['casework'] = [_clean(c) for c in CW.detail_counters(out['casework'], walls)]
     for jr in floor['rooms']:
         if jr['no'] in est_rooms:
             jr['furniture_estimated'] = True

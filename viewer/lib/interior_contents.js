@@ -15,6 +15,7 @@ export const MATS = {
   steel: M(0xa7adb3, { roughness: 0.35, metalness: 0.8 }), equip: M(0xa9b3ae, { roughness: 0.55, metalness: 0.2 }),
   equipDark: M(0x3e4447, { roughness: 0.5, metalness: 0.3 }), safety: M(0xe0b330, { roughness: 0.5 }), wood: M(0xb48a5c, { roughness: 0.6 }),
   carBody: M(0xffffff, { roughness: 0.35, metalness: 0.4 }), tire: M(0x1c1c1c, { roughness: 0.9 }), glass: M(0x3a4f5c, { roughness: 0.1, metalness: 0.3 }),
+  cabDoor: M(0xbdb6a8, { roughness: 0.5 }), plinth: M(0x2e2f31, { roughness: 0.8 }),
   robot: M(0xe8e8e2, { roughness: 0.45 }), robotAccent: M(0x2f6fb5, { roughness: 0.45 }), shelf: M(0x7d8389, { roughness: 0.5, metalness: 0.5 }),
 };
 for (const [k, m] of Object.entries(MATS)) m.name = 'int_c_' + k;
@@ -34,7 +35,25 @@ const T = {
   monitor: [B('screen', 0, 0.62, 0, 1, 0.72, 0.25), B('metal', 0, 0.12, 0.1, 0.1, 0.25, 0.3), B('metal', 0, 0.01, 0.1, 0.35, 0.02, 0.8)],
   shelving: [B('shelf', -0.48, 0.5, 0, 0.04, 1, 1), B('shelf', 0.48, 0.5, 0, 0.04, 1, 1), ...[0.02, 0.27, 0.52, 0.77, 0.99].map(y => B('shelf', 0, y, 0, 1, 0.02, 1))],
   base_cabinet: [B('cabinet', 0, 0.46, 0, 0.98, 0.92, 0.96), B('epoxy', 0, 0.97, 0, 1, 0.06, 1.02), B('metal', 0, 0.03, -0.42, 0.98, 0.06, 0.04)],
-  sink: [B('steel', 0, 0.3, 0, 1, 0.6, 1), B('chrome', 0, 1.6, 0.45, 0.06, 2.4, 0.06, 'c')],
+  // 하부장 모듈 (A-501 C8/G1…: 토킥 4" 들어감, 위 서랍 띠 + 문 2 짝, 손잡이). 높이 1 = 상판 밑까지, 앞 = 로컬 -z
+  base_doors: [B('plinth', 0, 0.058, 0.05, 0.98, 0.116, 0.86), B('cabinet', 0, 0.558, 0.02, 1, 0.884, 0.96),
+    B('cabDoor', 0, 0.89, -0.49, 0.97, 0.15, 0.02), B('cabDoor', -0.2475, 0.46, -0.49, 0.475, 0.64, 0.02), B('cabDoor', 0.2475, 0.46, -0.49, 0.475, 0.64, 0.02),
+    B('chrome', 0, 0.89, -0.505, 0.16, 0.02, 0.02), B('chrome', -0.05, 0.7, -0.505, 0.015, 0.1, 0.02), B('chrome', 0.05, 0.7, -0.505, 0.015, 0.1, 0.02)],
+  base_drawers: [B('plinth', 0, 0.058, 0.05, 0.98, 0.116, 0.86), B('cabinet', 0, 0.558, 0.02, 1, 0.884, 0.96),
+    ...[0.21, 0.42, 0.63, 0.86].map((y, i) => B('cabDoor', 0, y, -0.49, 0.97, i === 3 ? 0.2 : 0.19, 0.02)),
+    ...[0.24, 0.45, 0.66, 0.89].map(y => B('chrome', 0, y, -0.505, 0.2, 0.02, 0.02))],
+  base_island: [B('plinth', 0, 0.058, 0, 0.98, 0.116, 0.8), B('cabinet', 0, 0.558, 0, 1, 0.884, 0.96),
+    ...[-1, 1].flatMap(f => [B('cabDoor', -0.2475, 0.53, f * 0.49, 0.475, 0.78, 0.02), B('cabDoor', 0.2475, 0.53, f * 0.49, 0.475, 0.78, 0.02),
+      B('chrome', -0.05, 0.8, f * 0.505, 0.015, 0.1, 0.02), B('chrome', 0.05, 0.8, f * 0.505, 0.015, 0.1, 0.02)])],
+  countertop: [B('epoxy', 0, 0.5, 0, 1, 1, 1)],
+  // 벽걸이 상부장 (C8 PL-01, 밑 4'-6" 위 7'-0"): 몸통 + 문 2 짝 + 아래 손잡이; 열린 선반 (창고)
+  upper_cabinet: [B('cabinet', 0, 0.5, 0.02, 1, 1, 0.96), B('cabDoor', -0.2475, 0.5, -0.48, 0.475, 0.96, 0.02), B('cabDoor', 0.2475, 0.5, -0.48, 0.475, 0.96, 0.02),
+    B('chrome', -0.05, 0.12, -0.5, 0.015, 0.12, 0.02), B('chrome', 0.05, 0.12, -0.5, 0.015, 0.12, 0.02)],
+  wall_shelf: [B('shelf', -0.49, 0.5, 0, 0.02, 1, 1), B('shelf', 0.49, 0.5, 0, 0.02, 1, 1), B('shelf', 0, 0.5, 0.48, 1, 1, 0.03),
+    ...[0.02, 0.5, 0.98].map(y => B('shelf', 0, y, 0, 1, 0.03, 1))],
+  // 싱크: 상판 위 테두리 + 어두운 볼 바닥 + 수전 (상판에 묻힌 볼은 상판 상자에 가려지므로 테두리로 표시)
+  sink: [B('steel', 0, 0.12, -0.46, 1, 0.24, 0.08), B('steel', 0, 0.12, 0.46, 1, 0.24, 0.08), B('steel', -0.46, 0.12, 0, 0.08, 0.24, 1), B('steel', 0.46, 0.12, 0, 0.08, 0.24, 1),
+    B('equipDark', 0, 0.03, 0, 0.9, 0.06, 0.9), B('chrome', 0, 1.6, 0.45, 0.06, 2.4, 0.06, 'c'), B('chrome', 0, 2.8, 0.25, 0.06, 0.06, 0.45)],
   marker_board: [B('white', 0, 0.5, 0, 1, 1, 1), B('chrome', 0, 0.98, 0, 1.01, 0.04, 1.2), B('chrome', 0, 0.02, 0, 1.01, 0.04, 1.4)],
   wall_monitor: [B('screen', 0, 0.5, 0, 1, 1, 1)],
   toilet: [B('porcelain', 0, 0.3, -0.12, 0.85, 0.6, 0.7, 'c'), B('porcelain', 0, 0.62, 0.36, 0.95, 0.5, 0.26), B('porcelain', 0, 0.15, 0.1, 0.5, 0.3, 0.5)],
@@ -70,7 +89,7 @@ const T = {
   bench_unit: [B('equip', 0, 0.4, 0, 1, 0.8, 1), B('equipDark', 0.15, 0.88, 0, 0.5, 0.16, 0.6)],
   tv_stand: [B('screen', 0, 0.82, 0, 1, 0.36, 0.08), B('metal', 0, 0.35, 0, 0.06, 0.7, 0.06), B('metal', 0, 0.02, 0, 0.6, 0.04, 0.8)],
 };
-const ALIAS = {};
+const ALIAS = { base_cabinet: 'base_doors' };
 const CAR_COLORS = [0xb3202a, 0x2c4f86, 0xdedede, 0x2b2b2b, 0x7f8c8d];
 
 const tplCache = new Map();

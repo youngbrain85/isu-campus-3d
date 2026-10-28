@@ -123,7 +123,7 @@ def find_fixtures(plan, rooms, walls):
     return out
 
 
-def counter_sinks(plan, counters):
+def counter_sinks(plan, counters, end_ok=()):
     """카운터(base_cabinet) 안의 개수대: 렌더한 카운터 안의 네모난 흰 영역(0.8~3 ft², 볼록) → sink"""
     s = Sheet(sheet_path(plan)).fit_grid()
     out = []
@@ -149,8 +149,11 @@ def counter_sinks(plan, counters):
             x, z = x0 + (cx + 0.5) * sx, z0 + (cy + 0.5) * sz
             if not g.contains(Point(x, z)):
                 continue
-            # 싱크 기호 = 안에 배수구 원(작은 닫힌 영역)이 있다 → 구멍 있는 영역만
-            if p.euler_number >= 1:
+            # 싱크 기호 = 안에 배수구 원(작은 닫힌 영역)이 있다 → 구멍 있는 영역만.
+            # 예외: 실험대 끝의 싱크(A-101 106~108, A-501 G1/F3/D3 입면의 끝 수전)는 배수구가 닫힌 원이 아니다 → 실험실(end_ok) 카운터 끝 2.2 ft 안이면 허용
+            ux, uz = math.cos(c['rot']), -math.sin(c['rot'])
+            along = abs((x - c['x']) * ux + (z - c['z']) * uz)
+            if p.euler_number >= 1 and not (c['room'] in end_ok and along > c['w'] / 2 - 2.2 and 0.7 <= A <= 1.6 and p.solidity > 0.9):
                 continue
             out.append({'type': 'sink', 'x': x, 'z': z, 'w': round(min(maj, 2.0), 2), 'd': round(min(mn, 1.6), 2),
                         'rot': c['rot'], 'h': 0.15, 'y0': c['h'], 'room': c['room'], 'src': plan})

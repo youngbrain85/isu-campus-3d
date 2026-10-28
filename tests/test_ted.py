@@ -464,10 +464,12 @@ def test_casework_and_wall_items(ted_json):
     f1 = next(f for f in ted_json['floors'] if f['name'] == 'FIRST')
     cw = f1['casework']
     for room in ('106', '107', '108'):                  # 기계·토목 실험실 아일랜드 (A-501 G/E/D 입면)
-        assert any(c['type'] == 'base_cabinet' and c['room'] == room and c['w'] > 12 for c in cw), room
+        assert any(c['type'] == 'countertop' and c['room'] == room and c['w'] > 12 for c in cw), room
     assert sum(1 for c in cw if c['type'] == 'marker_board') == 4          # A-501 F1 + C5 VDS-01
     assert sum(1 for c in cw if c['type'] == 'wall_monitor' and c['room'] == '145') == 4   # A-501 B1 + B3
-    assert all(abs(c['h'] - 2.93) < 0.01 for c in cw if c['type'] == 'base_cabinet')
+    for c in cw:
+        if c['type'] == 'countertop':                   # 상판 윗면 = 2'-10" 하부장 + 상판 = 2.93 ft (A-501)
+            assert abs((c.get('y0') or 0) + c['h'] - 2.93 - _floor_off(f1, c)) < 0.02, c
 
 
 def test_restroom_fixtures(ted_json):
@@ -551,3 +553,50 @@ def test_fixture_counts_match_plan(ted_json):
     cnt = lambda fl, room, t: sum(1 for x in fx[fl] if x['room'] == room and x['type'] == t)
     assert cnt('SECOND', '240', 'lavatory') == 2 and cnt('SECOND', '241', 'lavatory') == 2   # 라벨 상자 오검출 없음
     assert cnt('SECOND', '209', 'toilet') == 1 and cnt('SECOND', '210', 'toilet') == 1
+
+
+
+# ── 마무리 2: 캐비닛 상세 ──
+def _floor_off(f, it):
+    """항목 자리의 낮은 바닥 높이(층 기준, 로비 95'/북측 98')"""
+    for L in f.get('levels') or []:
+        for p in L['polys']:
+            if _Pg(p).buffer(0.05).contains(_Pt(it['x'], it['z'])):
+                return L['y'] - f['y']
+    return 0.0
+
+
+def test_upper_cabinets_where_dashed(ted_json):
+    """평면 점선 상부장: 105 (A-501 C8), 118 (벽 남쪽 2 개), 228 (싱크 카운터 위) — 높이 4'-6"~7'-0", 벽에 붙음"""
+    F = {f['name']: f for f in ted_json['floors']}
+    up = [(f['name'], c) for f in ted_json['floors'] for c in f['casework'] if c['type'] in ('upper_cabinet', 'wall_shelf')]
+    rooms = {(n, c['room']) for n, c in up}
+    for k in (('FIRST', '105'), ('FIRST', '118'), ('SECOND', '228')):
+        assert k in rooms, k
+    assert sum(1 for n, c in up if c['room'] == '118') == 2
+    for n, c in up:
+        bottom = (c.get('y0') or 0) - _floor_off(F[n], c)
+        assert abs(bottom - 4.5) < 0.02 and abs(c['h'] - 2.5) < 0.01 and 0.8 <= c['d'] <= 1.6, c
+        W = _union([_Pg(w['poly'], w.get('holes') or []).buffer(0) for w in F[n]['walls']])
+        bx, bz = _math.sin(c['rot']), _math.cos(c['rot'])
+        assert W.distance(_Pt(c['x'] + bx * (c['d'] / 2 + 0.05), c['z'] + bz * (c['d'] / 2 + 0.05))) < 0.3, c   # 뒤가 벽
+
+
+def test_counter_detail(ted_json):
+    """하부장 = 2'-10" 안팎 모듈(문/서랍/양면), 상판은 하부장보다 넓고(내밀기) 그 위, 실험대 끝 싱크 (A-501 G1/F3/D3)"""
+    for f in ted_json['floors']:
+        cw = f['casework']
+        mods = [c for c in cw if c['type'] in ('base_doors', 'base_drawers', 'base_island')]
+        tops = [c for c in cw if c['type'] == 'countertop']
+        assert not any(c['type'] == 'base_cabinet' for c in cw)
+        if f['name'] == 'LOWER':
+            continue
+        assert mods and tops and any(c['type'] == 'base_drawers' for c in mods)
+        for m in mods:
+            assert 1.4 <= m['w'] <= 4.3, m                   # 2'-10" 등분 (짧은 카운터는 한 칸)
+        for t in tops:
+            under = [m for m in mods if m['room'] == t['room'] and _math.dist((m['x'], m['z']), (t['x'], t['z'])) < t['w'] / 2 + 0.5]
+            assert under, t
+            assert t['d'] > max(m['d'] for m in under) and abs(t['y0'] - (under[0].get('y0') or 0) - under[0]['h']) < 0.02
+    sinks = {c['room'] for f in ted_json['floors'] for c in f['casework'] if c['type'] == 'sink'}
+    assert {'106', '107', '108'} <= sinks
