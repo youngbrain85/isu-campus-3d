@@ -77,7 +77,7 @@ function labelSprite(text, sub) {
   x.fillStyle = '#b8c4d4'; x.font = '30px Segoe UI, Arial'; x.fillText(sub, 256, 100);
   const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace;
   const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: t, depthTest: false, transparent: true }));
-  s.scale.set(24, 6, 1); s.renderOrder = 20;
+  s.scale.set(11, 2.75, 1); s.renderOrder = 20; s.material.opacity = 0.9;   // 실 이름표: 가까이서 화면을 가리지 않게 작게 (ft)
   return s;
 }
 const centroid = (poly) => { let a = 0, cx = 0, cz = 0; for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) { const f = poly[j][0] * poly[i][1] - poly[i][0] * poly[j][1]; a += f; cx += (poly[j][0] + poly[i][0]) * f; cz += (poly[j][1] + poly[i][1]) * f; } return a ? [cx / (3 * a), cz / (3 * a)] : poly[0]; };
