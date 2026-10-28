@@ -45,12 +45,15 @@ the evidence it was modelled from.
 
 The Technology Building (Bailey College / cTED, 2025 renovation) has a full interior extracted from the RATIO
 construction set: rooms with names, areas and finishes, walls, glass partitions, doors, ceilings and lights, stairs,
-ramp and elevator, lab equipment, casework, restroom fixtures and furniture (from A-701/A-702; the few rooms without
-drawn furniture get an estimated layout, flagged in the room panel). In the viewer use *Technology Building interior*
+lobby, corridor and bridge ramps, the high-bay mezzanines with their stair and ladder, the ship's ladder to the
+penthouse, the elevator, lab equipment, casework (base modules, tops, sinks, wall-hung upper cabinets), restroom
+fixtures and furniture (from A-701/A-702; the few rooms without drawn furniture get an estimated layout, flagged in
+the room panel). Finishes or ceilings not tagged on the sheets come from the floor hatch, leader tags or the general
+notes; where the set gives nothing the room-type default is used and the room panel says so. In the viewer use *Technology Building interior*
 in the menu for a floor cutaway and click a room for its details. `?solo=way/461428305` opens the building on its own.
 
 `model/ted_vr.glb` is the building for VR (Unreal / Omni One): metres, Y-up, with three node groups —
-`WALKABLE` (floors, stairs, ground disc), `COLLISION` (walls, glass, exterior, equipment, furniture, rails) and
+`WALKABLE` (floors, stairs, ramps, mezzanine decks, ground disc), `COLLISION` (walls, glass, exterior, equipment, furniture, rails) and
 `VISUAL` (ceilings, lights). Regenerate with `node tools/export_building.mjs`. Interior data: `python tools/ted/build.py`
 (reads the drawings folder) → `viewer/assets/ted_interior.json`.
 

@@ -183,8 +183,9 @@ def build_floor(name, y, height, plan, fin, rcp_name, dsched, fsched):
         jwalls.append({'poly': poly_coords(g), 'holes': [], 'h': min(max(near), height) if near else DEFAULT_GLASS_H, 'glass': True})
     # 계단 난간·측판 선이 벽으로 잡힌 것 제거 (절반 넘게 계단 발자국 안)
     zone = ST.stair_zone(y, height)
-    if ST.cuts_for(name) is not None:          # 바닥 구멍 둘레 가드도 (2 층 N 계단·로비 계단 3)
-        zone = ST.cuts_for(name).buffer(0.8, join_style=2).union(zone) if zone is not None else ST.cuts_for(name).buffer(0.8, join_style=2)
+    wc = ST.cuts_for(name, for_walls=True)
+    if wc is not None:                         # 바닥 구멍 둘레 가드도 (2 층 N 계단·로비 계단 3; 경사로 구멍 둘레의 실제 벽은 남김)
+        zone = wc.buffer(0.8, join_style=2).union(zone) if zone is not None else wc.buffer(0.8, join_style=2)
     if zone is not None:
         from shapely.geometry import Polygon as _P
         def _in(w):
@@ -212,6 +213,27 @@ def build_floor(name, y, height, plan, fin, rcp_name, dsched, fsched):
         jwalls = nw
         elev_doors.append({'a': r2(e['door'][0]), 'b': r2(e['door'][1]), 'kind': 'elevator', 'tag': None,
                            'w': round(((ax_ - bx_) ** 2 + (az_ - bz_) ** 2) ** 0.5, 2), 'h': 7.4, 'hinges': [], 'swing': []})
+    for op in ST.openings_for(name):              # 계단·경사로 사양의 통로 개구부 (브리지 경사로 위 E13)
+        nw = []
+        for w in jwalls:
+            g = _Pe(w['poly'], w.get('holes') or []).buffer(0)
+            if not g.intersects(op):
+                nw.append(w); continue
+            for part in ST._polys(g.difference(op)):
+                nw.append({**w, 'poly': poly_coords(part), 'holes': [[r2(q) for q in list(h.coords)[:-1]] for h in part.interiors]})
+        jwalls = nw
+    # 메자닌 아래 벽(창고 130A/130B/131, 다이노 136 둘레): 슬래브 밑까지만 — 메자닌 위로 솟지 않게 벽을 그 구역에서 잘라 낮춘다
+    for m in ST.mezzanines_for(name):
+        zone_m = _Pe(m['poly']).buffer(0.5, join_style=2)
+        hm = round(m['y'] - m['t'] - y, 2)
+        nw = []
+        for w in jwalls:
+            g = _Pe(w['poly'], w.get('holes') or []).buffer(0)
+            if w['glass'] or not g.intersects(zone_m) or w['h'] <= hm:
+                nw.append(w); continue
+            for part, hh in [(q, hm) for q in ST._polys(g.intersection(zone_m))] + [(q, w['h']) for q in ST._polys(g.difference(zone_m))]:
+                nw.append({**w, 'poly': poly_coords(part), 'holes': [[r2(q) for q in list(h.coords)[:-1]] for h in part.interiors], 'h': hh})
+        jwalls = nw
     jdoors = []
     for d in doors:
         sc = dsched.get(d.get('tag'), {})
@@ -223,17 +245,32 @@ def build_floor(name, y, height, plan, fin, rcp_name, dsched, fsched):
     floor = {'name': name, 'y': y, 'height': height, 'sheets': [x for x in (plan, fin, rcp_name) if x],
              'walls': jwalls, 'partition_tags': partition_tags(s, building_outline(name, 2)),
              'doors': jdoors, 'rooms': jrooms, 'lights': lights, 'stairs': ST.stairs_for(name),
-             'elevators': ST.elevators_for(name),
+             'elevators': ST.elevators_for(name), 'mezzanines': ST.mezzanines_for(name),
              'stats': {'rooms': len(jrooms), 'rooms_labeled': sum(1 for r in jrooms if r['no']),
                        'wall_area_ft2': round(float(solid.sum() + glass.sum()) * FT * FT),
                        'glass_area_ft2': round(float(glass.sum()) * FT * FT),
                        'doors': len(jdoors), 'door_marks_in_schedule': len(marks),
                        'doors_tagged': sum(1 for d in jdoors if d['tag'] in dsched), 'lights': len(lights),
                        'grid_residual_ft': round(s.grid_residual_ft, 3), 'seconds': round(time.time() - t0, 1)}}
+    under_mezzanine(floor, rooms)
     _finish_stats(floor)
     apply_levels_and_cuts(floor, rooms)
     overlay(s, name, solid, glass, origin, jdoors, rooms, lights)
     return floor, used
+
+
+def under_mezzanine(floor, rooms):
+    """메자닌 슬래브 아래 실(130A/130B/131, 136): 천장 = 슬래브 밑 (A-301 A2 단면) — 위층 '트인 영역'의 높은 천장이 아님"""
+    from shapely.geometry import Polygon
+    for m in floor.get('mezzanines') or []:
+        g = Polygon(m['poly'])
+        for jr, r in zip(floor['rooms'], rooms):
+            c = r['poly'].representative_point()
+            if g.contains(c) and r['poly'].intersection(g).area > 0.6 * r['poly'].area:
+                h = round(m['y'] - m['t'] - floor['y'], 2)
+                if jr['ch'] > h or jr['ch_source'] == 'default':
+                    jr['ch'], jr['ch_source'] = h, 'mezzanine'
+                jr['under_mezzanine'] = m['id']
 
 
 def apply_levels_and_cuts(floor, rooms):
@@ -265,15 +302,17 @@ def apply_levels_and_cuts(floor, rooms):
                 wg = Polygon(w['poly'])
             except Exception:
                 continue
-            hit = [yy for _, yy, a in areas if wg.distance(a) < 0.8]
+            hit = [yy for _, yy, a in areas if wg.distance(a) < 0.8 and yy < y]     # 낮은 영역만 (높은 브리지 바닥은 벽 밑을 올리지 않음)
             if hit:
                 w['y0'] = min(hit)
         from shapely.geometry import Point
         for d in floor['doors']:
             m = Point((d['a'][0] + d['b'][0]) / 2, (d['a'][1] + d['b'][1]) / 2)
             hit = [yy for _, yy, a in areas if a.distance(m) < 1.0]
-            if hit:
+            if hit and min(hit) < y:
                 d['y0'] = min(hit)
+            elif hit:
+                d['y0'] = max(hit)                     # 높은 영역(브리지 전실) 문은 그 바닥부터
 
 
 def overlay(s, name, solid, glass, origin, doors, rooms, lights):

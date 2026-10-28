@@ -224,7 +224,9 @@ def test_json_first_floor_room_numbers(ted_json):
 # ── Task 7: 계단·엘리베이터 ──
 import math as _math
 
-LEVEL_Y = {'LOWER': -14.67, 'FIRST SW': -5.0, 'FIRST SW 97': -3.0, 'FIRST N': -2.0, 'FIRST': 0.0, 'SECOND': 14.67}
+LEVEL_Y = {'LOWER': -14.67, 'FIRST SW': -5.0, 'FIRST SW 97': -3.0, 'FIRST N': -2.0, 'FIRST': 0.0, 'SECOND': 14.67,
+           'FIRST LOBBY 98': -1.383, 'BRIDGE': 17.0, 'THIRD': 29.33,
+           'MEZZ': 9.208, 'MEZZ DYNO': 10.07}
 
 
 def _all_stairs(d):
@@ -235,7 +237,8 @@ def test_stairs_inventory(ted_json):
     # A-421/A-422 상세 제목 + 평면 실명(STAIR 002 / STAIRS 126) + 메자닌 계단 → 모두 모델에 있고, 시작 층에 속한다
     ids = {s['id']: f['name'] for f, s in _all_stairs(ted_json)}
     want = {'lobby1': 'FIRST', 'lobby1_seat': 'FIRST', 'lobby2': 'FIRST', 'lobby3': 'FIRST', 'n_stair': 'FIRST',
-            'corr_stair': 'FIRST', 'corr_ramp': 'FIRST', 'stair126': 'LOWER', 'mezz_stair': 'FIRST'}
+            'corr_stair': 'FIRST', 'corr_ramp': 'FIRST', 'stair126': 'LOWER', 'mezz_stair': 'FIRST',
+            'lobby_ramp1': 'FIRST', 'lobby_ramp23': 'FIRST', 'bridge_ramp': 'SECOND', 'ships_ladder': 'SECOND', 'dyno_ladder': 'FIRST'}
     for k, fl in want.items():
         assert ids.get(k) == fl, (k, ids.get(k))
 
@@ -280,7 +283,9 @@ def test_riser_heights(ted_json):
             if s.get('kind') == 'egress':
                 assert 6.5 <= r <= 7.75, (s['id'], r)      # 피난 계단: 6.5"~7.75"
             elif s.get('kind') == 'service':
-                assert 10.5 <= r <= 11.5, (s['id'], r)      # 메자닌 철재 계단 11"
+                assert 6.5 <= r <= 7.2, (s['id'], r)        # 메자닌 철재 계단: 16 챌판으로 109'-2 1/2" (6.9")
+            elif s.get('kind') == 'ladder':
+                assert 8.0 <= r <= 12.0, (s['id'], r)       # 사다리 (ship's ladder 9.8", 기존 고정 사다리 11.7")
             elif s.get('kind') == 'seating':
                 assert 14 <= r <= 16, (s['id'], r)          # 목재 좌석 단
             else:
@@ -308,7 +313,7 @@ def test_flights_connect_levels(ted_json):
             assert abs(p['y1'] - q['y0']) < 0.01, s['id']
             assert any(abs(L['y'] - p['y1']) < 0.01 for L in s['landings']), s['id']   # 계단참이 잇는다
         for fl in fls:
-            if fl['risers'] > 1:
+            if fl['risers'] > 1 and s.get('kind') != 'ladder':
                 L = _math.dist(fl['a'], fl['b']) / (fl['risers'] - 1)
                 assert 0.8 <= L <= 2.6, (s['id'], L)                                  # 디딤판 깊이
 
@@ -492,7 +497,7 @@ def test_every_labeled_room_has_finishes(ted_json):
             if not r['no']:
                 continue
             ok = r['floor'] and r['wall'] and r['ceiling'] and _FIN_SRC.match(r.get('finish_src') or '') \
-                and r['ch_source'] in ('rcp', 'rcp-leader', 'rcp-continued', 'note', 'default')
+                and r['ch_source'] in ('rcp', 'rcp-leader', 'rcp-continued', 'note', 'default', 'mezzanine')
             ok = ok and (r['base'] or 'ENCLOSURE' in r['name'])
             if not ok:
                 bad.append((f['name'], r['no'], r['name'], r['floor'], r['base'], r['wall'], r['ceiling'], r.get('finish_src')))
@@ -600,3 +605,75 @@ def test_counter_detail(ted_json):
             assert t['d'] > max(m['d'] for m in under) and abs(t['y0'] - (under[0].get('y0') or 0) - under[0]['h']) < 0.02
     sinks = {c['room'] for f in ted_json['floors'] for c in f['casework'] if c['type'] == 'sink'}
     assert {'106', '107', '108'} <= sinks
+
+
+
+# ── 마무리 4: 경사로·메자닌·사다리 ──
+def test_nothing_left_unmodelled(ted_json):
+    assert ted_json['unmodelled'] == []
+
+
+def test_ramps_slope_and_levels(ted_json):
+    """경사로: 기울기 1:12 이하(허용 0.5 %), 정해진 층을 잇는다 (A-421 B4/A4/A7, A-422 A5/A7)"""
+    S = {s['id']: s for _, s in _all_stairs(ted_json)}
+    want = {'lobby_ramp1': [(-5.0, -3.0)], 'lobby_ramp23': [(-3.0, -1.383), (-1.383, 0.0)], 'corr_ramp': [(-2.0, 0.0)],
+            'bridge_ramp': [(14.67, 17.0)]}
+    for k, lv in want.items():
+        fls = S[k]['flights']
+        assert [(round(f['y0'], 3), round(f['y1'], 3)) for f in fls] == lv, (k, fls)
+        for f in fls:
+            run = _math.dist(f['a'], f['b'])
+            assert f['risers'] == 0 and abs(f['y1'] - f['y0']) / run <= 1 / 12 + 0.005, (k, run, f['y1'] - f['y0'])
+    # 위 끝·아래 끝이 실제 바닥 높이에 닿는다: 경사로 3 동쪽 끝 = 100'-0" 바닥, 경사로 1 남쪽 = 97' 단, 브리지 = 250 바닥
+    F = {f['name']: f for f in ted_json['floors']}
+    R = {r['no']: r for r in F['SECOND']['rooms']}
+    assert any(abs(p['y'] - 17.0) < 0.01 for p in R['250']['parts'])
+
+
+def test_ramp_surface_not_buried(ted_json):
+    """경사로 위로 바닥 마감 조각이 솟아 있지 않다 (바닥 구멍 cut 으로 낮은 영역·100' 바닥을 비움)"""
+    F = {f['name']: f for f in ted_json['floors']}
+    for fname, sid in (('FIRST', 'lobby_ramp1'), ('FIRST', 'lobby_ramp23'), ('SECOND', 'bridge_ramp')):
+        st = next(s for s in F[fname]['stairs'] if s['id'] == sid)
+        for fl in st['flights']:
+            for t in (0.15, 0.5, 0.85):
+                x = fl['a'][0] + (fl['b'][0] - fl['a'][0]) * t
+                z = fl['a'][1] + (fl['b'][1] - fl['a'][1]) * t
+                ys = fl['y0'] + (fl['y1'] - fl['y0']) * t
+                for r in F[fname]['rooms']:
+                    if r.get('open'):
+                        continue
+                    for p in r.get('parts') or [{'poly': r['poly'], 'holes': [], 'y': F[fname]['y']}]:
+                        g = _Pg(p['poly'], p.get('holes', []))
+                        if g.is_valid and g.contains(_Pt(x, z)):
+                            assert p['y'] <= ys + 0.05, (sid, round(x, 1), round(z, 1), r['no'], p['y'], ys)
+
+
+def test_mezzanines(ted_json):
+    """고베이 메자닌 (A-425 C3/A5: 슬래브 위 109'-2 1/2", B3/A6: ≈110'-1"): 바닥 + 난간 3'-6", 철재 계단·기존 사다리가 닿고,
+    아래 실 천장은 슬래브 밑 (A-301 A2)"""
+    F1 = next(f for f in ted_json['floors'] if f['name'] == 'FIRST')
+    M = {m['id']: m for m in F1['mezzanines']}
+    assert set(M) == {'mezz_storage', 'mezz_dyno'}
+    assert abs(M['mezz_storage']['y'] - 9.208) < 0.01 and abs(M['mezz_dyno']['y'] - 10.07) < 0.01
+    for m in M.values():
+        assert _Pg(m['poly']).area > 300 and m['rails'] and all(r['h'] == 3.5 and abs(r['pts'][0][1] - m['y']) < 0.01 for r in m['rails'])
+    ms = next(s for _, s in _all_stairs(ted_json) if s['id'] == 'mezz_stair')
+    top = ms['flights'][-1]
+    assert abs(top['y1'] - M['mezz_storage']['y']) < 0.01 and _Pg(M['mezz_storage']['poly']).buffer(0.2).contains(_Pt(top['b']))
+    b = _Pg(M['mezz_storage']['poly']).bounds
+    assert abs(b[2] - b[0] - 38.6) < 0.5                                   # 37'-9 5/8" 난간 + 계단 끝
+    dl = next(s for _, s in _all_stairs(ted_json) if s['id'] == 'dyno_ladder')
+    assert abs(dl['flights'][0]['y1'] - M['mezz_dyno']['y']) < 0.01 and _Pg(M['mezz_dyno']['poly']).distance(_Pt(dl['flights'][0]['b'])) < 1.0
+    R = {r['no']: r for r in F1['rooms']}
+    for no in ('130A', '130B', '131', '136'):
+        assert R[no]['ch_source'] == 'mezzanine' and R[no]['ch'] < 9.6, (no, R[no]['ch'])
+
+
+def test_ships_ladder_reaches_roof_hatch(ted_json):
+    """A-102 'SHIPS LADDER TO PENTHOUSE' (창고 239) 위 끝이 A-103 지붕 해치 077200.C01 아래"""
+    st = next(s for _, s in _all_stairs(ted_json) if s['id'] == 'ships_ladder')
+    f = st['flights'][0]
+    assert abs(f['y0'] - 14.67) < 0.01 and abs(f['y1'] - 29.33) < 0.01
+    hatch = _Pg([(98.2, 40.8), (101.4, 40.8), (101.4, 46.0), (98.2, 46.0)])
+    assert hatch.contains(_Pt(f['b']))

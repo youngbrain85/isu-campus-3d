@@ -26,12 +26,18 @@ from shapely.ops import unary_union
 from ted.sheet import Sheet, sheet_path, building_outline
 
 # 층 높이 (A-301, A-421/A-422 단면): FIRST 100'-0" = 0
-LEVELS = {'LOWER': -14.67, 'FIRST SW': -5.0, 'FIRST SW 97': -3.0, 'FIRST N': -2.0, 'FIRST': 0.0, 'SECOND': 14.67}
+LEVELS = {'LOWER': -14.67, 'FIRST SW': -5.0, 'FIRST SW 97': -3.0, 'FIRST N': -2.0, 'FIRST': 0.0, 'SECOND': 14.67,
+          'FIRST LOBBY 98': -1.383,   # A-421 C3: 로비 경사로 2·3 사이 계단참 98'-7 13/32"
+          'BRIDGE': 17.0,             # A-422 A7: 경사로 27'-11" @ 1:12 위 = 117'-0" (스카이브리지 바닥; 반대편 MT 2 층 117'-4 3/8")
+          'THIRD': 29.33,
+          'MEZZ': 9.208,              # A-425 C3/A5: 메자닌 난간 위 = 114'-8" - 1'-11 1/2", 난간 3'-6" → 슬래브 위 109'-2 1/2" (A-301 A2 단면과 맞음)
+          'MEZZ DYNO': 10.07}         # A-425 B3/A6: 5'-4" (114'-8" 까지) - 휜 판 8 7/8" 아래 → 슬래브 위 ≈ 110'-1" (근사)             # A-301 'THIRD LEVEL 129'-4"' (펜트하우스 층) — A-103 지붕 해치 077200.C01 아래
 GUARD, HANDRAIL = 3.5, 2.83            # 3'-6" 가드, 2'-10" 손잡이 (상세에 다른 값이 없을 때)
 
 
-def F(a, b, risers, w, check=()):
-    return {'a': a, 'b': b, 'risers': risers, 'w': w, 'check': list(check)}
+def F(a, b, risers, w, check=(), to=None):
+    """to = 이 층계(경사로)가 끝나는 높이 이름 (경사로가 여럿 이어질 때; 없으면 챌판 비율·계단 도착층)"""
+    return {'a': a, 'b': b, 'risers': risers, 'w': w, 'check': list(check), 'to': to}
 
 
 def L(x0, z0, x1, z1):
@@ -139,16 +145,86 @@ STAIRS = [
         'text': [],
     },
     {   # 자동차 실험실 동쪽 메자닌 철재 계단 (A-425 E5 금속 그레이팅 디딤판 + 체커 논슬립, A-425 C3 메자닌 난간 at 114'-8").
-        # A-423 G1 상세 없음 → A-101/A-102 선: 16 챌판 @ 11" 간격 = 14'-8" (11" 챌판), 폭 3'-8"
-        'id': 'mezz_stair', 'name': 'Mezzanine Stair', 'floor': 'FIRST', 'from': 'FIRST', 'to': 'SECOND', 'kind': 'service',
+        # A-423 G1 상세 없음 → A-101/A-102 선: 16 챌판, 디딤판 11", 폭 3'-8". 도착 = 메자닌 109'-2 1/2" (A-425 C3, A-301 A2) → 챌판 6.9"
+        'id': 'mezz_stair', 'name': 'Mezzanine Stair', 'floor': 'FIRST', 'from': 'FIRST', 'to': 'MEZZ', 'kind': 'service',
         'finish': 'grating', 'open': True, 'solid': False, 'approx': True, 'src': 'A-101, A-102, A-425 E5/C3 (A-423 G1 not in set)',
         'flights': [F((171.77, 72.425), (185.51, 72.425), 16, 3.67, [('A-102', 16)])],
-        'landings': [L(185.51, 68.10, 224.10, 77.10)],    # 메자닌 바닥 (A-102: 37'-9 5/8" 난간 길이)
-        'rails': [('metal', GUARD, 'F0+'), ('metal', GUARD, 'F0-'),
-                  ('metal', GUARD, 'L0:186.30,77.10,224.10,77.10'), ('metal', GUARD, 'L0:185.51,74.26,185.51,77.10')],
+        'landings': [],                                   # 도착 = 메자닌 바닥 (MEZZANINES 'mezz_storage')
+        'rails': [('metal', GUARD, 'F0+'), ('metal', GUARD, 'F0-')],
         'cut': {},
         'text': [('A-425', 'METAL GRATING'), ('A-425', 'RAILING ELEV- MEZZANINE LEVEL')],
     },
+    {   # A-421 C3 / B4: 로비 경사로 1 — 서쪽 커튼월을 따라 95'-0" (북, EE+1') → 97'-0" (남, ED), 26'-5 1/4", 1"/12" (1:13.2)
+        # 폭 = 커튼월 안쪽 ~ 1 번 그리드 동쪽 손잡이 (5'-4"), 양쪽 손잡이 (064023.D06 커튼월 멀리언에 부착 / 가드 감쌈)
+        'id': 'lobby_ramp1', 'name': 'Lobby Ramp 1', 'floor': 'FIRST', 'from': 'FIRST SW', 'to': 'FIRST SW 97', 'kind': 'ramp',
+        'finish': 'terrazzo', 'open': False, 'solid': True, 'base': -5.0, 'src': 'A-421 C3, B4; A-422 C1; A-101',
+        'flights': [F((2.235, 67.20), (2.235, 93.60), 0, 5.33)],
+        'landings': [L(-0.43, 93.60, 4.90, 94.60)],
+        'rails': [('handrail', HANDRAIL, 'F0+'), ('handrail', HANDRAIL, 'F0-')],
+        'cut': {'FIRST': [box(-0.43, 67.20, 4.90, 94.60)]}, 'keep_walls': True,
+        'text': [('A-421', '26\'-5 1/4"'), ('A-421', 'LOBBY RAMP 1- SECTION'), ('A-421', 'LOBBY RAISED FLOOR ACCESS')],
+    },
+    {   # A-421 C3 / A4 / A7: 로비 경사로 2 (97'-0" 남 → 98'-7 13/32" 북, 19'-4 3/4", 1"/12") + 모퉁이 계단참 + 경사로 3
+        # (98'-7 13/32" 서 → 100'-0" 동, 16'-7", 폭 6'-8 1/4"). 경사로 2 서쪽·경사로 3 북쪽은 GL-13 유리 가드(손잡이 감쌈)
+        'id': 'lobby_ramp23', 'name': 'Lobby Ramps 2 and 3', 'floor': 'FIRST', 'from': 'FIRST SW 97', 'to': 'FIRST', 'kind': 'ramp',
+        'finish': 'terrazzo', 'open': False, 'solid': True, 'base': -5.0, 'src': 'A-421 C3, A4, A7, A8; A-422 A1, B1; A-101',
+        'flights': [F((29.75, 93.00), (29.75, 74.20), 0, 5.10, to='FIRST LOBBY 98'),
+                    F((32.30, 70.85), (49.10, 70.85), 0, 6.70, to='FIRST')],
+        'landings': [L(27.20, 93.00, 32.30, 94.60), L(27.20, 67.50, 32.30, 74.20)],
+        'rails': [('glass', GUARD, 'F0+'), ('handrail', HANDRAIL, 'F0-'),
+                  ('glass', GUARD, 'L1:27.20,74.20,27.20,67.50'), ('glass', GUARD, 'L1:27.20,67.50,32.30,67.50'),
+                  ('glass', GUARD, 'F1+'), ('handrail', HANDRAIL, 'F1-')],
+        'cut': {'FIRST': [box(27.20, 67.50, 49.10, 74.20), box(27.20, 74.20, 32.30, 94.60)]}, 'keep_walls': True,
+        'text': [('A-421', '19\'-4 3/4"'), ('A-421', '16\'-7"'), ('A-421', '98\'-7 13/32"'), ('A-421', 'LOBBY RAMP 2- SECTION'),
+                 ('A-421', 'LOBBY RAMP 3- SECTION')],
+    },
+    {   # A-422 C7 / A7: 브리지 접근 경사로 (2 층 229 동쪽 끝, E11~E13): 114'-8" (서) → 117'-0" (동, 스카이브리지 250), 27'-11" @ 1"/12",
+        # 폭 EF+1'-2" ~ EE-1'-1" (7'-8"), 양쪽 벽부착 손잡이 3'-0" (064023.D06), 위 계단참 1'-7"
+        'id': 'bridge_ramp', 'name': 'Bridge Access Ramp 200D', 'floor': 'SECOND', 'from': 'SECOND', 'to': 'BRIDGE', 'kind': 'ramp',
+        'finish': 'terrazzo', 'open': False, 'solid': True, 'src': 'A-422 C7, A7; A-425 F7/F8/E9; A-102',
+        'flights': [F((142.10, 63.05), (170.00, 63.05), 0, 7.70)],
+        'landings': [L(170.00, 59.20, 171.60, 66.90)],
+        'rails': [('handrail', 3.0, 'F0+'), ('handrail', 3.0, 'F0-')],
+        'cut': {}, 'keep_walls': True,
+        # E13 의 기존 벽 띠: C7 에서는 경사로 폭(EF+1'-2" ~ EE-1'-1")만큼 끊겨 있다 → 평면 벽 추출이 막은 것을 연다
+        'openings': {'SECOND': [box(169.9, 59.25, 172.0, 66.85)]},
+        'text': [('A-422', '27\'-11"'), ('A-422', 'BRIDGE ACCESS RAMP'), ('A-422', 'BRIDGE RAMP ACCESS- SECTION')],
+    },
+    {   # A-102 'SHIPS LADDER TO PENTHOUSE' (창고 239, 위로 = 북쪽) → A-103 지붕 해치 077200.C01 (x 98.2~101.4, z 40.8~46.0).
+        # 펜트하우스 = A-301 THIRD LEVEL 129'-4". 상세 A-423 F3/C3 는 세트에 없음 → 폭 = 평면 기호 2'-4", 경사 ~70° (14'-8" 오름 / 4'-10" 수평), 18 챌판 (9.8")
+        'id': 'ships_ladder', 'name': "Ship's Ladder to Penthouse", 'floor': 'SECOND', 'from': 'SECOND', 'to': 'THIRD', 'kind': 'ladder',
+        'finish': 'grating', 'open': True, 'solid': False, 'approx': True, 'src': 'A-102 note, A-103 roof hatch (A-423 F3 not in set)',
+        'flights': [F((99.80, 47.20), (99.80, 42.40), 18, 2.30)],
+        'landings': [],
+        'rails': [('handrail', HANDRAIL, 'F0+'), ('handrail', HANDRAIL, 'F0-')],
+        'cut': {}, 'keep_walls': True,
+        'text': [('A-102', 'SHIPS LADDER TO PENTHOUSE'), ('A-301', 'THIRD LEVEL 129' + "'" + '-4"')],
+    },
+    {   # A-425 B3 'SALVAGE AND REINSTALL EXISTING LADDER' — 다이노 메자닌 북쪽 난간 서쪽 끝의 기존 고정 사다리 (FIRST → 114'-8").
+        # 위치·크기는 B3 입면 서쪽 끝 + A-102 난간선에서 근사 (사다리 상세 없음): 폭 1'-6", 거의 수직, 11 단 (11")
+        'id': 'dyno_ladder', 'name': 'Dyno Mezzanine Ladder (existing)', 'floor': 'FIRST', 'from': 'FIRST', 'to': 'MEZZ DYNO',
+        'kind': 'ladder', 'finish': 'grating', 'open': True, 'solid': False, 'approx': True, 'src': 'A-425 B3; A-102',
+        'flights': [F((173.00, 110.90), (173.00, 111.70), 11, 1.50)],
+        'landings': [],
+        'rails': [('handrail', 3.5, 'F0+'), ('handrail', 3.5, 'F0-')],
+        'cut': {}, 'keep_walls': True,
+        'text': [('A-425', 'SALVAGE AND REINSTALL EXISTING LADDER')],
+    },
+]
+
+# 메자닌 (1 층 고베이 안의 기존 슬래브, A-425 C3/A3/B3 난간 입면 + A5/A6 난간 상세, AD-10x 주기 31 '기존 난간 철거, 벤트 플레이트 유지'):
+#   mezz_storage — 창고 130A/130B·실험 사무실 131 위 (A-102: x 185.5~224.1, z 68.1~77.1; C3 난간 37'-9 5/8"), 철재 계단으로 오름
+#   mezz_dyno    — 섀시 다이노 136 위 (A-102 B3 북쪽 난간 z 112.1, A3 동쪽 난간 x 204.0 · 24'-0 1/4"), 기존 사다리
+# 높이: C3 (37'-9 5/8" 난간) 슬래브 위 109'-2 1/2", 두께 6 1/2" (A5); B3 (28'-5") 110'-1" 근사, 두께 8 7/8" (A6). 난간 = 강관 3'-6".
+# 평면 위치는 A-102 (2 층 평면에 '아래로 트인' 영역 안의 난간선) — 메자닌은 1 층 그룹에 속하고(높이가 1 층 범위),
+# 2 층 평면의 같은 자리 선(난간·칸막이)은 2 층 벽에서 뺀다(drop_walls_on).
+MEZZANINES = [
+    {'id': 'mezz_storage', 'name': 'Mezzanine (over 130A/130B/131)', 'floor': 'FIRST', 'level': 'MEZZ', 'deck': 'concrete', 't': 0.54,
+     'poly': L(185.51, 68.10, 224.10, 77.10), 'src': 'A-102, A-425 C3/A5, A-301 A2, AD-102 note 31', 'drop_walls_on': 'SECOND',
+     'rails': [('metal', GUARD, 'M:186.30,77.10,224.10,77.10'), ('metal', GUARD, 'M:185.51,74.26,185.51,77.10')]},
+    {'id': 'mezz_dyno', 'name': 'Dyno Mezzanine (over 136)', 'floor': 'FIRST', 'level': 'MEZZ DYNO', 'deck': 'concrete', 't': 0.74,
+     'poly': L(171.90, 112.10, 204.00, 136.10), 'src': 'A-102, A-425 A3/B3/A6', 'approx': True, 'drop_walls_on': 'SECOND',
+     'rails': [('metal', GUARD, 'M:174.40,112.10,204.00,112.10'), ('metal', GUARD, 'M:204.00,112.10,204.00,136.10')]},
 ]
 
 # 엘리베이터 E1 (A-101/A-102 같은 위치): 승강로 안쪽, 동쪽 벽 문(3'-6"), 카. 1·2 층 정지 (A-100 은 기계실 004 만)
@@ -156,18 +232,16 @@ ELEVATORS = [{'id': 'E1', 'floors': ['FIRST', 'SECOND'], 'poly': L(48.90, 30.75,
               'door': [(58.90, 32.00), (58.90, 35.50)], 'cab': L(49.75, 31.55, 57.90, 36.95), 'src': 'A-101, A-102'}]
 
 # FIRST 바닥의 낮은 영역 (A-301 A2/D2, A-421 G4/B7, A-422 C5): (이름, y, 대상 실 번호(None = 모두), 영역)
-SUB_LEVELS = {'FIRST': [
+SUB_LEVELS = {'SECOND': [
+    ('BRIDGE', 17.0, {'250', '200D'}, box(170.0, 20.0, 275.0, 70.0)),   # 스카이브리지 + 브리지 전실 (경사로 위 117'-0")
+], 'FIRST': [
     ('FIRST SW', -5.0, {'100', '101'}, box(-12, 29, 34.09, 91.07)),       # 로비·전실 95'-0"
     ('FIRST SW 97', -3.0, {'101', '102'}, box(-12, 94.08, 34.09, 140)),   # 로비 남쪽 단 + 102 (계단 2 위, 97'-0")
     ('FIRST N', -2.0, None, box(5.45, -76.5, 121.45, -1.41)),             # 북측 증축 98'-0"
 ]}
 
 # 평면의 UP/DN 중 모델하지 않은 것 (시트, x, z, 이유)
-UNMODELLED = [
-    ('A-101', 50.8, 71.2, 'lobby ramps (A-421 B4/A4/A7, A-422 A1/B1/C1): several 1:12 ramps between 95/97/98\'-7"/100\', not modelled yet'),
-    ('A-102', 170.9, 63.0, 'bridge access ramp 200D (A-422 C7/A7) to the skybridge, not modelled yet'),
-    ('A-102', 100.2, 49.9, 'ship\'s ladder to the roof penthouse (A-102 note), out of interior scope'),
-]
+UNMODELLED = []          # 평면 UP/DN 중 모델하지 않은 것 (시트, x, z, 이유) — 모두 모델함
 
 
 # ── 기하 ──
@@ -200,7 +274,9 @@ def build_stair(st):
     out = []
     y = y_from
     for f in fls:
-        if f['risers']:
+        if f.get('to'):
+            y1 = LEVELS[f['to']]                         # 이어진 경사로: 중간 계단참 높이
+        elif f['risers']:
             y1 = y + (y_to - y_from) * f['risers'] / n
         else:
             y1 = y_to                                    # 경사로 하나뿐
@@ -237,6 +313,7 @@ def build_stair(st):
         rails.append({'pts': [[round(v, 3) for v in p] for p in pts], 'h': h, 'kind': kind})
     return {'id': st['id'], 'name': st['name'], 'kind': st['kind'], 'finish': st['finish'], 'open': st['open'],
             'solid': st['solid'], 'from': st['from'], 'to': st['to'], 'src': st['src'],
+            **({'base': st['base']} if st.get('base') is not None else {}),
             **({'approx': True} if st.get('approx') else {}),
             'flights': out, 'landings': lands, 'rails': rails}
 
@@ -250,9 +327,14 @@ def elevators_for(floor):
              'cab': [list(p) for p in e['cab']], 'src': e['src']} for e in ELEVATORS if floor in e['floors']]
 
 
-def cuts_for(floor):
-    """그 층 바닥 마감·슬래브에서 뺄 계단 구멍 (shapely)"""
-    g = [c for s in STAIRS for c in s.get('cut', {}).get(floor, [])]
+def openings_for(floor):
+    """벽에서 뺄 개구부 (평면 벽 추출이 막은 통로) → [shapely]"""
+    return [o for st in STAIRS for o in st.get('openings', {}).get(floor, [])]
+
+
+def cuts_for(floor, for_walls=False):
+    """그 층 바닥 마감·슬래브에서 뺄 계단 구멍 (shapely). for_walls: 둘레 벽을 지울 구멍만 (경사로 구멍 둘레의 실제 벽은 남김)"""
+    g = [c for s in STAIRS if not (for_walls and s.get('keep_walls')) for c in s.get('cut', {}).get(floor, [])]
     return unary_union(g) if g else None
 
 
@@ -279,10 +361,10 @@ def room_parts(poly, floor_y, cut, areas):
     for name, y, A in areas:
         part = g.intersection(A)
         for p in _polys(part):
-            out.append((p, y, None))
+            out.append((p, y, floor_y if y > floor_y else None))     # 높은 영역(브리지 117'): 층 바닥부터 블록
         rest = rest.difference(A)
-    low = min([y for _, y, _ in areas], default=floor_y)
-    near = unary_union([A for _, _, A in areas]).buffer(1.0) if areas else None
+    low = min([y for _, y, _ in areas if y < floor_y], default=floor_y)
+    near = unary_union([A for _, y, A in areas if y < floor_y]).buffer(1.0) if any(y < floor_y for _, y, _ in areas) else None
     for p in _polys(rest):
         out.append((p, floor_y, low if (near is not None and p.intersects(near)) else None))
     return out
@@ -380,4 +462,23 @@ def stair_zone(fy, H):
         for Ld in s['landings']:
             if fy - 0.5 <= Ld['y'] <= fy + H - 0.5:
                 g.append(Polygon(Ld['poly']).buffer(0.6, join_style=2))
+    for m in MEZZANINES:                                 # 메자닌 위 2 층 평면의 난간·칸막이 선 (벽으로 잡힘)
+        if abs(LEVELS[m['drop_walls_on']] - fy) < 0.1:
+            g.append(Polygon(m['poly']).buffer(0.6, join_style=2))
     return unary_union(g) if g else None
+
+
+def mezzanines_for(floor):
+    """메자닌 → JSON [{id, name, poly, y, t, deck, rails: [{pts, h, kind}], src}]"""
+    out = []
+    for m in MEZZANINES:
+        if m['floor'] != floor:
+            continue
+        rails = []
+        y = LEVELS[m['level']]
+        for kind, h, path in m['rails']:
+            x0, z0, x1, z1 = map(float, path.split(':')[1].split(','))
+            rails.append({'pts': [[x0, y, z0], [x1, y, z1]], 'h': h, 'kind': kind})
+        out.append({'id': m['id'], 'name': m['name'], 'poly': [[round(x, 3), round(z, 3)] for x, z in m['poly']], 'y': y,
+                    't': m['t'], 'deck': m['deck'], 'rails': rails, 'src': m['src'], **({'approx': True} if m.get('approx') else {})})
+    return out

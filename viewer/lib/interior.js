@@ -111,25 +111,29 @@ export function buildInterior(data, M, tex) {
     grating: new THREE.MeshStandardMaterial({ color: 0x55595e, roughness: 0.6, metalness: 0.6, name: 'int_stair_grating' }),
     wood: new THREE.MeshStandardMaterial({ color: 0xb08356, roughness: 0.7, name: 'int_stair_wood' }),
   };
+  // 경사로 (A-421 C3 로비 경사로 1~3, A-422 C7 브리지 접근 경사로): 이름 int_ramp_* → VR 내보내기에서 WALKABLE
+  const rampMat = { terrazzo: new THREE.MeshStandardMaterial({ color: 0xd2cdc1, roughness: 0.5, name: 'int_ramp_terrazzo' }) };
+  // 메자닌 바닥 (기존 콘크리트 슬래브, 2 층 114'-8"): int_mezz_* → WALKABLE
+  const mezzMat = { concrete: new THREE.MeshStandardMaterial({ color: 0xa6a39c, roughness: 0.85, name: 'int_mezz_concrete' }) };
   const steelMat = new THREE.MeshStandardMaterial({ color: 0x4a4d52, roughness: 0.5, metalness: 0.55, name: 'int_stair_steel' });
   const railWoodMat = new THREE.MeshStandardMaterial({ color: 0x9a6b40, roughness: 0.55, name: 'int_rail_wood' });
   const elevDoorMat = new THREE.MeshStandardMaterial({ color: 0xc4c8cc, roughness: 0.3, metalness: 0.85, name: 'int_elev_door' });
   const cabMat = new THREE.MeshStandardMaterial({ color: 0x8f8a80, roughness: 0.6, name: 'int_elev_cab' });
 
   const cut = new THREE.Plane(new THREE.Vector3(0, -1, 0), 1e6);   // 단면 보기 절단면 (월드 y = 상수; 건물 변환은 y 축 회전·평행이동뿐)
-  for (const m of [wallMat, glassMat, doorMat, frameMat, steelMat, railWoodMat, elevDoorMat, cabMat, ...Object.values(stairMat)]) m.clippingPlanes = [cut];
+  for (const m of [wallMat, glassMat, doorMat, frameMat, steelMat, railWoodMat, elevDoorMat, cabMat, ...Object.values(stairMat), ...Object.values(rampMat), ...Object.values(mezzMat)]) m.clippingPlanes = [cut];
   /** 계단 하나 → add(재질, 형상). flights: a(첫 챌판)·b(마지막 챌판) 중심, risers, w, y0→y1. risers 0 = 경사로.
    *  높이는 바닥 마감과 같은 +0.45 (실 바닥 마감 cap 높이) 를 더해 이어지게 한다. */
   function buildStair(st, add) {
     const tm = stairMat[st.finish] || stairMat.terrazzo, grating = st.finish === 'grating';
-    const base = st.flights[0].y0;                         // 현장타설(solid) 계단은 출발 바닥까지 채운다
+    const base = st.base ?? (st.flights.length ? st.flights[0].y0 : 0);   // 현장타설(solid) 계단은 출발 바닥까지 채운다 (base: 더 낮은 바닥까지)
     const nose = grating ? 0.05 : 0.104, th = grating ? 0.12 : 0.17;   // 논슬립 돌출 1 1/4", 디딤판 두께 2"
     const F = 0.45;
     for (const f of st.flights) {
       const dx = f.b[0] - f.a[0], dz = f.b[1] - f.a[1], Ln = Math.hypot(dx, dz), ux = dx / Ln, uz = dz / Ln;
       const at = (s) => [f.a[0] + ux * s, f.a[1] + uz * s];
       if (!f.risers) {                                     // 경사로: 경사 판 (solid → 바닥까지)
-        add(tm, prism(f.a, f.b, f.w, f.y0 + F, f.y1 + F, st.solid ? base : f.y0 - 0.1, st.solid ? base : f.y1 - 0.6));
+        add(rampMat[st.finish] || tm, prism(f.a, f.b, f.w, f.y0 + F, f.y1 + F, st.solid ? base : f.y0 - 0.1, st.solid ? base : f.y1 - 0.6));
         continue;
       }
       const n = f.risers, t = Ln / (n - 1), r = (f.y1 - f.y0) / n;
@@ -158,7 +162,8 @@ export function buildInterior(data, M, tex) {
       }
     }
     for (const L of st.landings) {
-      try { add(tm, extrude(L.poly, [], st.solid ? base : L.y + F - (grating ? th : 0.5), L.y + F)); } catch (e) { }
+      const lm = st.mezz ? (mezzMat[st.finish] || tm) : st.kind === 'ramp' ? (rampMat[st.finish] || tm) : tm;
+      try { add(lm, extrude(L.poly, [], st.solid ? base : L.y + F - (st.mezz ? st.t : grating ? th : 0.5), L.y + F)); } catch (e) { }
     }
     for (const R of st.rails) {
       for (let i = 0; i + 1 < R.pts.length; i++) {
@@ -185,7 +190,8 @@ export function buildInterior(data, M, tex) {
   const root = new THREE.Group(); root.name = 'interior';
   const floors = {}, rooms = [];
   // 2 개 층 높이 공간: 위층에서 '아래로 트인'(open) 영역 아래의 실은 천장이 위층까지 (고베이·아트리움)
-  const openAbove = (fi, x, z) => { const up = data.floors[fi + 1]; return !!up && up.rooms.some(r => r.open && r.poly && pip(r.poly, x, z)); };
+  // 단, 위층 메자닌(기존 슬래브) 아래는 보통 천장 (A-425 C3/B3: 130A·130B·131, 섀시 다이노 136 위)
+  const openAbove = (fi, x, z) => { const up = data.floors[fi + 1]; return !!up && up.rooms.some(r => r.open && r.poly && pip(r.poly, x, z)) && !(data.floors[fi].mezzanines || []).some(m => pip(m.poly, x, z)); };
   for (let fi = 0; fi < data.floors.length; fi++) {
     const fl = data.floors[fi];
     const y = fl.y, H = fl.height;
@@ -239,6 +245,8 @@ export function buildInterior(data, M, tex) {
     }
     // 계단·경사로·계단참·난간 (VR 보행용 실제 디딤판 형상)
     for (const st of fl.stairs || []) buildStair(st, add);
+    // 메자닌: 슬래브(두께 t) + 강관 난간 — 계단 계단참과 같은 방법 (landing 하나, flights 없음)
+    for (const m of fl.mezzanines || []) buildStair({ mezz: true, t: m.t, finish: m.deck, kind: 'mezzanine', solid: false, flights: [], landings: [{ poly: m.poly, y: m.y }], rails: m.rails }, add);
     // 엘리베이터 E1: 승강로 문(스테인리스 2 짝, 닫힘), 문틀, 카
     for (const e of fl.elevators || []) {
       const [a, b] = e.door, m = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];

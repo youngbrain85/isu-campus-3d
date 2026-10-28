@@ -247,7 +247,7 @@ async function exportBuildingGLB(groupName = 'bldg_tech', r = 220) {
     const n = ((o.material && o.material.name) || '') + ' ' + o.name;
     for (let p = o; p; p = p.parent) if (p.name === 'ceiling') return 'VISUAL';
     if (/int_light/.test(n)) return 'VISUAL';
-    if (/int_slab|int_stair_(terrazzo|concrete|wood|grating)|int_landing/.test(n)) return 'WALKABLE';
+    if (/int_slab|int_stair_(terrazzo|concrete|wood|grating)|int_landing|int_ramp_|int_mezz_/.test(n)) return 'WALKABLE';   // 경사로·메자닌 바닥도 보행면
     if (/^int_/.test(o.material && o.material.name || '') && !/int_(wall|glass|mullion|frame|door|base|rail|stair_steel|elev|c_)/.test(n)) return 'WALKABLE';   // 실 바닥 마감 (재질 이름 = 마감 코드)
     return 'COLLISION';
   };
